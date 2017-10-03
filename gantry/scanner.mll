@@ -65,9 +65,13 @@ rule token = parse
 | "char"      { CHAR }
 | "string"    { STRING }
 
+(* Strings *)
+| '"'         { read_string (Buffer.create 10) lexbuf }
+
 (* Literals *)
 | ['0'-'9']+ as lxm { INTLIT(int_of_string lxm) }
 | ['0'-'9']+[.]['0'-'9']+ as lxm { FLOATLIT(float_of_string lxm) }
+
 
 (* Identifiers *)
 | identifier as lxm { ID(lxm) }
@@ -75,6 +79,28 @@ rule token = parse
 (* EOF and Error Handling *)
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
+
+(* Strings
+ * Recursive read_string modified from
+ * https://realworldocaml.org/v1/en/html/parsing-with-ocamllex-and-menhir.html
+ * accept '\r', '\n', '\\', '\/', '\b', '\f', '\"'
+ *)
+and read_string buf =
+  parse
+  | '"'       { STRING (Buffer.contents buf) }
+  | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
+  | '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
+  | '\\' 'b'  { Buffer.add_char buf '\b'; read_string buf lexbuf }
+  | '\\' 'f'  { Buffer.add_char buf '\012'; read_string buf lexbuf }
+  | '\\' 'n'  { Buffer.add_char buf '\n'; read_string buf lexbuf }
+  | '\\' 'r'  { Buffer.add_char buf '\r'; read_string buf lexbuf }
+  | '\\' 't'  { Buffer.add_char buf '\t'; read_string buf lexbuf }
+  | '\\' '"'  { Buffer.add_char buf '\t'; read_string buf lexbuf }
+  | [^ '"' '\\']+
+    { Buffer.add_string buf (Lexing.lexeme lexbuf);
+      read_string buf lexbuf
+    }
+  | _
 
 (* Comments *)
 and comment = parse
