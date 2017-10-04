@@ -3,10 +3,10 @@
 { open Parser }
 
 let identifier = ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']*
-(* Support a limited set of special characters and alphanumeric characters *)
-let ch = ['\r']|['\n']|['\\']|['/']|['\b']|['\012']|['\r']|[' '-'~']
 
+(* Support a limited set of special characters and alphanumeric characters *)
 (* '\r', '\n', '\\', '\/', '\b', '\f', '\"' *)
+let ch = ['\r']|['\n']|['\\']|['/']|['\b']|['\012']|['\r']|[' '-'~']
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
@@ -20,6 +20,7 @@ rule token = parse
 | ']'         { RBRACK }
 | ';'         { SEMI }
 | ','         { COMMA }
+| ':'         { COLON }
 
 (* Arithmetic Operators (Binary and Unary) *)
 | '+'         { PLUS }
@@ -66,6 +67,7 @@ rule token = parse
 | "true"      { TRUE }
 | "false"     { FALSE }
 | "object"    { OBJECT }
+| "arr"       { ARRAY }
 | "char"      { CHAR }
 | "string"    { STRING }
 
@@ -75,7 +77,7 @@ rule token = parse
 (* Literals *)
 | ['0'-'9']+ as lxm { INTLIT(int_of_string lxm) }
 | ['0'-'9']+['.']['0'-'9']+ as lxm { FLOATLIT(float_of_string lxm) }
-
+| ch as lxm { CHARLIT(lxm) }
 
 (* Identifiers *)
 | identifier as lxm { ID(lxm) }
@@ -84,7 +86,7 @@ rule token = parse
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
-(* Strings
+(* String Literals
  * Recursive read_string modified from
  * https://realworldocaml.org/v1/en/html/parsing-with-ocamllex-and-menhir.html
  * accept '\r', '\n', '\\', '\/', '\b', '\f', '\"'
