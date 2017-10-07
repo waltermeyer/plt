@@ -2,14 +2,14 @@ README for the tests directory.
 
 Tests: 
 
-###Type creation
+### Type creation
 
 [] int
 [] float
 [] string
 [] char
 
-###Operators
+### Operators
 
 [] Arithmetic int
 [] Arithmetic float
@@ -35,7 +35,7 @@ Tests:
 [] NOT bool
 [] Concatenation string
 
-###Control Flow
+### Control Flow
 
 [] if, elif, else
 [] while
