@@ -21,6 +21,7 @@ rule token = parse
 | ';'         { SEMI }
 | ','         { COMMA }
 | ':'         { COLON }
+| '.'         { PERIOD }
 
 (* Arithmetic Operators (Binary and Unary) *)
 | '+'         { PLUS }
