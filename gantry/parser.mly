@@ -38,14 +38,14 @@ open Ast
 
 /* CFG */
 program:
-    declaration_list_opt EOF { (List.rev $1) }
+    declaration_list_opt EOF { $1 }
 
 declaration_list_opt:
     /* empty */                              { [] }
     | declaration_list                       { List.rev $1 }
 
 declaration_list:
-    /* empty */                              { [] }
+    declaration                              { [$1] }
     | declaration_list declaration           { $2 :: $1 }
 
 declaration:
@@ -108,6 +108,8 @@ expression:
     | object_expression                     { $1 }
     | arithmetic_expression                 { $1 }
     | comparison_expression                 { $1 }
+    | logical_expression                    { $1 }
+    | string_concat_expression              { $1 }
 
 array_expression:
     LBRACK expression_list_opt RBRACK       { ArrExp($2) }
