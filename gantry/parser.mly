@@ -31,7 +31,7 @@ open Ast
 %right NOT NEG
 %left CONCAT
 
-start program
+%start program
 %type <Ast.program> program
 
 %%
@@ -77,9 +77,9 @@ func_param_list:
     type_spec ID                            { ($1, $2) }
     | func_param_list COMMA type_spec ID    { ($3, $4) :: $1 }
 
-function_expression_opt
-    /* nothing */                          { [] }
-    | ID RPAREN expression_list_opt LPAREN { FunExp($1, $3) }
+function_expression_opt:
+    /* nothing */                           { [] }
+    | ID RPAREN expression_list_opt LPAREN  { FunExp($1, $3) }
 
 statement_list:
     /* empty */                             { [] }
@@ -87,15 +87,15 @@ statement_list:
 
 statement:
     for_statement                           { $1 }
-    | if_statement                          { $1 }
+    /* if_statement */
     | while_statement                       { $1 }
     | jump_statement                        { $1 }
     | expression_statement                  { $1 }
 
 expression_statement:
     expression_opt SEMI                     { $1 }
-    assignment_expression_opt SEMI          { $1 }
-    function_expression_opt SEMI            { $1 }
+    | assignment_expression_opt SEMI        { $1 }
+    | function_expression_opt SEMI          { $1 }
 
 expression_opt:
      /* nothing */                          { [] }
@@ -103,66 +103,66 @@ expression_opt:
 
 expression:
     ID                                      { Id($1) }
-    constant                                { $1 }
-    array_expression                        { $1 }
-    object_expression                       { $1 }
-    arithmetic_expression                   { $1 }
-    comparison_expression                   { $1 }
+    | constant                              { $1 }
+    | array_expression                      { $1 }
+    | object_expression                     { $1 }
+    | arithmetic_expression                 { $1 }
+    | comparison_expression                 { $1 }
 
 array_expression:
-    LBRACK expression_list_opt RBRACK       { ArrExp($1) }
+    LBRACK expression_list_opt RBRACK       { ArrExp($2) }
 
-expression_list_opt
+expression_list_opt:
     /* empty */                             { [] }
     | expression_list                       { List.rev $1 }
 
 expression_list:
     expression                              { $1 }
-    | expression_list COMMA expression      { $2 :: $1 }
+    | expression_list COMMA expression      { $3 :: $1 }
 
 object_expression:
     LBRACE key_value_list_opt RBRACE        { $2 }
 
-key_value_list_opt
+key_value_list_opt:
     /* empty */                             { [] }
     | key_value_list                        { List.rev $1 }
 
 key_value_list:
     key_value                               { $1 }
-    | key_value_list COMMA key_value        { $2 :: $1 }
+    | key_value_list COMMA key_value        { $3 :: $1 }
 
 key_value:
     QUOTE STRLIT QUOTE COLON expression     { KeyVal($2, $5) }
 
 arithmetic_expression:
     expression PLUS expression              { Binop($1, Add, $3) }
-    expression MINUS expression             { Binop($1, Sub, $3) }
-    expression TIMES expression             { Binop($1, Mult, $3) }
-    expression DIVIDE expression            { Binop($1, Div, $3) }
-    expression INCREM                       { Inc($1) }
-    expression DECREM                       { Dec($1) }
+    | expression MINUS expression           { Binop($1, Sub, $3) }
+    | expression TIMES expression           { Binop($1, Mult, $3) }
+    | expression DIVIDE expression          { Binop($1, Div, $3) }
+    | expression INCREM                     { Inc($1) }
+    | expression DECREM                     { Dec($1) }
 
 comparison_expression:
     expression LT expression                { Binop($1, Lt, $3) }
-    expression GT expression                { Binop($1, Gt, $3) }
-    expression LEQ expression               { Binop($1, Leq, $3) }
-    expression GEQ expression               { Binop($1, Geq, $3) }
-    expression EQ expression                { Binop($1, Eq, $3) }
-    expression NEQ expression               { Binop($1, Neq, $3) }
+    | expression GT expression              { Binop($1, Gt, $3) }
+    | expression LEQ expression             { Binop($1, Leq, $3) }
+    | expression GEQ expression             { Binop($1, Geq, $3) }
+    | expression EQ expression              { Binop($1, Eq, $3) }
+    | expression NEQ expression             { Binop($1, Neq, $3) }
 
 logical_expression:
     expression AND expression               { Binop($1, Lt, $3) }
-    expression OR expression                { Binop($1, Gt, $3) }
-    NOT expression                          { Not($1) }
+    | expression OR expression              { Binop($1, Gt, $3) }
+    | NOT expression                        { Not($2) }
 
 string_concat_expression:
     expression CONCAT expression            { StrConc($1, Ct, $3) }
 
-assignment_expression_opt
+assignment_expression_opt:
     /* empty */                             { [] }
     | assignment_expression                 { $1 }
 
-assignment_expression
+assignment_expression:
     ID array_sub_op_list_opt EQ expression  { Asgnmod($1, $2, $4) }
     | type_spec arr_opt ID expression       { Asgndec($1, $2, $3, $4) }
     | ID PERIOD ID EQ expression            { Asgobj($1, $3, $5) }
@@ -181,7 +181,7 @@ array_sub_op:
 
 arr_opt:
     /* empty */                             { [] }
-    | RBRACK LBRACK                         { $1 }
+    | RBRACK LBRACK                         { Arropt }
 
 for_statement:
     FOR LPAREN expression SEMI expression SEMI expression SEMI RPAREN RBRACE statement_list LBRACE
@@ -189,12 +189,12 @@ for_statement:
 
 while_statement:
     WHILE LPAREN expression RPAREN RBRACE statement_list LBRACE
-      { While($3, $5, $7) }
+      { While($3, $6) }
 
 jump_statement:
-    BREAK SEMI                              { Break($1) }
-    | CONTINUE SEMI                         { Continue($1) }
-    | RETURN expression SEMI                { Return($1) }
+    BREAK SEMI                              { Break }
+    | CONTINUE SEMI                         { Continue }
+    | RETURN expression SEMI                { Return($2) }
 
 constant:
     TRUE                                    { True }
