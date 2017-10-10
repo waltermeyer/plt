@@ -49,7 +49,7 @@ declaration_list:
     | declaration_list declaration           { $2 :: $1 }
 
 declaration:
-    | statement                              { $1 }
+    statement                                { $1 }
     | function_declaration                   { $1 }
 
 /* Use a record as action for semantic checking later */
@@ -62,7 +62,7 @@ function_declaration:
       } }
 
 type_spec:
-    | INT                                   { Int }
+    INT                                     { Int }
     | FLOAT                                 { Float }
     | OBJECT                                { Object }
     | STRING                                { String }
@@ -77,8 +77,7 @@ func_param_list:
     type_spec ID                            { ($1, $2) }
     | func_param_list COMMA type_spec ID    { ($3, $4) :: $1 }
 
-function_expression_opt:
-    /* nothing */                           { [] }
+function_expression:
     | ID RPAREN expression_list_opt LPAREN  { FunExp($1, $3) }
 
 statement_list:
@@ -90,16 +89,16 @@ statement:
     /* if_statement */
     | while_statement                       { $1 }
     | jump_statement                        { $1 }
-    | expression_statement                  { $1 }
+    | expression_statement_opt              { $1 }
+
+expression_statement_opt:
+    /* nothing */ 			    { [] }
+    | expression_statement 		    { $1 }
 
 expression_statement:
-    expression_opt SEMI                     { $1 }
-    | assignment_expression_opt SEMI        { $1 }
-    | function_expression_opt SEMI          { $1 }
-
-expression_opt:
-     /* nothing */                          { [] }
-    | expression                            { $1 }
+    expression SEMI                         { $1 }
+    | assignment_expression SEMI            { $1 }
+    | function_expression SEMI              { $1 }
 
 expression:
     ID                                      { Id($1) }
@@ -159,10 +158,6 @@ logical_expression:
 
 string_concat_expression:
     expression CONCAT expression            { StrConc($1, Ct, $3) }
-
-assignment_expression_opt:
-    /* empty */                             { [] }
-    | assignment_expression                 { $1 }
 
 assignment_expression:
     ID array_sub_op_list_opt EQ expression  { Asgnmod($1, $2, $4) }
