@@ -5,8 +5,8 @@
 let identifier = ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']*
 
 (* Support a limited set of special characters and alphanumeric characters *)
-(* '\r', '\n', '\\', '\/', '\b', '\f', '\"' *)
-let ch = ['\r']|['\n']|['\\']|['/']|['\b']|['\012']|['\r']|[' '-'~']
+(* '\r', '\t', '\n', '\\', '\/', '\b', '\f', '\"' *)
+let ch = ['\r']|['\t']|['\n']|['\\']|['/']|['\b']|['\012']|['\r']|[' '-'~']
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
@@ -68,7 +68,6 @@ rule token = parse
 | "true"      { TRUE }
 | "false"     { FALSE }
 | "object"    { OBJECT }
-| "arr"       { ARRAY }
 | "char"      { CHAR }
 | "string"    { STRING }
 
