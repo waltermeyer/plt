@@ -77,6 +77,10 @@ func_param_list:
     type_spec ID                            { ($1, $2) }
     | func_param_list COMMA type_spec ID    { ($3, $4) :: $1 }
 
+function_expression_opt
+    /* nothing */                          { [] }
+    | ID RPAREN expression_list_opt LPAREN { FunExp($1, $3) }
+
 statement_list:
     /* empty */                             { [] }
     | statement_list statement              { $2 :: $1 }
@@ -158,11 +162,10 @@ assignment_expression_opt
     /* empty */                             { [] }
     | assignment_expression                 { $1 }
 
-/* here */
 assignment_expression
-    ID array_sub_op_list_opt EQ expression  { [] }
-    | type_spec array_qual_opt              { $1 }
-    | ID PERIOD ID EQ expression            { $1 }
+    ID array_sub_op_list_opt EQ expression  { Asgnmod($1, $2, $4) }
+    | type_spec arr_opt ID expression       { Asgndec($1, $2, $3, $4) }
+    | ID PERIOD ID EQ expression            { Asgobj($1, $3, $5) }
 
 array_sub_op_list_opt:
     /* empty */                             { [] }
@@ -173,7 +176,12 @@ array_sub_op_list:
     | array_sub_op_list array_sub_op        { $2 :: $1 }
 
 array_sub_op:
-    RBRACK INTLIT LBRACK                    { ArrSub($2) }
+    RBRACK INTLIT LBRACK                    { Arrsub($2) }
+    | RBRACK ID LBRACK                      { Arrsub($2) }
+
+arr_opt:
+    /* empty */                             { [] }
+    | RBRACK LBRACK                         { $1 }
 
 for_statement:
     FOR LPAREN expression SEMI expression SEMI expression SEMI RPAREN RBRACE statement_list LBRACE
