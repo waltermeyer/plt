@@ -4,10 +4,6 @@
 
 let identifier = ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']*
 
-(* Support a limited set of special characters and alphanumeric characters *)
-(* '\r', '\n', '\\', '\/', '\b', '\f', '\"' *)
-let ch = ['\r']|['\n']|['\\']|['/']|['\b']|['\012']|['\r']|[' '-'~']
-
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 | "/*"        { comment lexbuf }        (* Comments *)
@@ -21,6 +17,7 @@ rule token = parse
 | ';'         { SEMI }
 | ','         { COMMA }
 | ':'         { COLON }
+| '.'         { PERIOD }
 
 (* Arithmetic Operators (Binary and Unary) *)
 | '+'         { PLUS }
@@ -67,8 +64,6 @@ rule token = parse
 | "true"      { TRUE }
 | "false"     { FALSE }
 | "object"    { OBJECT }
-| "arr"       { ARRAY }
-| "char"      { CHAR }
 | "string"    { STRING }
 
 (* Strings *)
@@ -89,19 +84,18 @@ rule token = parse
 (* String Literals
  * Recursive read_string modified from
  * https://realworldocaml.org/v1/en/html/parsing-with-ocamllex-and-menhir.html
- * accept '\r', '\n', '\\', '\/', '\b', '\f', '\"'
+ * accept '\r', '\t', '\n', '\b', '\f', '\"', '\\'
  *)
 and read_string buf =
   parse
   | '"'       { STRING (Buffer.contents buf) }
-  | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
-  | '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
-  | '\\' 'b'  { Buffer.add_char buf '\b'; read_string buf lexbuf }
-  | '\\' 'f'  { Buffer.add_char buf '\012'; read_string buf lexbuf }
-  | '\\' 'n'  { Buffer.add_char buf '\n'; read_string buf lexbuf }
   | '\\' 'r'  { Buffer.add_char buf '\r'; read_string buf lexbuf }
   | '\\' 't'  { Buffer.add_char buf '\t'; read_string buf lexbuf }
+  | '\\' 'n'  { Buffer.add_char buf '\n'; read_string buf lexbuf }
+  | '\\' 'b'  { Buffer.add_char buf '\b'; read_string buf lexbuf }
+  | '\\' 'f'  { Buffer.add_char buf '\012'; read_string buf lexbuf }
   | '\\' '"'  { Buffer.add_char buf '\"'; read_string buf lexbuf }
+  | '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
   | [^ '"' '\\']+
     { Buffer.add_string buf (Lexing.lexeme lexbuf);
       read_string buf lexbuf
