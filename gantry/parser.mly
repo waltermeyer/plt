@@ -30,9 +30,9 @@ open Ast
 %left EQ NEQ
 %left LT GT LEQ GEQ
 %left PLUS MINUS
-%nonassoc UMINUS
 %left TIMES DIVIDE
-%right NOT NEG
+%nonassoc UMINUS
+%right NOT
 %left CONCAT
 
 %start program
