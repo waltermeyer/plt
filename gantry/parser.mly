@@ -21,6 +21,8 @@ open Ast
 %token EOF
 
 /* Precedence Rules */
+
+
 %right ASSIGN
 %left OR
 %left AND
@@ -28,6 +30,7 @@ open Ast
 %left EQ NEQ
 %left LT GT LEQ GEQ
 %left PLUS MINUS
+%nonassoc UMINUS
 %left TIMES DIVIDE
 %right NOT NEG
 %left CONCAT
@@ -139,6 +142,7 @@ arithmetic_expression:
     | expression DIVIDE expression          { Binop($1, Div, $3) }
     | expression INCREM                     { Inc($1) }
     | expression DECREM                     { Dec($1) }
+    | MINUS expression %prec UMINUS 	    { - $2 }
 
 comparison_expression:
     expression LT expression                { Binop($1, Lt, $3) }
