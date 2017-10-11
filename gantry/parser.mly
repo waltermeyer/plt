@@ -24,6 +24,7 @@ open Ast
 %right ASSIGN
 %left OR
 %left AND
+%left INCREM DECREM
 %left EQ NEQ
 %left LT GT LEQ GEQ
 %left PLUS MINUS
@@ -89,11 +90,7 @@ statement:
     /* if_statement */
     | while_statement                       { $1 }
     | jump_statement                        { $1 }
-    | expression_statement_opt              { $1 }
-
-expression_statement_opt:
-    /* nothing */ 			    { [] }
-    | expression_statement 		    { $1 }
+    | expression_statement                  { $1 }
 
 expression_statement:
     expression SEMI                         { $1 }
@@ -160,25 +157,12 @@ string_concat_expression:
     expression CONCAT expression            { StrConc($1, Ct, $3) }
 
 assignment_expression:
-    ID array_sub_op_list_opt EQ expression  { Asgnmod($1, $2, $4) }
-    | type_spec arr_opt ID expression       { Asgndec($1, $2, $3, $4) }
-    | ID PERIOD ID EQ expression            { Asgobj($1, $3, $5) }
-
-array_sub_op_list_opt:
-    /* empty */                             { [] }
-    | array_sub_op_list                     { List.rev $1 }
-
-array_sub_op_list:
-    array_sub_op                            { $1 }
-    | array_sub_op_list array_sub_op        { $2 :: $1 }
-
-array_sub_op:
-    RBRACK INTLIT LBRACK                    { Arrsub($2) }
-    | RBRACK ID LBRACK                      { Arrsub($2) }
-
-arr_opt:
-    /* empty */                             { [] }
-    | RBRACK LBRACK                         { Arropt }
+    ID ASSIGN expression                        { Asgnmod($1, Id, $3) }
+    | type_spec ID ASSIGN expression            { Asgndec($1, $2, $4) }
+    | ID RBRACK expression LBRACK ASSIGN expression
+        { Asgnmod($1, $3, Arr, $6) }
+    | type_spec RBRACK LBRACK ID ASSIGN expression
+        { Asgndec($1, $4, $6) }
 
 for_statement:
     FOR LPAREN expression SEMI expression SEMI expression SEMI RPAREN RBRACE statement_list LBRACE
