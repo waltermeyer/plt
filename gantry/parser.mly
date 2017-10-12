@@ -12,7 +12,7 @@ open Ast
 %token LT LEQ GT GEQ
 %token AND OR NOT
 %token CONCAT
-%token IF ELIF FOR WHILE CONTINUE BREAK RETURN
+%token IF ELIF ELSE FOR WHILE CONTINUE BREAK RETURN
 %token INT FLOAT BOOL NULL OBJECT
 %token TRUE FALSE
 %token <int> INTLIT
@@ -21,6 +21,8 @@ open Ast
 %token EOF
 
 /* Precedence Rules */
+
+
 %right ASSIGN
 %left OR
 %left AND
@@ -29,7 +31,8 @@ open Ast
 %left LT GT LEQ GEQ
 %left PLUS MINUS
 %left TIMES DIVIDE
-%right NOT NEG
+%nonassoc UMINUS
+%right NOT
 %left CONCAT
 
 %start program
@@ -87,7 +90,7 @@ statement_list:
 
 statement:
     for_statement                           { $1 }
-    /* if_statement */
+    | if_statement                          { $1 }
     | while_statement                       { $1 }
     | jump_statement                        { $1 }
     | expression_statement                  { $1 }
@@ -139,6 +142,7 @@ arithmetic_expression:
     | expression DIVIDE expression          { Binop($1, Div, $3) }
     | expression INCREM                     { Inc($1) }
     | expression DECREM                     { Dec($1) }
+    | MINUS expression %prec UMINUS 	    { - $2 }
 
 comparison_expression:
     expression LT expression                { Binop($1, Lt, $3) }
@@ -167,6 +171,15 @@ assignment_expression:
 for_statement:
     FOR LPAREN expression SEMI expression SEMI expression SEMI RPAREN RBRACE statement_list LBRACE
       { For($3, $5, $7) }
+
+if_statement:
+    IF LPAREN expression RPAREN RBRACE statement_list LBRACE
+      { If($3, $6) }
+    | IF LPAREN expression RPAREN RBRACE statement_list LBRACE ELSE RBRACE statement_list LBRACE
+      { If($3, $6, $10) }
+    | IF LPAREN expression RPAREN RBRACE statement_list LBRACE
+      ELIF LPAREN expression RPAREN RBRACE statement_list LBRACE ELSE RBRACE statement_list LBRACE
+      { If($3, $6, $10, $13, $17) }
 
 while_statement:
     WHILE LPAREN expression RPAREN RBRACE statement_list LBRACE
