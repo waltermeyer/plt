@@ -58,7 +58,7 @@ declaration:
 
 /* Use a record as action for semantic checking later */
 function_declaration:
-    type_spec ID LPAREN func_param_list_opt RPAREN RBRACE statement_list LBRACE
+    type_spec ID LPAREN func_param_list_opt RPAREN LBRACE statement_list RBRACE
       { { type_spec = $1;
           f_id = $2;
           f_params = $4;
@@ -82,7 +82,7 @@ func_param_list:
     | func_param_list COMMA type_spec ID    { ($3, $4) :: $1 }
 
 function_expression:
-    | ID RPAREN expression_list_opt LPAREN  { FunExp($1, $3) }
+    | ID LPAREN expression_list_opt RPAREN  { FunExp($1, $3) }
 
 statement_list:
     /* empty */                             { [] }
@@ -133,7 +133,7 @@ key_value_list:
     | key_value_list COMMA key_value        { $3 :: $1 }
 
 key_value:
-    QUOTE STRLIT QUOTE COLON expression     { KeyVal($2, $5) }
+    type_spec ID COLON expression 	    { KeyVal($2, $4) }
 
 arithmetic_expression:
     expression PLUS expression              { Binop($1, Add, $3) }
@@ -163,26 +163,26 @@ string_concat_expression:
 assignment_expression:
     ID ASSIGN expression                        { Asgnmod($1, Id, $3) }
     | type_spec ID ASSIGN expression            { Asgndec($1, $2, $4) }
-    | ID RBRACK expression LBRACK ASSIGN expression
+    | ID LBRACK expression RBRACK ASSIGN expression
         { Asgnmod($1, $3, Arr, $6) }
-    | type_spec RBRACK LBRACK ID ASSIGN expression
+    | type_spec LBRACK RBRACK ID ASSIGN expression
         { Asgndec($1, $4, $6) }
 
 for_statement:
-    FOR LPAREN expression SEMI expression SEMI expression SEMI RPAREN RBRACE statement_list LBRACE
+    FOR LPAREN expression SEMI expression SEMI expression SEMI RPAREN LBRACE statement_list RBRACE
       { For($3, $5, $7) }
 
 if_statement:
-    IF LPAREN expression RPAREN RBRACE statement_list LBRACE
+    IF LPAREN expression RPAREN LBRACE statement_list RBRACE
       { If($3, $6) }
-    | IF LPAREN expression RPAREN RBRACE statement_list LBRACE ELSE RBRACE statement_list LBRACE
+    | IF LPAREN expression RPAREN LBRACE statement_list RBRACE ELSE LBRACE statement_list RBRACE
       { If($3, $6, $10) }
-    | IF LPAREN expression RPAREN RBRACE statement_list LBRACE
-      ELIF LPAREN expression RPAREN RBRACE statement_list LBRACE ELSE RBRACE statement_list LBRACE
+    | IF LPAREN expression RPAREN LBRACE statement_list RBRACE
+      ELIF LPAREN expression RPAREN LBRACE statement_list RBRACE ELSE LBRACE statement_list RBRACE
       { If($3, $6, $10, $13, $17) }
 
 while_statement:
-    WHILE LPAREN expression RPAREN RBRACE statement_list LBRACE
+    WHILE LPAREN expression RPAREN LBRACE statement_list RBRACE
       { While($3, $6) }
 
 jump_statement:
