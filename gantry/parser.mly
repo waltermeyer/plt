@@ -162,7 +162,7 @@ string_concat_expression:
 
 assignment_expression:
     ID ASSIGN expression                        { Assign($1, Id, $3) }
-    | type_spec ID ASSIGN expression            { Asgign($1, $2, $4) }
+    | type_spec ID ASSIGN expression            { Assign($1, $2, $4) }
     | ID LBRACK expression RBRACK ASSIGN expression
         { Asgnmod($1, $3, Arr, $6) }
     | type_spec LBRACK RBRACK ID ASSIGN expression
