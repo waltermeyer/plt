@@ -37,7 +37,7 @@ type expression =
 	| Binop of expression * op * expression
 	| Unop of uop * expression
 	| Assign of string * expression
-	| Call of string * expression
+	| FunExp of string * expression
 	| Noexpr
 
 type statement = 
@@ -56,3 +56,54 @@ type function_declaration = {
 }
 
 type program = typ_bind list * function_declaration list
+
+(* Pretty-printing functions *)
+
+let string_of_op = function
+	Add -> "+"
+	| Sub -> "-"
+	| Mult -> "*"
+	| Div -> "/"
+	| Equal -> "=="
+	| Neq -> "!="
+	| Less -> "<"
+	| Leq -> "<="
+	| Greater -> ">"
+	| Geq -> ">="
+ 	| And -> "&&"
+	| Or -> "||"
+
+let string_of_uop = function
+	Neg -> "-"
+	| Not -> "!"
+
+let rec string_of_expression = function
+	Literal(l)
+	| BoolLit(true) -> "true"
+	| BoolLit(false) -> "false"
+	| Id(s) -> s
+	| Binop(e1, o, e2) -> string_of_expression e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expression e2
+	| Unop(o, e) -> string_of_uop o ^ string_of_expression e
+	| Assign(v, e) -> v ^ " = " ^ string_of_expression e
+	| FunExp(f, el) -> f ^ "(" ^ String.concat ", " (List.map string_of_expression el) ^ ")"
+  	| Noexpr -> ""
+
+let rec string_of_statement = function
+	Block(statements) -> 
+		"{\n" ^ String.concat "" (List.map string_of_statement statements) ^ "}\n"
+	| Expr(expression) -> string_of_expression expression ^ ";\n";
+	| Return(expression) -> "return " ^ string_of_expression expression ^ ";\n";
+  	| If(e, s1, s2) ->  "if (" ^ string_of_expression e ^ ")\n" ^ string_of_statement s1 ^ "else\n" ^ string_of_statement s2
+  	| For(e1, e2, e3, s) -> "for (" ^ string_of_expression e1  ^ " ; " ^ string_of_expression e2 ^ " ; " ^ string_of_expression e3  ^ ") " ^ string_of_statement s
+  	| While(e, s) -> "while (" ^ string_of_expression e ^ ") " ^ string_of_statement s
+
+let string_of_typ = function
+	Int -> "int"
+	| Bool -> "bool"
+	| Void -> "void"
+	| Float -> "float"
+	| String -> "string"
+
+(* string of vdecl? *)
+(* string of function_declaration *)
+(* string of program *)
