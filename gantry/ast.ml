@@ -5,25 +5,27 @@ type op = Add | Sub | Mult | Div | Equal | Neq |Geq | Leq | Gt| Lt | And | Or
 
 type uop = Not
 
-type typ = Int | Float | Bool | Null
+type typ = Int | Float | Bool | Null | String
 
-type expr = 
+type typ_bind = typ * string
+
+type expression = 
 	Intlit of int
 	| BoolLit of bool
 	| Id of string
-	| Binop of expr * op * expr
-	| Unop of uop * expr
-	| Assign of string * expr
-	| Call of string * expr
+	| Binop of expression * op * expression
+	| Unop of uop * expression
+	| Assign of string * expression
+	| Call of string * expression
 	| Noexpr
 
-type stmt = 
-	Block of stmt list
-	| Expr of expr
-	| Return of expr
-	| If of expr * stmt *stmt
-	| For of expr * expr * expr
-	| While of expr * stmt
+type statement = 
+	Block of statement list
+	| Expr of expression
+	| Return of expression
+	| If of expression * statement *statement
+	| For of expression * expression * expression
+	| While of expression * statement
 
 type function_declaration = {
 	type_spec : type_spec;
@@ -32,4 +34,4 @@ type function_declaration = {
 	f_statements = statement_list;
 }
 
-type program = bind list * function_declaration list
+type program = typ_bind list * function_declaration list
