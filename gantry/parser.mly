@@ -140,9 +140,9 @@ arithmetic_expression:
     | expression MINUS expression           { Binop($1, Sub, $3) }
     | expression TIMES expression           { Binop($1, Mult, $3) }
     | expression DIVIDE expression          { Binop($1, Div, $3) }
-    | expression INCREM                     { Inc($1) }
-    | expression DECREM                     { Dec($1) }
-    | MINUS expression %prec UMINUS 	    { - $2 }
+    | expression INCREM                     { Unop(Inc, $1) }
+    | expression DECREM                     { Unop(Dec, $1) }
+    | MINUS expression %prec UMINUS 	    { Unop(Neg, $2) }
 
 comparison_expression:
     expression LT expression                { Binop($1, Lt, $3) }
@@ -191,13 +191,13 @@ jump_statement:
     | RETURN expression SEMI                { Return($2) }
 
 constant:
-    TRUE                                    { True }
-    | FALSE                                 { False }
+    TRUE                                    { BoolLit(true) }
+    | FALSE                                 { BoolLit(false) }
     | NULL                                  { Null }
     | literal                               { $1 }
 
 literal:
-    INTLIT                                  { Intlit($1) }
-    | FLOATLIT                              { Floatlit($1) }
-    | STRLIT                                { Strlit($1) }
+    INTLIT                                  { IntLit($1) }
+    | FLOATLIT                              { FloatLit($1) }
+    | STRLIT                                { StrLit($1) }
 

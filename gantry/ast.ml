@@ -1,17 +1,38 @@
 (* Abstract Syntax Tree *)
 
 
-type op = Add | Sub | Mult | Div | Equal | Neq |Geq | Leq | Gt| Lt | And | Or
+type op = Add
+          | Sub
+          | Mult
+          | Div
+          | Equal
+          | Neq
+          | Geq
+          | Leq
+          | Gt
+          | Lt
+          | And
+          | Or
+          | Conc
 
 type uop = Not
+           | Neg
+           | Inc
+           | Dec
 
-type typ = Int | Float | Bool | Null | String
+type typ = Int
+           | Float
+           | Bool
+           | Null
+           | String
 
 type typ_bind = typ * string
 
 type expression = 
-	Intlit of int
-	| BoolLit of bool
+	IntLit of int
+        | FloatLit of float
+        | StrLit of string
+	| BootLit of bool
 	| Id of string
 	| Binop of expression * op * expression
 	| Unop of uop * expression
