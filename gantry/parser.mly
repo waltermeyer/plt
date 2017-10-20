@@ -155,14 +155,14 @@ comparison_expression:
 logical_expression:
     expression AND expression               { Binop($1, Lt, $3) }
     | expression OR expression              { Binop($1, Gt, $3) }
-    | NOT expression                        { Not($2) }
+    | NOT expression                        { Unop($2) }
 
 string_concat_expression:
     expression CONCAT expression            { StrConc($1, Ct, $3) }
 
 assignment_expression:
-    ID ASSIGN expression                        { Asgnmod($1, Id, $3) }
-    | type_spec ID ASSIGN expression            { Asgndec($1, $2, $4) }
+    ID ASSIGN expression                        { Assign($1, Id, $3) }
+    | type_spec ID ASSIGN expression            { Asgign($1, $2, $4) }
     | ID LBRACK expression RBRACK ASSIGN expression
         { Asgnmod($1, $3, Arr, $6) }
     | type_spec LBRACK RBRACK ID ASSIGN expression
