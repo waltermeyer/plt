@@ -161,12 +161,12 @@ string_concat_expression:
     expression CONCAT expression            { StrConc($1, Ct, $3) }
 
 assignment_expression:
-    ID ASSIGN expression                        { Assign($1, Id, $3) }
-    | type_spec ID ASSIGN expression            { Assign($1, $2, $4) }
+    ID ASSIGN expression                        { Assign($1, $3) }
+    | type_spec ID ASSIGN expression            { AssignDecl($1, $2, $4) }
     | ID LBRACK expression RBRACK ASSIGN expression
-        { Asgnmod($1, $3, Arr, $6) }
+        { ArrAssign($1, $3, $6) }
     | type_spec LBRACK RBRACK ID ASSIGN expression
-        { Asgndec($1, $4, $6) }
+        { ArrAssignDecl($1, $4, $6) }
 
 for_statement:
     FOR LPAREN expression SEMI expression SEMI expression SEMI RPAREN LBRACE statement_list RBRACE
