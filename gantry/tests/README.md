@@ -44,7 +44,7 @@ Tests:
 ### Control Flow
 
 [X] if, elif, else
-[] while
+[X] while
 [] for
 [] return
 [] continue
@@ -52,12 +52,12 @@ Tests:
 
 ### Built in Functions
 
-- jsonify
-- arrify
-- objectify
-- slice
-- print
-- length
-- tostring
-- httpget
+[] jsonify
+[] arrify
+[] objectify
+[] slice
+[X] print
+[] length
+[] tostring
+[] httpget
 - httppost 
