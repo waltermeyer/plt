@@ -4,9 +4,17 @@ Tests:
 
 ### Type creation
 
+<<<<<<< Updated upstream
 [X] int
 [X] float
 [X] string
+=======
+[] int
+[] float
+[] string
+[] bool
+#[] char
+>>>>>>> Stashed changes
 
 ### Operators
 
@@ -15,17 +23,16 @@ Tests:
 [] Assignment int
 [] Assignment float
 [] Assignment bool
-[] Assignment char
 [] Assignment string
 [] Equal int
 [] Equal float
 [] Equal bool
-[] Equal char
+#[] Equal char
 [] Equal string
 [] Not Equal int
 [] Not Equal float
 [] Not Equal bool
-[] Not Equal char
+#[] Not Equal char
 [] Not Equal string
 [] Comparison int
 [] Comparison float
@@ -39,9 +46,18 @@ Tests:
 [X] if, elif, else
 [] while
 [] for
+[] return
+[] continue
+[] break
 
 ### Built in Functions
 
 - jsonify
 - arrify
-- 
+- objectify
+- slice
+- print
+- length
+- tostring
+- httpget
+- httppost 
