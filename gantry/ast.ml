@@ -32,7 +32,7 @@ type expression =
 	IntLit of int
         | FloatLit of float
         | StrLit of string
-	| BootLit of bool
+	| BoolLit of bool
 	| Id of string
 	| Binop of expression * op * expression
 	| Unop of uop * expression
