@@ -37,6 +37,9 @@ type expression =
 	| Binop of expression * op * expression
 	| Unop of uop * expression
 	| Assign of string * expression
+	| AssignDecl of typ * string * expression
+	| ArrAssign of string * expression * expression
+	| ArrAssignDecl of typ * string * expression
 	| FunExp of string * expression
 	| Noexpr
 
@@ -55,7 +58,7 @@ type function_declaration = {
 	f_statements = statement_list;
 }
 
-type program = typ_bind list * function_declaration list
+type program = statement list * function_declaration list
 
 (* Pretty-printing functions *)
 
