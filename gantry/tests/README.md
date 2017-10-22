@@ -4,10 +4,9 @@ Tests:
 
 ### Type creation
 
-[] int
-[] float
-[] string
-[] char
+[X] int
+[X] float
+[X] string
 
 ### Operators
 
@@ -37,7 +36,7 @@ Tests:
 
 ### Control Flow
 
-[] if, elif, else
+[X] if, elif, else
 [] while
 [] for
 

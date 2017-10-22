@@ -1,0 +1,2 @@
+// initializes an integer y with the value 42
+int y = 42;
