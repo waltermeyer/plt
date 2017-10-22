@@ -104,6 +104,15 @@ let string_of_typ = function
 	| Float -> "float"
 	| String -> "string"
 
-(* string of vdecl? *)
-(* string of function_declaration *)
-(* string of program *)
+let string_of_vardec vardec t id =
+	string_of_typ t ^ " " ^ id ^ ";\n"
+
+let string_of_fundec fundec
+	string_of_typ fundec.type_spec ^ " " ^ fundec.f_id ^ " "
+	^ "(" ^ String.concat ", " List.map snd fundec f_params ^ ")\n{\n"
+	^ String.concat "" (List.map string_of_vardec fundec.f_statements)
+	^ "}\n"
+
+let string_of_program vars funcs =
+	String.concat "" (List.map string_of_vardec vars) ^ "\n"
+	^ String.concat "\n" (List.map string_of_fundec funcs)
