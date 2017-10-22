@@ -10,22 +10,19 @@ Tests:
 
 ### Operators
 
-[] Arithmetic int
-[] Arithmetic float
+[X] Arithmetic int
+[X] Arithmetic float
 [] Assignment int
 [] Assignment float
 [] Assignment bool
-[] Assignment char
 [] Assignment string
 [] Equal int
 [] Equal float
 [] Equal bool
-[] Equal char
 [] Equal string
 [] Not Equal int
 [] Not Equal float
 [] Not Equal bool
-[] Not Equal char
 [] Not Equal string
 [] Comparison int
 [] Comparison float
@@ -39,9 +36,11 @@ Tests:
 [X] if, elif, else
 [] while
 [] for
+[] break
+[] continue
 
 ### Built in Functions
 
-- jsonify
-- arrify
+[] jsonify
+[]  arrify
 - 
