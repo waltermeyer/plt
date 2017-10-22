@@ -173,16 +173,16 @@ for_statement:
       { For($3, $5, $7) }
 
 if_statement:
-    IF LPAREN expression SEMI RPAREN LBRACE statement_list RBRACE
+    IF LPAREN expression RPAREN LBRACE statement_list RBRACE
       { If($3, $6) }
-    | IF LPAREN expression SEMI RPAREN LBRACE statement_list RBRACE ELSE LBRACE statement_list RBRACE
+    | IF LPAREN expression RPAREN LBRACE statement_list RBRACE ELSE LBRACE statement_list RBRACE
       { If($3, $6, $10) }
-    | IF LPAREN expression SEMI RPAREN LBRACE statement_list RBRACE
-      ELIF LPAREN expression SEMI  RPAREN LBRACE statement_list RBRACE ELSE LBRACE statement_list RBRACE
+    | IF LPAREN expression RPAREN LBRACE statement_list RBRACE
+      ELIF LPAREN expression  RPAREN LBRACE statement_list RBRACE ELSE LBRACE statement_list RBRACE
       { If($3, $6, $10, $13, $17) }
 
 while_statement:
-    WHILE LPAREN expression SEMI RPAREN LBRACE statement_list RBRACE
+    WHILE LPAREN expression RPAREN LBRACE statement_list RBRACE
       { While($3, $6) }
 
 jump_statement:
