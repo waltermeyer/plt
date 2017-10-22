@@ -18,8 +18,8 @@ Tests:
 
 ### Operators
 
-[] Arithmetic int
-[] Arithmetic float
+[X] Arithmetic int
+[X] Arithmetic float
 [] Assignment int
 [] Assignment float
 [] Assignment bool
@@ -27,12 +27,18 @@ Tests:
 [] Equal int
 [] Equal float
 [] Equal bool
+<<<<<<< HEAD
 #[] Equal char
+=======
+>>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617
 [] Equal string
 [] Not Equal int
 [] Not Equal float
 [] Not Equal bool
+<<<<<<< HEAD
 #[] Not Equal char
+=======
+>>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617
 [] Not Equal string
 [] Comparison int
 [] Comparison float
@@ -46,13 +52,19 @@ Tests:
 [X] if, elif, else
 [X] while
 [] for
+<<<<<<< HEAD
 [] return
 [] continue
 [] break
+=======
+[] break
+[] continue
+>>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617
 
 ### Built in Functions
 
 [] jsonify
+<<<<<<< HEAD
 [] arrify
 [] objectify
 [] slice
@@ -61,3 +73,7 @@ Tests:
 [] tostring
 [] httpget
 - httppost 
+=======
+[]  arrify
+- 
+>>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617

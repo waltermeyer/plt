@@ -1,0 +1,9 @@
+int test_add_float(){
+	int y = 4.00;
+	int x = 6.00;
+
+	int z = y + z;
+	print(z);
+}
+
+test_add_float();
