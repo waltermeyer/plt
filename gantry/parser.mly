@@ -56,7 +56,6 @@ declaration:
     statement                                { $1 }
     | function_declaration                   { $1 }
 
-/* Use a record as action for semantic checking later */
 function_declaration:
     type_spec ID LPAREN func_param_list_opt RPAREN LBRACE statement_list RBRACE
       { { type_spec = $1;
@@ -104,7 +103,7 @@ expression:
     ID                                      { Id($1) }
     | constant                              { $1 }
     | array_expression                      { $1 }
-    | object_expression                     { $1 }
+    | object_expression                     { ObjExp($1) }
     | arithmetic_expression                 { $1 }
     | comparison_expression                 { $1 }
     | logical_expression                    { $1 }
@@ -155,10 +154,10 @@ comparison_expression:
 logical_expression:
     expression AND expression               { Binop($1, And, $3) }
     | expression OR expression              { Binop($1, Or, $3) }
-    | NOT expression                        { Unop($2) }
+    | NOT expression                        { Unop(Not, $2) }
 
 string_concat_expression:
-    expression CONCAT expression            { StrConc($1, Ct, $3) }
+    expression CONCAT expression            { StrConc($1, Conc, $3) }
 
 assignment_expression:
     ID ASSIGN expression                        { Assign($1, $3) }
@@ -170,13 +169,13 @@ assignment_expression:
 
 for_statement:
     FOR LPAREN expression SEMI expression SEMI expression SEMI RPAREN LBRACE statement_list RBRACE
-      { For($3, $5, $7) }
+      { For($3, $5, $7, $11) }
 
 if_statement:
     IF LPAREN expression RPAREN LBRACE statement_list RBRACE
-      { If($3, $6) }
+      { If($3, $6, Block([]), NoExp, Block([]), Block([])) }
     | IF LPAREN expression RPAREN LBRACE statement_list RBRACE ELSE LBRACE statement_list RBRACE
-      { If($3, $6, $10) }
+      { If($3, $6, Block([]), NoExp, Block([]), $10) }
     | IF LPAREN expression RPAREN LBRACE statement_list RBRACE
       ELIF LPAREN expression  RPAREN LBRACE statement_list RBRACE ELSE LBRACE statement_list RBRACE
       { If($3, $6, $10, $13, $17) }
@@ -200,4 +199,3 @@ literal:
     INTLIT                                  { IntLit($1) }
     | FLOATLIT                              { FloatLit($1) }
     | STRLIT                                { StrLit($1) }
-
