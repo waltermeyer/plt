@@ -91,6 +91,7 @@ expression_statement:
 
 expression:
     ID                                      { Id($1) }
+    | ID LBRACK expression RBRACK	    { ArrId($1, $3) }
     | constant                              { $1 }
     | array_expression                      { $1 }
     | object_expression                     { ObjExp($1) }

@@ -35,6 +35,7 @@ type expression =
 	| BoolLit of bool
 	| NullLit of string
 	| Id of string
+	| ArrId of string * expression
 	| Binop of expression * op * expression
 	| Unop of uop * expression
 	| Assign of string * expression
@@ -105,6 +106,7 @@ let rec string_of_expression = function
 	| BoolLit(false) -> "false"
 	| NullLit(s) -> s
 	| Id(s) -> s
+	| ArrId(s, e) -> s ^ "[" ^ string_of_expression e ^ "]"
 	| Binop(e1, o, e2) -> string_of_expression e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expression e2
 	| Unop(o, e) -> string_of_uop o ^ string_of_expression e
 	| ObjExp(el) -> "{\n" ^ String.concat ", " (List.map string_of_expression el) ^ "\n}"
