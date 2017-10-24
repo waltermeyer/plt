@@ -1,0 +1,6 @@
+bool failequal(float i,float j) {
+	return i == j;
+
+}
+
+failequal(-3.2, -3.21);
