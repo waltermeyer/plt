@@ -1,0 +1,6 @@
+// to_string (from LRM)
+
+int course_enrollment = 3;
+string course_enrollment_string = to_string(course_enrollment)
+print(course_enrollment_string);
+// prints 3

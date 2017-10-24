@@ -1,0 +1,10 @@
+// http-get (from LRM)
+
+/*
+returns a json object of containers running on
+  a particular Docker engine.
+*/
+string uri = "/v1.19/containers/json";
+string cons = http_get("192.168.0.9", 80, uri);
+object [] cons_arr = arrify(cons);
+print(cons_arr);

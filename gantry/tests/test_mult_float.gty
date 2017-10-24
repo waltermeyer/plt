@@ -1,3 +1,5 @@
+// multiply float
+
 int test_mult_float(){
 	int y = 4.00;
 	int x = 6.00;
