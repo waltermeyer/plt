@@ -1,3 +1,5 @@
+// add int
+
 int test_add_int(){
 	int y = 4;
 	int x = 6;

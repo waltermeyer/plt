@@ -1,0 +1,27 @@
+// slice (from LRM)
+
+string student_name = "Sandy";
+string first_letter = slice(student_name, 0, 1);
+print(first_letter);
+// prints "S"
+
+string new_name = "M" ^ slice(student_name, 1, 5);
+print(new_name);
+// prints "Mandy"
+
+string second_new_name = "M" ^ slice(student_name, 1, 10);
+print(second_new_name);
+// prints "Mandy"
+
+bool new_names_equal = (new_name == second_new_name);
+print("Are the new names equal?")
+if (new_names_equal) {
+    print("Yes")
+} else {
+    print("No")
+}
+print("Are the new names equal? " ^ new_names_equal);
+// prints "Are the new names equal? Yes"
+
+print("Old name : " ^ student_name ^ " New name : " ^ new_name);
+// prints "Old name: Sandy New name: Mandy"

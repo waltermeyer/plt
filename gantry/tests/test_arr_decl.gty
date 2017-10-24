@@ -1,1 +1,13 @@
-int [] arr = [1, 10, 100];
+// declare array
+
+int test_arr_decl(){
+
+	int [] arr = [3, 10, 100];
+	print(arr);
+
+}
+
+test_arr_decl();
+
+// prints 3, 10, 100
+

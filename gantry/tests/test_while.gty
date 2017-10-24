@@ -1,3 +1,5 @@
+// while
+
 int x = 10;
 while (x<12)
 {
