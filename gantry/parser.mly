@@ -13,11 +13,11 @@ open Ast
 %token AND OR NOT
 %token CONCAT
 %token IF ELIF ELSE FOR WHILE CONTINUE BREAK RETURN
-%token INT FLOAT OBJECT STR BOOL NULL
+%token INT FLOAT OBJECT STRING BOOL NULL
 %token TRUE FALSE
 %token <int> INTLIT
 %token <float> FLOATLIT
-%token <string> ID STRING STRLIT
+%token <string> ID STRLIT
 %token EOF
 
 /* Precedence Rules */

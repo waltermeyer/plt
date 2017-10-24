@@ -64,7 +64,7 @@ rule token = parse
 | "true"      { TRUE }
 | "false"     { FALSE }
 | "object"    { OBJECT }
-| "string"    { STR }
+| "string"    { STRING }
 
 (* Strings *)
 | '"'         { read_string (Buffer.create 10) lexbuf }
@@ -96,7 +96,7 @@ and new_comment = parse
  *)
 and read_string buf =
   parse
-  | '"'       { STRING (Buffer.contents buf) }
+  | '"'       { STRLIT (Buffer.contents buf) }
   | '\\' 'r'  { Buffer.add_char buf '\r'; read_string buf lexbuf }
   | '\\' 't'  { Buffer.add_char buf '\t'; read_string buf lexbuf }
   | '\\' 'n'  { Buffer.add_char buf '\n'; read_string buf lexbuf }

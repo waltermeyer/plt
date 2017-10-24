@@ -100,7 +100,7 @@ let string_of_typ = function
 let rec string_of_expression = function
 	  IntLit(i) -> string_of_int i
 	| FloatLit(f) -> string_of_float f
-	| StrLit(s) -> s
+	| StrLit(s) -> "\"" ^ s ^ "\""
 	| BoolLit(true) -> "true"
 	| BoolLit(false) -> "false"
 	| NullLit(s) -> s
