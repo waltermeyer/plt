@@ -64,7 +64,7 @@ rule token = parse
 | "true"      { TRUE }
 | "false"     { FALSE }
 | "object"    { OBJECT }
-| "string"    { STRING }
+| "string"    { STR }
 
 (* Strings *)
 | '"'         { read_string (Buffer.create 10) lexbuf }
@@ -79,6 +79,15 @@ rule token = parse
 (* EOF and Error Handling *)
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
+
+(* Comments *)
+and comment = parse
+  "*/" { token lexbuf }
+| _       { comment lexbuf }
+
+and new_comment = parse
+  '\n' { token lexbuf }
+| _       { new_comment lexbuf }
 
 (* String Literals
  * Recursive read_string modified from
@@ -99,14 +108,6 @@ and read_string buf =
     { Buffer.add_string buf (Lexing.lexeme lexbuf);
       read_string buf lexbuf
     }
-  | _ { raise (SyntaxError ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
-  | eof { raise (SyntaxError ("String is not terminated")) }
+  | _ { raise (Failure ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
+  | eof { raise (Failure ("String is not terminated")) }
 
-(* Comments *)
-and comment = parse
-  "*/" { token lexbuf }
-| _       { comment lexbuf }
-
-and new_comment = parse
-  '\n' { token lexbuf }
-| _       { new_comment lexbuf }
