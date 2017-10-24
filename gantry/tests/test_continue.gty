@@ -1,5 +1,8 @@
-for(int x = 0; x<4; x++)
-{
+// continue and break
+
+int test_continue(){
+	
+	for(int x = 0; x<4; x++){
 
 	print("x = "^x);
 	if(x < 3)
@@ -12,10 +15,12 @@ for(int x = 0; x<4; x++)
 		break;
 	}
 	
-
-}
+	}
 
 print("broken");
+}
+
+test_continue();
 
 /* prints
 x = 0
