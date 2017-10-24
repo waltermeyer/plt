@@ -1,0 +1,9 @@
+int test_mult_int(){
+	int y = 4;
+	int x = 6;
+
+	int z = y * z;
+	print(z);
+}
+
+test_mult_int();

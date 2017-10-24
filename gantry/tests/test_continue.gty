@@ -1,0 +1,25 @@
+for(int x = 0; x<4; x++)
+{
+
+	print("x = "^x);
+	if(x < 3)
+	{
+		continue;
+	}
+
+	if(x == 3)
+	{
+		break;
+	}
+	
+
+}
+
+print("broken");
+
+/* prints
+x = 0
+x = 1
+x = 2
+x = 3 broken
+*/

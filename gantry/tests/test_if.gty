@@ -1,0 +1,18 @@
+boolean test_if() { 
+	int x = 1;
+	
+	if(!x){
+		//test fails
+		return 0;
+	} 
+	elif(x!= 1){
+		//test fails
+		return 0;
+	}
+	else {
+		//test passes
+		return 1;
+	}
+}
+
+boolean pass = test_if();
