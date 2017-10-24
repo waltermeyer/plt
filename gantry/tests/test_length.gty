@@ -1,0 +1,6 @@
+// length (from LRM)
+
+string [] student_arr = ["Joe", "Bob", "Alan"];
+int arr_length = length(student_arr);
+print(arr_length);
+// prints 3
