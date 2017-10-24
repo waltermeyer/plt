@@ -40,15 +40,12 @@ open Ast
 
 /* CFG */
 program:
-    declaration_list_opt EOF { $1 }
-
-declaration_list_opt:
-    /* empty */                              { [], [] }
-    | declaration_list                       { $1 }
+    declaration_list EOF { $1 }
 
 /* Build up a tuple of ordered lists for stmts and fdecls for the AST */
 declaration_list:
-    declaration_list statement               { ($2 :: fst $1), snd $1 }
+    /* empty */                              { [], [] }
+    | declaration_list statement               { ($2 :: fst $1), snd $1 }
     | declaration_list function_declaration  { fst $1, ($2 :: snd $1) }
 
 function_declaration:
