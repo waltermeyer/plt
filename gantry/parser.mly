@@ -13,7 +13,7 @@ open Ast
 %token AND OR NOT
 %token CONCAT
 %token IF ELIF ELSE FOR WHILE CONTINUE BREAK RETURN
-%token INT FLOAT BOOL NULL OBJECT
+%token INT FLOAT OBJECT STR BOOL NULL
 %token TRUE FALSE
 %token <int> INTLIT
 %token <float> FLOATLIT
@@ -21,8 +21,6 @@ open Ast
 %token EOF
 
 /* Precedence Rules */
-
-
 %right ASSIGN
 %left OR
 %left AND
@@ -45,16 +43,13 @@ program:
     declaration_list_opt EOF { $1 }
 
 declaration_list_opt:
-    /* empty */                              { [] }
-    | declaration_list                       { List.rev $1 }
+    /* empty */                              { [], [] }
+    | declaration_list                       { $1 }
 
+/* Build up a tuple of ordered lists for stmts and fdecls for the AST */
 declaration_list:
-    declaration                              { [$1] }
-    | declaration_list declaration           { $2 :: $1 }
-
-declaration:
-    statement                                { $1 }
-    | function_declaration                   { $1 }
+    declaration_list statement               { ($2 :: fst $1), snd $1 }
+    | declaration_list function_declaration  { fst $1, ($2 :: snd $1) }
 
 function_declaration:
     type_spec ID LPAREN func_param_list_opt RPAREN LBRACE statement_list RBRACE
@@ -77,7 +72,7 @@ func_param_list_opt:
     | func_param_list                       { List.rev $1 }
 
 func_param_list:
-    type_spec ID                            { ($1, $2) }
+    type_spec ID                            { [($1, $2)] }
     | func_param_list COMMA type_spec ID    { ($3, $4) :: $1 }
 
 function_expression:
@@ -95,9 +90,7 @@ statement:
     | expression_statement                  { $1 }
 
 expression_statement:
-    expression SEMI                         { $1 }
-    | assignment_expression SEMI            { $1 }
-    | function_expression SEMI              { $1 }
+    expression SEMI                         { Expr($1) }
 
 expression:
     ID                                      { Id($1) }
@@ -108,6 +101,8 @@ expression:
     | comparison_expression                 { $1 }
     | logical_expression                    { $1 }
     | string_concat_expression              { $1 }
+    | assignment_expression                 { $1 }
+    | function_expression                   { $1 }
 
 array_expression:
     LBRACK expression_list_opt RBRACK       { ArrExp($2) }
@@ -117,22 +112,15 @@ expression_list_opt:
     | expression_list                       { List.rev $1 }
 
 expression_list:
-    expression                              { $1 }
+    expression                              { [$1] }
     | expression_list COMMA expression      { $3 :: $1 }
 
 object_expression:
-    LBRACE key_value_list_opt RBRACE        { $2 }
+    LBRACE key_value_opt RBRACE             { $2 }
 
-key_value_list_opt:
+key_value_opt:
     /* empty */                             { [] }
-    | key_value_list                        { List.rev $1 }
-
-key_value_list:
-    key_value                               { $1 }
-    | key_value_list COMMA key_value        { $3 :: $1 }
-
-key_value:
-    type_spec ID COLON expression 	    { KeyVal($2, $4) }
+    | type_spec ID COLON expression 	    { [KeyVal($1, $2, $4)] }
 
 arithmetic_expression:
     expression PLUS expression              { Binop($1, Add, $3) }
@@ -157,7 +145,7 @@ logical_expression:
     | NOT expression                        { Unop(Not, $2) }
 
 string_concat_expression:
-    expression CONCAT expression            { StrConc($1, Conc, $3) }
+    expression CONCAT expression            { Binop($1, Conc, $3) }
 
 assignment_expression:
     ID ASSIGN expression                        { Assign($1, $3) }
@@ -168,20 +156,20 @@ assignment_expression:
         { ArrAssignDecl($1, $4, $6) }
 
 for_statement:
-    FOR LPAREN expression SEMI expression SEMI expression SEMI RPAREN LBRACE statement_list RBRACE
+    FOR LPAREN expression SEMI expression SEMI expression SEMI RPAREN LBRACE statement RBRACE
       { For($3, $5, $7, $11) }
 
 if_statement:
-    IF LPAREN expression RPAREN LBRACE statement_list RBRACE
-      { If($3, $6, Block([]), NoExp, Block([]), Block([])) }
-    | IF LPAREN expression RPAREN LBRACE statement_list RBRACE ELSE LBRACE statement_list RBRACE
-      { If($3, $6, Block([]), NoExp, Block([]), $10) }
-    | IF LPAREN expression RPAREN LBRACE statement_list RBRACE
-      ELIF LPAREN expression  RPAREN LBRACE statement_list RBRACE ELSE LBRACE statement_list RBRACE
+    IF LPAREN expression RPAREN LBRACE statement RBRACE
+      { If($3, $6, Noexpr, Block([]), Block([])) }
+    | IF LPAREN expression RPAREN LBRACE statement RBRACE ELSE LBRACE statement RBRACE
+      { If($3, $6, Noexpr, Block([]), $10) }
+    | IF LPAREN expression RPAREN LBRACE statement RBRACE
+      ELIF LPAREN expression  RPAREN LBRACE statement RBRACE ELSE LBRACE statement RBRACE
       { If($3, $6, $10, $13, $17) }
 
 while_statement:
-    WHILE LPAREN expression RPAREN LBRACE statement_list RBRACE
+    WHILE LPAREN expression RPAREN LBRACE statement RBRACE
       { While($3, $6) }
 
 jump_statement:
@@ -192,7 +180,7 @@ jump_statement:
 constant:
     TRUE                                    { BoolLit(true) }
     | FALSE                                 { BoolLit(false) }
-    | NULL                                  { Null }
+    | NULL                                  { NullLit("null") }
     | literal                               { $1 }
 
 literal:
