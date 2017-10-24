@@ -1,0 +1,6 @@
+bool equals(bool i, bool j) {
+	return i == j;
+
+}
+
+equals(true, true);

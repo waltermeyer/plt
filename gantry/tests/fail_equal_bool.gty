@@ -1,0 +1,5 @@
+bool failequals(bool i, bool j) {
+	return i == j;
+}
+
+failequals(true, false);

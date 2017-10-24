@@ -1,0 +1,5 @@
+bool equals (int i,int j) {	
+	return i == j;
+}
+
+equals(0,0);
