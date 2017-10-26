@@ -140,7 +140,7 @@ let rec string_of_statement = function
 			            "else\n" ^ "{\n" ^ "  " ^ string_of_statement s3 ^ "}\n"
 	| For(e1, e2, e3, s) -> "for (" ^ string_of_expression e1  ^ " ; " ^ string_of_expression e2 ^ " ; "
 				        ^ string_of_expression e3  ^ ") " ^ string_of_statement s
-  	| While(e, s) -> "while (" ^ string_of_expression e ^ ") " ^ string_of_statement s
+	| While(e, s) -> "while (" ^ string_of_expression e ^ ")\n" ^ "{\n" ^ string_of_statement s ^ "}\n"
 	| Break -> "break ; "
 	| Continue -> "continue ; "
 

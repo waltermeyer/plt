@@ -21,6 +21,9 @@ open Ast
 %token EOF
 
 /* Precedence Rules */
+%nonassoc NOELSE
+%nonassoc ELIF
+%nonassoc ELSE
 %right ASSIGN
 %left OR
 %left AND
@@ -158,10 +161,13 @@ for_statement:
       { For($3, $5, $7, $11) }
 
 if_statement:
-    IF LPAREN expression RPAREN LBRACE statement RBRACE
+    IF LPAREN expression RPAREN LBRACE statement RBRACE %prec NOELSE
       { If($3, $6, Noexpr, Block([]), Block([])) }
     | IF LPAREN expression RPAREN LBRACE statement RBRACE ELSE LBRACE statement RBRACE
       { If($3, $6, Noexpr, Block([]), $10) }
+    | IF LPAREN expression RPAREN LBRACE statement RBRACE
+      ELIF LPAREN expression  RPAREN LBRACE statement RBRACE %prec NOELSE
+      { If($3, $6, $10, $13, Block([])) }
     | IF LPAREN expression RPAREN LBRACE statement RBRACE
       ELIF LPAREN expression  RPAREN LBRACE statement RBRACE ELSE LBRACE statement RBRACE
       { If($3, $6, $10, $13, $17) }
