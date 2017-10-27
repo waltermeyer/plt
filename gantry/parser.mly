@@ -43,7 +43,7 @@ open Ast
 
 /* CFG */
 program:
-    declaration_list EOF { $1 }
+    declaration_list EOF 		     { $1 }
 
 /* Build up a tuple of ordered lists for stmts and fdecls for the AST */
 declaration_list:
@@ -88,6 +88,7 @@ statement:
     | while_statement                       { $1 }
     | jump_statement                        { $1 }
     | expression_statement                  { $1 }
+    | LBRACE statement_list RBRACE	    { Block(List.rev $2) }
 
 expression_statement:
     expression SEMI                         { Expr($1) }
@@ -97,7 +98,6 @@ expression:
     | ID LBRACK expression RBRACK	    { ArrId($1, $3) }
     | constant                              { $1 }
     | array_expression                      { $1 }
-    | object_expression                     { ObjExp($1) }
     | arithmetic_expression                 { $1 }
     | comparison_expression                 { $1 }
     | logical_expression                    { $1 }
@@ -117,11 +117,18 @@ expression_list:
     | expression_list COMMA expression      { $3 :: $1 }
 
 object_expression:
-    LBRACE key_value_opt RBRACE             { $2 }
+    LBRACE key_value_list_opt RBRACE        { $2 }
 
-key_value_opt:
+key_value_list_opt:
     /* empty */                             { [] }
-    | type_spec ID COLON expression 	    { [KeyVal($1, $2, $4)] }
+    | key_value_list                        { List.rev $1 }
+
+key_value_list:
+    key_value				    { [$1] }
+    | key_value_list COMMA key_value        { $3 :: $1 }
+
+key_value:
+    | type_spec ID COLON expression 	    { KeyVal($1, $2, $4) }
 
 arithmetic_expression:
     expression PLUS expression              { Binop($1, Add, $3) }
@@ -149,32 +156,33 @@ string_concat_expression:
     expression CONCAT expression            { Binop($1, Conc, $3) }
 
 assignment_expression:
-    ID ASSIGN expression                        { Assign($1, $3) }
-    | type_spec ID ASSIGN expression            { AssignDecl($1, $2, $4) }
+    ID ASSIGN expression                    { Assign($1, $3) }
+    | type_spec ID ASSIGN expression        { AssignDecl($1, $2, $4) }
     | ID LBRACK expression RBRACK ASSIGN expression
         { ArrAssign($1, $3, $6) }
     | type_spec LBRACK RBRACK ID ASSIGN expression
         { ArrAssignDecl($1, $4, $6) }
+    | type_spec ID object_expression	    { AssignObj($1, $2, $3) }
 
 for_statement:
-    FOR LPAREN expression SEMI expression SEMI expression SEMI RPAREN LBRACE statement RBRACE
-      { For($3, $5, $7, $11) }
+    FOR LPAREN expression SEMI expression SEMI expression SEMI RPAREN statement
+      { For($3, $5, $7, $10) }
 
 if_statement:
-    IF LPAREN expression RPAREN LBRACE statement RBRACE %prec NOELSE
-      { If($3, $6, Noexpr, Block([]), Block([])) }
-    | IF LPAREN expression RPAREN LBRACE statement RBRACE ELSE LBRACE statement RBRACE
-      { If($3, $6, Noexpr, Block([]), $10) }
-    | IF LPAREN expression RPAREN LBRACE statement RBRACE
-      ELIF LPAREN expression  RPAREN LBRACE statement RBRACE %prec NOELSE
-      { If($3, $6, $10, $13, Block([])) }
-    | IF LPAREN expression RPAREN LBRACE statement RBRACE
-      ELIF LPAREN expression  RPAREN LBRACE statement RBRACE ELSE LBRACE statement RBRACE
-      { If($3, $6, $10, $13, $17) }
+    IF LPAREN expression RPAREN statement %prec NOELSE
+      { If($3, $5, Noexpr, Block([]), Block([])) }
+    | IF LPAREN expression RPAREN statement ELSE statement
+      { If($3, $5, Noexpr, Block([]), $7) }
+    | IF LPAREN expression RPAREN statement
+      ELIF LPAREN expression RPAREN statement %prec NOELSE
+      { If($3, $5, $8, $10, Block([])) }
+    | IF LPAREN expression RPAREN statement
+      ELIF LPAREN expression RPAREN statement ELSE statement
+      { If($3, $5, $8, $10, $12) }
 
 while_statement:
-    WHILE LPAREN expression RPAREN LBRACE statement RBRACE
-      { While($3, $6) }
+    WHILE LPAREN expression RPAREN statement
+      { While($3, $5) }
 
 jump_statement:
     BREAK SEMI                              { Break }
