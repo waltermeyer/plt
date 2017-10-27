@@ -1,0 +1,12 @@
+// fail - access array element (out of bounds)
+
+int fail_arr_access(){
+        arr = [1,2,3];
+        int x = arr[4];
+
+        print(x);
+}
+
+fail_arr_access();
+
+// out of bounds

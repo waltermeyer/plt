@@ -1,4 +1,4 @@
-// initialize boolean x (true) and y (false)
+// pass - initialize boolean x (true) and y (false)
 
 int test_bool_declaration(){
 

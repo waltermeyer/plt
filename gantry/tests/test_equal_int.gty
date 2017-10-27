@@ -1,5 +1,7 @@
+// pass - integer equals
+
 bool equals (int i,int j) {	
 	return i == j;
 }
 
-equals(0,0);
+equals(2,2);

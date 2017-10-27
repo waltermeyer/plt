@@ -1,3 +1,5 @@
+// fail - boolean equals
+
 bool failequals(bool i, bool j) {
 	return i == j;
 }

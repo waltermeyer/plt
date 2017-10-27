@@ -1,4 +1,4 @@
-// add int
+// pass - add two integers
 
 int test_add_int(){
 	int y = 4;
@@ -9,3 +9,6 @@ int test_add_int(){
 }
 
 test_add_int();
+
+// prints 10
+

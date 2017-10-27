@@ -1,3 +1,5 @@
+// pass - float equals
+
 bool equals(float i, float j) {
 	return i == j:
 }

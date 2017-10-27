@@ -4,8 +4,10 @@ int test_div_int(){
 	int y = 4;
 	int x = 6;
 
-	int z = y / z;
+	int z = x / y;
 	print(z);
 }
 
 test_div_int();
+
+// prints 2 

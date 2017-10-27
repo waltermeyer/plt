@@ -1,4 +1,4 @@
-// add int
+// add int (fail - adding mismatching types)
 
 int test_add_int(){
 	int y = 4;

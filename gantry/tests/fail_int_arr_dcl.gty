@@ -1,1 +1,3 @@
+// fail int array declaration - multiple data types 
+
 int [] arr = ["1", 1, 2];

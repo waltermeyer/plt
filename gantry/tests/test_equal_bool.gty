@@ -1,3 +1,5 @@
+// pass - boolean equals
+
 bool equals(bool i, bool j) {
 	return i == j;
 
