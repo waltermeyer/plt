@@ -126,22 +126,22 @@ let rec string_of_statement = function
 	| Expr(expression) -> string_of_expression expression ^ ";\n";
 	| Return(expression) -> "return " ^ string_of_expression expression ^ ";\n";
 	| If(e1, s1, Noexpr, Block([]), Block([])) -> "if (" ^ string_of_expression e1 ^ ")\n" ^
-                                                      "{\n" ^ "  " ^ string_of_statement s1 ^ "}\n"
+                                                      string_of_statement s1 ^ "\n"
 	| If(e1, s1, Noexpr, Block([]), s2) -> "if (" ^ string_of_expression e1 ^ ")\n" ^
-					       "{\n" ^ "  " ^ string_of_statement s1 ^ "}\n" ^
-                                               "else\n" ^ "{\n" ^ "  " ^ string_of_statement s2 ^ "}\n"
+					       string_of_statement s1 ^ "\n" ^
+                                               "else\n" ^ string_of_statement s2 ^ "\n"
 	| If(e1, s1, e2, s2, Block([])) -> "if (" ^ string_of_expression e1 ^ ")\n" ^
-				           "{\n" ^ "  " ^ string_of_statement s1 ^ "}\n" ^
+				           string_of_statement s1 ^ "\n" ^
 					   "elif (" ^ string_of_expression e2 ^ ")\n" ^
-					   "{\n" ^ "  " ^ string_of_statement s2 ^ "}\n"
+					   string_of_statement s2 ^ "\n"
 	| If(e1, s1, e2, s2, s3) -> "if (" ^ string_of_expression e1 ^ ")\n" ^
-				    "{\n" ^ "  " ^ string_of_statement s1 ^ "}\n" ^
+				    string_of_statement s1 ^ "\n" ^
 				    "elif (" ^ string_of_expression e2 ^ ")\n" ^
-				    "{\n" ^ "  " ^ string_of_statement s2 ^ "}\n" ^
-			            "else\n" ^ "{\n" ^ "  " ^ string_of_statement s3 ^ "}\n"
+				    string_of_statement s2 ^ "\n" ^
+			            "else\n" ^ string_of_statement s3 ^ "\n"
 	| For(e1, e2, e3, s) -> "for (" ^ string_of_expression e1  ^ " ; " ^ string_of_expression e2 ^ " ; "
 				        ^ string_of_expression e3  ^ ") " ^ string_of_statement s
-	| While(e, s) -> "while (" ^ string_of_expression e ^ ")\n" ^ "{\n" ^ string_of_statement s ^ "}\n"
+	| While(e, s) -> "while (" ^ string_of_expression e ^ ")\n" ^ string_of_statement s ^ "\n"
 	| Break -> "break ; "
 	| Continue -> "continue ; "
 
