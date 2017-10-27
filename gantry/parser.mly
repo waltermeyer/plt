@@ -165,8 +165,8 @@ assignment_expression:
     | type_spec ID object_expression	    { AssignObj($1, $2, $3) }
 
 for_statement:
-    FOR LPAREN expression SEMI expression SEMI expression SEMI RPAREN statement
-      { For($3, $5, $7, $10) }
+    FOR LPAREN expression SEMI expression SEMI expression RPAREN statement
+      { For($3, $5, $7, $9) }
 
 if_statement:
     IF LPAREN expression RPAREN statement %prec NOELSE
