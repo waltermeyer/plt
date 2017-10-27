@@ -1,0 +1,13 @@
+// string structural equality test -- pass
+
+bool equals(string x, string y) {
+
+	return x == y;
+
+}
+
+
+string x = "Work work work work work";
+string y = "Work work work work work";
+
+equals(x, y);
