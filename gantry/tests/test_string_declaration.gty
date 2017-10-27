@@ -1,1 +1,10 @@
-string my_string = "new_string";
+// pass - string declaration
+
+test_string_decl(){
+	string my_string = "new_string";
+
+	}
+
+test_string_decl();
+
+

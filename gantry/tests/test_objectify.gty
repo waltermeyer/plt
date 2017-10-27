@@ -1,4 +1,5 @@
-// objectify (from LRM)
+// pass - objectify (from LRM)
+// review
 
 string str = "{course:\"PLT\",students:125,location:\"NWC\"}";
 object course_obj = objectify(str);

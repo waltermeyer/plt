@@ -1,4 +1,6 @@
-// slice (from LRM)
+// pass - slice (from LRM)
+// review
+
 
 string student_name = "Sandy";
 string first_letter = slice(student_name, 0, 1);

@@ -1,9 +1,15 @@
-// while
+// pass - while
 
-int x = 10;
-while (x<12)
-{
-	print(x);
-	x++;
+test_while(){
+	
+	int x = 10;
+	while (x<12){
+		
+		print(x);
+		x++;
+	}
 }
+
+test_while();
+// prints 10 11
 

@@ -1,4 +1,5 @@
-// length (from LRM)
+// pass - length (from LRM)
+// review
 
 string [] student_arr = ["Joe", "Bob", "Alan"];
 int arr_length = length(student_arr);

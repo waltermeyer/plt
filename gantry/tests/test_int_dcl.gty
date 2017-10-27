@@ -1,2 +1,9 @@
-// initializes an integer y with the value 42
-int y = 42;
+// pass - declare an integer
+
+test_int_decl(){
+	int y = 42;
+	}
+
+test_int_decl();
+
+

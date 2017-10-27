@@ -1,9 +1,13 @@
-int test_sub_float(){
-	int y = 4.00;
-	int x = 6.00;
+// pass - subtract floats
 
-	int z = y-z;
-	print(z);
+float test_sub_float(){
+        float x = 4.00;
+        float y = 6.00;
+
+        float z = y - x;
+        print(z);
 }
 
 test_sub_float();
+
+// prints 2.00
