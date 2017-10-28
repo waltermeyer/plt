@@ -5,7 +5,7 @@ open Ast
 %}
 
 /* Tokens / Terminals */
-%token LPAREN RPAREN LBRACE RBRACE LBRACK RBRACK SEMI COMMA COLON PERIOD
+%token LPAREN RPAREN LBRACE RBRACE LBRACK RBRACK SEMI COLON COMMA PERIOD BAR
 %token QUOTE
 %token PLUS MINUS INCREM DECREM
 %token TIMES DIVIDE ASSIGN EQ NEQ
@@ -24,7 +24,7 @@ open Ast
 %nonassoc NOELSE
 %nonassoc ELIF
 %nonassoc ELSE
-%right ASSIGN
+%right ASSIGN COLON
 %left OR
 %left AND
 %left INCREM DECREM
@@ -98,6 +98,7 @@ expression:
     | ID LBRACK expression RBRACK	    { ArrId($1, $3) }
     | constant                              { $1 }
     | array_expression                      { $1 }
+    | object_expression			    { $1 }
     | arithmetic_expression                 { $1 }
     | comparison_expression                 { $1 }
     | logical_expression                    { $1 }
@@ -108,6 +109,9 @@ expression:
 array_expression:
     LBRACK expression_list_opt RBRACK       { ArrExp($2) }
 
+object_expression:
+    LBRACE BAR expression_list_opt BAR RBRACE       { ObjExp($3) }
+
 expression_list_opt:
     /* empty */                             { [] }
     | expression_list                       { List.rev $1 }
@@ -115,20 +119,6 @@ expression_list_opt:
 expression_list:
     expression                              { [$1] }
     | expression_list COMMA expression      { $3 :: $1 }
-
-object_expression:
-    LBRACE key_value_list_opt RBRACE        { $2 }
-
-key_value_list_opt:
-    /* empty */                             { [] }
-    | key_value_list                        { List.rev $1 }
-
-key_value_list:
-    key_value				    { [$1] }
-    | key_value_list COMMA key_value        { $3 :: $1 }
-
-key_value:
-    | type_spec ID COLON expression 	    { KeyVal($1, $2, $4) }
 
 arithmetic_expression:
     expression PLUS expression              { Binop($1, Add, $3) }
@@ -162,7 +152,7 @@ assignment_expression:
         { ArrAssign($1, $3, $6) }
     | type_spec LBRACK RBRACK ID ASSIGN expression
         { ArrAssignDecl($1, $4, $6) }
-    | type_spec ID object_expression	    { AssignObj($1, $2, $3) }
+    | type_spec ID COLON expression         { KeyVal($1, $2, $4) }
 
 for_statement:
     FOR LPAREN expression SEMI expression SEMI expression RPAREN statement

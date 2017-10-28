@@ -42,10 +42,10 @@ type expression =
 	| AssignDecl of typ * string * expression
 	| ArrAssign of string * expression * expression
 	| ArrAssignDecl of typ * string * expression
-	| AssignObj of typ * string * expression list
 	| FunExp of string * expression list
 	| KeyVal of typ * string * expression
 	| ArrExp of expression list
+	| ObjExp of expression list
 	| Noexpr
 
 type statement = 
@@ -109,10 +109,9 @@ let rec string_of_expression = function
 	| ArrId(s, e) -> s ^ "[" ^ string_of_expression e ^ "]"
 	| Binop(e1, o, e2) -> string_of_expression e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expression e2
 	| Unop(o, e) -> string_of_uop o ^ string_of_expression e
-	| AssignObj(t, v, el) -> string_of_typ t ^ " " ^ v ^ " = " ^
-				 "{\n" ^ String.concat ", " (List.map string_of_expression el) ^ "\n}"
 	| KeyVal(t, k, e) -> "  " ^ string_of_typ t ^ " " ^ k ^ " : " ^ string_of_expression e
 	| ArrExp(el) -> "[ " ^ String.concat ", " (List.map string_of_expression el) ^ " ]"
+	| ObjExp(el) -> "{| " ^ String.concat ", " (List.map string_of_expression el) ^ " |}"
 	| Assign(v, e) -> v ^ " = " ^ string_of_expression e
 	| AssignDecl(t, v, e) -> string_of_typ t ^ " " ^ v ^ " = " ^ string_of_expression e
 	| ArrAssign(v, e1, e2) -> v ^ "[ " ^ string_of_expression e1 ^ " ]" ^ " = " ^ string_of_expression e2
