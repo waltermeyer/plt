@@ -15,13 +15,32 @@ let translate (globals, functions) =
  
  let ltype_of_typ = function
    A.Int  -> i32_t
-   A.Bool -> i1_t
-   A.Float-> float_t (*Not sure about this https://llvm.org/docs/LangRef.html#floating-point-types*)
-   A.Null -> void_t (*LHS refers to the name in our language right?*) in
+   | A.Bool -> i1_t
+   | A.Float-> float_t (*Not sure about this https://llvm.org/docs/LangRef.html#floating-point-types*)
+   | A.Null -> void_t (*LHS refers to the name in our language right?*) in
 
 (* This is currently the same as the one in microC, I don't think it references anything specific to gantry *)
  let global_vars =
   let global_var m (t, n) = 
   let init = L.const_int (ltype_of_typ t) 0
   in StringMap.add n (L.define_global n init the_module) m in 
-  List.fold_left global_var StringMap.empty globals
+ List.fold_left global_var StringMap.empty globals
+
+(*print f, get called by built in print function *) 
+ let printf_t = L.var_arg_function_type i32_5 [| L.pointer_type i8_t |] in
+ let printf_func = L.declare_function "printf" printf_t the_module in
+
+(* TODO: Declare our built-in print function, similar to printbig in microc *)
+
+
+(* Define each function (arguments and return type) so we can call it *)
+(* In micro C function_decls and function_decl are unique to codegen and semant *)
+ let func_decls = 
+  let func_decl m fdecl =
+   let name = fdec.A.fname (*what does the A refer too?*)
+   and formal_types = 
+    Array.of_list (List.map (fun (t, _) -> ltype_of_typ t) fdecl.A.formals)
+    in let ftype = L.function_type (ltype_of_typ fdecl.A.typ) formal_types in
+    StringMap.add name (L.define_function name ftype the_module, fdecl) m in
+   List.fold_left func_decl StringMap.empty functions in
+
