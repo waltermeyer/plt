@@ -144,9 +144,11 @@ let rec string_of_statement = function
 	| Break -> "break ; "
 	| Continue -> "continue ; "
 
+let string_of_param (t, id) = string_of_typ t ^ " " ^ id
+
 let string_of_fdecl fdecl =
 	string_of_typ fdecl.type_spec ^ " "
-        ^ fdecl.f_id ^ " " ^ "(" ^ String.concat ", " (List.map snd fdecl.f_params) ^ ")\n{\n"
+        ^ fdecl.f_id ^ " " ^ "(" ^ String.concat ", " (List.map string_of_param fdecl.f_params) ^ ")\n{\n"
 	^ String.concat "" (List.map string_of_statement fdecl.f_statements)
 	^ "}\n"
 
