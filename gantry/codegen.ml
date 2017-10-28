@@ -15,9 +15,12 @@ let translate (globals, functions) =
  
  let ltype_of_typ = function
    A.Int  -> i32_t
+   | A.Float-> flt_t (*Not sure about this https://llvm.org/docs/LangRef.html#floating-point-types*)
+   | A.Object -> pointer_type i8_t (*TODO: Figure out whether this is correct?!?*)
+   | A.String -> pointer_type i8_t
    | A.Bool -> i1_t
-   | A.Float-> float_t (*Not sure about this https://llvm.org/docs/LangRef.html#floating-point-types*)
-   | A.Null -> void_t (*LHS refers to the name in our language right?*) in
+   | A.Null -> void_t (*LHS refers to the name in our language right?*) 
+in
 
 (* This is currently the same as the one in microC, I don't think it references anything specific to gantry *)
  let global_vars =
@@ -53,8 +56,70 @@ let translate (globals, functions) =
 
  (* Construct code for an expression and return the value *)
  let rec expr builder = function
- 	A.Literal i -> L.const_int i32_t i
-	A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
- 	A.Noexpr -> L.const_int i32_t 0
- 	A.Id s -> L.build_load (lookup s) s builder
- 	A.Binop (e1, op, e2)  		
+ 	A.IntLit i -> L.const_int i32_t i
+ 	| A.FloatLit f -> L.const_int flt_t f, A.
+	| A.StrLit s -> (*TODO*)
+	| A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
+	| A.NullLit -> L.const_int i32_t 0
+ 	| A.Id s -> L.build_load (lookup s) s builder (*TODO: check that this is correct*)
+	| A.ArrId a -> (*TODO: Figure this out *) 
+ 	| A.Binop (e1, op, e2) -> 
+	    let e1' = expr builder e1
+	    and e2' = expr builder e2 in
+ 	    (match op with
+ 	     A.Add 	-> L.build_add
+ 	   | A.Sub 	-> L.build_sub
+ 	   | A.Mult 	-> L.build_mul
+ 	   | A.Div      -> L.build_sdiv
+ 	   | A.And 	-> L.build_and
+	   | A.Or 	-> L.build_or
+ 	   | A.Equal 	-> L.build_icmp L.Icmp.Eq
+ 	   | A.Neq 	-> L.build_icmp L.Icmp.Ne
+ 	   | A.Less 	-> L.build_icmp L.Icmp.Slt
+           | A.Leq      -> L.build_icmp L.Icmp.Sle
+           | A.Greater  -> L.build_icmp L.Icmp.Sgt
+	   | A.Geq  	-> L.build_icmp L.Icmp.Sge
+ 	   ) e1' e2' "tmp" builder
+ 	| A.Unop(op, e) ->
+	    let e' = expr builder e in
+ 	    (match op with
+		A.Neg 	-> L.build_neg
+ 		A.Not 	-> L.build_not) e' "tmp" builder
+ 	| A.Assign (s,e) -> let e' = expr builder e in ignore (L.build_store e' (lookup s) builder); e'
+	| A.AssignDecl (*TODO*) 
+	| A.ArrAssign  (*TODO*) 
+	| A.ArrAssignDecl  (*TODO*) 
+	| A.AssignObj  (*TODO*) 
+	| A.FunExp  (*TODO*) 
+	| A.KeyVal  (*TODO*) 
+	| A.ArrExp  (*TODO*) 
+	| A.Noexpr  (*TODO*)
+
+(* TODO: Do we need something like this? *)
+(* Invoke "f builder" if the current block doesn't already have a terminal (e.g., a branch). *)                             
+(* let add_terminal builder f =                                        
+   match L.block_terminator (L.insertion_block builder) with         
+     Some _ -> ()                                                    
+   | None -> ignore (f builder) in  *)
+
+ (*Build the code for the given statement; return the builder for the statement's successor*)
+ let rec stmt builder = function
+  A.Block sl -> List.fold_left stmt builder sl
+  (*TODO: Add other statements *)
+  in
+  
+  (*Build the code for each statement in the function*)
+  (*TODO : I think our implementation will have to be different since we have statements and the function declarations , but I'm not sure whether the builder function is where that comes in*)
+ let builder = stmt builder (A.Block  fdeclA.body) in
+ 
+ (* Add a return if the last block falls off at the end*) 
+(*TODO: What does this do? Copied from microC*)
+(*
+    add_terminal builder (match fdecl.A.typ with                                
+        A.Void -> L.build_ret_void                                              
+      | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))                      
+  in                       
+ *)
+
+  List.iter build_function_body functions;
+  the_module
