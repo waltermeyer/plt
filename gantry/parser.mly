@@ -43,13 +43,13 @@ open Ast
 
 /* CFG */
 program:
-    declaration_list EOF 		     { $1 }
+    declaration_list EOF 		     { (List.rev (fst $1)), (List.rev (snd $1)) }
 
 /* Build up a tuple of ordered lists for stmts and fdecls for the AST */
 declaration_list:
     /* empty */                              { [], [] }
-    | declaration_list statement             { (List.rev($2 :: fst $1)), snd $1 }
-    | declaration_list function_declaration  { fst $1, ($2 :: snd $1) }
+    | declaration_list statement             { $2 :: fst $1, snd $1 }
+    | declaration_list function_declaration  { fst $1, $2 :: snd $1 }
 
 function_declaration:
     type_spec ID LPAREN func_param_list_opt RPAREN LBRACE statement_list RBRACE
