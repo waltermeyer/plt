@@ -117,8 +117,8 @@ access_expression:
 assignment_expression:
     expression ASSIGN expression   	    { Assign($1, $3) }
     | type_spec ID ASSIGN expression        { AssignDecl($1, $2, $4) }
-    | type_spec LBRACK RBRACK ID ASSIGN expression
-        { ArrAssignDecl($1, $4, $6) }
+    | type_spec LBRACK expression RBRACK ID ASSIGN expression
+        { ArrAssignDecl($1, $3, $5, $7) }
     | type_spec ID COLON expression         { KeyVal($1, $2, $4) }
 
 object_expression:
