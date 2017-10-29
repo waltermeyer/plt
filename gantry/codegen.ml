@@ -7,17 +7,20 @@ module StringMap = Map.Make(String)
 let translate (globals, functions) = 
  let context = L.global_context () in
  let the_module = L.create_module context "Gantry"
-(*Not sure if we need the same types http://llvm.org/doxygen/MachineValueType_8h_source.html - i32 i8 i1*)
+(* ref ; http://llvm.org/doxygen/MachineValueType_8h_source.html - i32 i8 i1*)
  and i32_t = L.i32_type  context
  and i8_t = L.i8_type  context
  and i1_t = L.i1_type  context
+ and str_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
+ and obj_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
+ and flt_t = L.double_type context
  and void_t = L.void_type context in
  
  let ltype_of_typ = function
    A.Int  -> i32_t
-   | A.Float-> flt_t (*Not sure about this https://llvm.org/docs/LangRef.html#floating-point-types*)
-   | A.Object -> pointer_type i8_t (*TODO: Figure out whether this is correct?!?*)
-   | A.String -> pointer_type i8_t
+   | A.Float-> flt_t
+   | A.Object -> obj_t (*TODO: Figure out whether this is correct?*)
+   | A.String -> str_t (*TODO: Figure out whether this is correct?*)
    | A.Bool -> i1_t
    | A.Null -> void_t (*LHS refers to the name in our language right?*) 
 in
@@ -95,17 +98,41 @@ in
 	| A.ArrExp  (*TODO*) 
 	| A.Noexpr  (*TODO*)
 
-(* TODO: Do we need something like this? *)
+(* TODO: What does this mean? *)
 (* Invoke "f builder" if the current block doesn't already have a terminal (e.g., a branch). *)                             
-(* let add_terminal builder f =                                        
-   match L.block_terminator (L.insertion_block builder) with         
-     Some _ -> ()                                                    
-   | None -> ignore (f builder) in  *)
+ let add_terminal builder f =                                        
+    match L.block_terminator (L.insertion_block builder) with         
+      Some _ -> ()                                                    
+    | None -> ignore (f builder) in 
 
  (*Build the code for the given statement; return the builder for the statement's successor*)
  let rec stmt builder = function
   A.Block sl -> List.fold_left stmt builder sl
-  (*TODO: Add other statements *)
+  | A.Expr e -> ignore (expr builder e); builder
+  | A.Return e -> ignore (match fdecl.A.typ with
+      A.Null -> L.build_ret_void builder
+    | _ -> L.build_ret (expr builder e) builder); builder 
+  | (*TODO: A.If*)
+  | A.While (predicate, body) -> (*This goes first b/c it's used by For*)
+	let pred_bb = L.append_block context "while" the_function in
+ 	(* ignore function returns ()*)
+	ignore (L.build_br pred_bb builder);
+
+	let body_bb = L.append_block context "while_body" the_function in
+ 	add_terminal (stmt (L.builder_at_end context body_bb) body)
+ 	  (L.build_br pred_bb);
+
+	let pred_builder = L.builder_at_end context pred_bb in
+	let bool_val = expr pred_builder predicate in
+
+ 	let merge_bb = L.append_block context "merge" the_function in
+	ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
+	L.builder_at_end context merge_bb
+
+  | A.For (e1, e2, e3, body) -> stmt builder
+	( A.Block [A. Expr e1; A.While(e2, A.Block [body; A.Expr e3]) )
+  (*TODO: A.Break *)
+  (*TODO: A.Continue *)
   in
   
   (*Build the code for each statement in the function*)
@@ -114,12 +141,10 @@ in
  
  (* Add a return if the last block falls off at the end*) 
 (*TODO: What does this do? Copied from microC*)
-(*
-    add_terminal builder (match fdecl.A.typ with                                
-        A.Void -> L.build_ret_void                                              
+  add_terminal builder (match fdecl.A.typ with                                
+        A.Null -> L.build_ret_void                                              
       | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))                      
   in                       
- *)
 
   List.iter build_function_body functions;
   the_module
