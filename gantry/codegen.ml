@@ -13,14 +13,16 @@ let translate (globals, functions) =
  and i1_t = L.i1_type  context
  and str_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
  and obj_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
+ and arr_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
  and flt_t = L.double_type context
  and void_t = L.void_type context in
  
  let ltype_of_typ = function
    A.Int  -> i32_t
    | A.Float-> flt_t
-   | A.Object -> obj_t (*TODO: Figure out whether this is correct?*)
-   | A.String -> str_t (*TODO: Figure out whether this is correct?*)
+   | A.Object -> obj_t 
+   | A.Array -> arr_t  
+   | A.String -> str_t 
    | A.Bool -> i1_t
    | A.Null -> void_t (*LHS refers to the name in our language right?*) 
 in
