@@ -1,30 +1,15 @@
 (* Abstract Syntax Tree *)
 
-type op =   Add
-          | Sub
-          | Mult
-          | Div
-          | Eq
-          | Neq
-          | Geq
-          | Leq
-          | Gt
-          | Lt
-          | And
-          | Or
-          | Conc
+type op =
+  | Add | Sub | Mult | Div
+  | Eq | Neq | Geq | Leq | Gt | Lt
+  | And | Or | Conc
 
-type uop =   Not
-           | Neg
-           | Inc
-           | Dec
+type uop =
+  Not | Neg | Inc | Dec
 
-type typ =   Int
-           | Float
-	   | Object
-	   | String
-           | Bool
-           | Null
+type typ =
+  Int | Float | Object | Array | String | Bool | Null
 
 type typ_bind = typ * string
 
@@ -33,19 +18,18 @@ type expression =
         | FloatLit of float
         | StrLit of string
 	| BoolLit of bool
-	| NullLit of string
 	| Id of string
-	| ArrId of string * expression
+	| ObjAcc of expression * expression
+	| ArrAcc of expression * expression
 	| Binop of expression * op * expression
 	| Unop of uop * expression
-	| Assign of string * expression
+	| Assign of expression * expression
 	| AssignDecl of typ * string * expression
-	| ArrAssign of string * expression * expression
-	| ArrAssignDecl of typ * string * expression
-	| AssignObj of typ * string * expression list
+	| ObjAssign of expression list * expression
 	| FunExp of string * expression list
 	| KeyVal of typ * string * expression
 	| ArrExp of expression list
+	| ObjExp of expression list
 	| Noexpr
 
 type statement = 
@@ -94,6 +78,7 @@ let string_of_typ = function
 	  Int -> "int"
 	| Float -> "float"
 	| Object -> "object"
+	| Array -> "array"
 	| String -> "string"
         | Bool -> "bool"
 	| Null -> "null"
@@ -104,19 +89,19 @@ let rec string_of_expression = function
 	| StrLit(s) -> "\"" ^ s ^ "\""
 	| BoolLit(true) -> "true"
 	| BoolLit(false) -> "false"
-	| NullLit(s) -> s
 	| Id(s) -> s
-	| ArrId(s, e) -> s ^ "[" ^ string_of_expression e ^ "]"
+	| ObjAcc(e1, e2) -> string_of_expression e1 ^ "." ^ string_of_expression e2
+	| ArrAcc(e1, e2) -> string_of_expression e1 ^ "[" ^ string_of_expression e2 ^ "]"
 	| Binop(e1, o, e2) -> string_of_expression e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expression e2
-	| Unop(o, e) -> string_of_uop o ^ string_of_expression e
-	| AssignObj(t, v, el) -> string_of_typ t ^ " " ^ v ^ " = " ^
-				 "{\n" ^ String.concat ", " (List.map string_of_expression el) ^ "\n}"
+	| Unop(o, e) -> (match o with
+			Inc | Dec -> string_of_expression e ^ string_of_uop o
+			| _ -> string_of_uop o ^ string_of_expression e)
 	| KeyVal(t, k, e) -> "  " ^ string_of_typ t ^ " " ^ k ^ " : " ^ string_of_expression e
 	| ArrExp(el) -> "[ " ^ String.concat ", " (List.map string_of_expression el) ^ " ]"
-	| Assign(v, e) -> v ^ " = " ^ string_of_expression e
+	| ObjExp(el) -> "{| " ^ String.concat ", " (List.map string_of_expression el) ^ " |}"
+	| Assign(e1, e2) -> string_of_expression e1 ^ " = " ^ string_of_expression e2
 	| AssignDecl(t, v, e) -> string_of_typ t ^ " " ^ v ^ " = " ^ string_of_expression e
-	| ArrAssign(v, e1, e2) -> v ^ "[ " ^ string_of_expression e1 ^ " ]" ^ " = " ^ string_of_expression e2
-	| ArrAssignDecl(t, v, e) -> string_of_typ t ^ " [] " ^ v ^ " = " ^ string_of_expression e
+	| ObjAssign(el, e) -> String.concat "." (List.map string_of_expression el) ^ " = " ^ string_of_expression e
 	| FunExp(f, el) -> f ^ "(" ^ String.concat ", " (List.map string_of_expression el) ^ ")"
   	| Noexpr -> ""
 
@@ -145,9 +130,11 @@ let rec string_of_statement = function
 	| Break -> "break ; "
 	| Continue -> "continue ; "
 
+let string_of_param (t, id) = string_of_typ t ^ " " ^ id
+
 let string_of_fdecl fdecl =
 	string_of_typ fdecl.type_spec ^ " "
-        ^ fdecl.f_id ^ " " ^ "(" ^ String.concat ", " (List.map snd fdecl.f_params) ^ ")\n{\n"
+        ^ fdecl.f_id ^ " " ^ "(" ^ String.concat ", " (List.map string_of_param fdecl.f_params) ^ ")\n{\n"
 	^ String.concat "" (List.map string_of_statement fdecl.f_statements)
 	^ "}\n"
 

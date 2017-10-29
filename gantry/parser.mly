@@ -5,7 +5,7 @@ open Ast
 %}
 
 /* Tokens / Terminals */
-%token LPAREN RPAREN LBRACE RBRACE LBRACK RBRACK SEMI COMMA COLON PERIOD
+%token LPAREN RPAREN LBRACE RBRACE LBRACK RBRACK SEMI COLON COMMA PERIOD BAR
 %token QUOTE
 %token PLUS MINUS INCREM DECREM
 %token TIMES DIVIDE ASSIGN EQ NEQ
@@ -13,7 +13,7 @@ open Ast
 %token AND OR NOT
 %token CONCAT
 %token IF ELIF ELSE FOR WHILE CONTINUE BREAK RETURN
-%token INT FLOAT OBJECT STRING BOOL NULL
+%token INT FLOAT OBJECT ARRAY STRING BOOL NULL
 %token TRUE FALSE
 %token <int> INTLIT
 %token <float> FLOATLIT
@@ -24,7 +24,8 @@ open Ast
 %nonassoc NOELSE
 %nonassoc ELIF
 %nonassoc ELSE
-%right ASSIGN
+%right ASSIGN COLON
+%left PERIOD LBRACK
 %left OR
 %left AND
 %left INCREM DECREM
@@ -43,13 +44,13 @@ open Ast
 
 /* CFG */
 program:
-    declaration_list EOF 		     { $1 }
+    declaration_list EOF 		     { (List.rev (fst $1)), (List.rev (snd $1)) }
 
 /* Build up a tuple of ordered lists for stmts and fdecls for the AST */
 declaration_list:
     /* empty */                              { [], [] }
-    | declaration_list statement             { (List.rev($2 :: fst $1)), snd $1 }
-    | declaration_list function_declaration  { fst $1, ($2 :: snd $1) }
+    | declaration_list statement             { $2 :: fst $1, snd $1 }
+    | declaration_list function_declaration  { fst $1, $2 :: snd $1 }
 
 function_declaration:
     type_spec ID LPAREN func_param_list_opt RPAREN LBRACE statement_list RBRACE
@@ -63,6 +64,7 @@ type_spec:
     INT                                     { Int }
     | FLOAT                                 { Float }
     | OBJECT                                { Object }
+    | ARRAY                                 { Array }
     | STRING                                { String }
     | BOOL                                  { Bool }
     | NULL                                  { Null }
@@ -94,10 +96,11 @@ expression_statement:
     expression SEMI                         { Expr($1) }
 
 expression:
-    ID                                      { Id($1) }
-    | ID LBRACK expression RBRACK	    { ArrId($1, $3) }
+    ID		                            { Id($1) }
+    | access_expression			    { $1 }
     | constant                              { $1 }
     | array_expression                      { $1 }
+    | object_expression			    { $1 }
     | arithmetic_expression                 { $1 }
     | comparison_expression                 { $1 }
     | logical_expression                    { $1 }
@@ -108,6 +111,19 @@ expression:
 array_expression:
     LBRACK expression_list_opt RBRACK       { ArrExp($2) }
 
+access_expression:
+    expression LBRACK expression RBRACK     { ArrAcc($1, $3) }
+    | expression PERIOD expression	    { ObjAcc($1, $3) }
+
+assignment_expression:
+    expression ASSIGN expression   	    { Assign($1, $3) }
+    | type_spec ID ASSIGN expression        { AssignDecl($1, $2, $4) }
+    | type_spec ID COLON expression         { KeyVal($1, $2, $4) }
+
+object_expression:
+    LBRACE BAR expression_list_opt BAR RBRACE
+	{ ObjExp($3) }
+
 expression_list_opt:
     /* empty */                             { [] }
     | expression_list                       { List.rev $1 }
@@ -115,20 +131,6 @@ expression_list_opt:
 expression_list:
     expression                              { [$1] }
     | expression_list COMMA expression      { $3 :: $1 }
-
-object_expression:
-    LBRACE key_value_list_opt RBRACE        { $2 }
-
-key_value_list_opt:
-    /* empty */                             { [] }
-    | key_value_list                        { List.rev $1 }
-
-key_value_list:
-    key_value				    { [$1] }
-    | key_value_list COMMA key_value        { $3 :: $1 }
-
-key_value:
-    | type_spec ID COLON expression 	    { KeyVal($1, $2, $4) }
 
 arithmetic_expression:
     expression PLUS expression              { Binop($1, Add, $3) }
@@ -155,15 +157,6 @@ logical_expression:
 string_concat_expression:
     expression CONCAT expression            { Binop($1, Conc, $3) }
 
-assignment_expression:
-    ID ASSIGN expression                    { Assign($1, $3) }
-    | type_spec ID ASSIGN expression        { AssignDecl($1, $2, $4) }
-    | ID LBRACK expression RBRACK ASSIGN expression
-        { ArrAssign($1, $3, $6) }
-    | type_spec LBRACK RBRACK ID ASSIGN expression
-        { ArrAssignDecl($1, $4, $6) }
-    | type_spec ID object_expression	    { AssignObj($1, $2, $3) }
-
 for_statement:
     FOR LPAREN expression SEMI expression SEMI expression RPAREN statement
       { For($3, $5, $7, $9) }
@@ -187,12 +180,12 @@ while_statement:
 jump_statement:
     BREAK SEMI                              { Break }
     | CONTINUE SEMI                         { Continue }
+    | RETURN SEMI	                    { Return(Noexpr) }
     | RETURN expression SEMI                { Return($2) }
 
 constant:
     TRUE                                    { BoolLit(true) }
     | FALSE                                 { BoolLit(false) }
-    | NULL                                  { NullLit("null") }
     | literal                               { $1 }
 
 literal:

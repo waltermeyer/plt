@@ -18,6 +18,7 @@ rule token = parse
 | ','         { COMMA }
 | ':'         { COLON }
 | '.'         { PERIOD }
+| '|'	      { BAR }
 
 (* Arithmetic Operators (Binary and Unary) *)
 | '+'         { PLUS }
@@ -64,6 +65,7 @@ rule token = parse
 | "true"      { TRUE }
 | "false"     { FALSE }
 | "object"    { OBJECT }
+| "array"     { ARRAY }
 | "string"    { STRING }
 
 (* Strings *)

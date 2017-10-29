@@ -13,14 +13,16 @@ let translate (globals, functions) =
  and i1_t = L.i1_type  context
  and str_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
  and obj_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
+ and arr_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
  and flt_t = L.double_type context
  and void_t = L.void_type context in
  
  let ltype_of_typ = function
    A.Int  -> i32_t
    | A.Float-> flt_t
-   | A.Object -> obj_t (*TODO: Figure out whether this is correct?*)
-   | A.String -> str_t (*TODO: Figure out whether this is correct?*)
+   | A.Object -> obj_t 
+   | A.Array -> arr_t  
+   | A.String -> str_t 
    | A.Bool -> i1_t
    | A.Null -> void_t (*LHS refers to the name in our language right?*) 
 in
@@ -44,23 +46,16 @@ in
 (* In micro C function_decls and function_decl are unique to codegen and semant *)
  let func_decls = 
   let func_decl m fdecl =
-   let name = fdec.A.f_id
+   let name = fdec.A.fname
    and formal_types = 
-    Array.of_list (List.map (fun (t, _) -> ltype_of_typ t) fdecl.A.params)
-    in let ftype = L.function_type (ltype_of_typ fdecl.A.type_spec) formal_types in
+    Array.of_list (List.map (fun (t, _) -> ltype_of_typ t) fdecl.A.formals)
+    in let ftype = L.function_type (ltype_of_typ fdecl.A.typ) formal_types in
     StringMap.add name (L.define_function name ftype the_module, fdecl) m in
    List.fold_left func_decl StringMap.empty functions in
 
  (* Fill in the body of the given function *)
  (* TODO : Figure out what we need to change from microC code*)
-let build_function_body fdecl =
-  let (the_function, _) = StringMap.find fdecl.A.f_id function_decls in
-  let builder = L.builder_and_end context (L.entry_block in function) in
 
-  let int_format_str = L.build_global_stringptr "%d]n" "fmt" in
-  let local_vars = 
-    let add_formal m (t, n) p = L.set_value_name n p;
-  let local = L_
 
  (* Construct the function's "locals": formal arguments and locally declared variables.  Allocate each on the stack, initialize their value, if appropriate, and remember their values in the "locals" map *)
  (* TODO : Figure out what we need to change from microC code*)
