@@ -18,15 +18,13 @@ type expression =
         | FloatLit of float
         | StrLit of string
 	| BoolLit of bool
-	| NullLit of string
 	| Id of string
-	| ObjId of string * string
-	| ArrId of string * expression
+	| ObjAcc of expression * expression
+	| ArrAcc of expression * expression
 	| Binop of expression * op * expression
 	| Unop of uop * expression
-	| Assign of string * expression
+	| Assign of expression * expression
 	| AssignDecl of typ * string * expression
-	| ArrAssign of string * expression * expression
 	| ArrAssignDecl of typ * string * expression
 	| ObjAssign of expression list * expression
 	| FunExp of string * expression list
@@ -91,10 +89,9 @@ let rec string_of_expression = function
 	| StrLit(s) -> "\"" ^ s ^ "\""
 	| BoolLit(true) -> "true"
 	| BoolLit(false) -> "false"
-	| NullLit(s) -> s
 	| Id(s) -> s
-	| ObjId(s1, s2) -> s1 ^ "." ^ s2
-	| ArrId(s, e) -> s ^ "[" ^ string_of_expression e ^ "]"
+	| ObjAcc(e1, e2) -> string_of_expression e1 ^ "." ^ string_of_expression e2
+	| ArrAcc(e1, e2) -> string_of_expression e1 ^ "[" ^ string_of_expression e2 ^ "]"
 	| Binop(e1, o, e2) -> string_of_expression e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expression e2
 	| Unop(o, e) -> (match o with
 			Inc | Dec -> string_of_expression e ^ string_of_uop o
@@ -102,9 +99,8 @@ let rec string_of_expression = function
 	| KeyVal(t, k, e) -> "  " ^ string_of_typ t ^ " " ^ k ^ " : " ^ string_of_expression e
 	| ArrExp(el) -> "[ " ^ String.concat ", " (List.map string_of_expression el) ^ " ]"
 	| ObjExp(el) -> "{| " ^ String.concat ", " (List.map string_of_expression el) ^ " |}"
-	| Assign(v, e) -> v ^ " = " ^ string_of_expression e
+	| Assign(e1, e2) -> string_of_expression e1 ^ " = " ^ string_of_expression e2
 	| AssignDecl(t, v, e) -> string_of_typ t ^ " " ^ v ^ " = " ^ string_of_expression e
-	| ArrAssign(v, e1, e2) -> v ^ "[ " ^ string_of_expression e1 ^ " ]" ^ " = " ^ string_of_expression e2
 	| ArrAssignDecl(t, v, e) -> string_of_typ t ^ " [] " ^ v ^ " = " ^ string_of_expression e
 	| ObjAssign(el, e) -> String.concat "." (List.map string_of_expression el) ^ " = " ^ string_of_expression e
 	| FunExp(f, el) -> f ^ "(" ^ String.concat ", " (List.map string_of_expression el) ^ ")"

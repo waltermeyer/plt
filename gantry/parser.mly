@@ -24,8 +24,8 @@ open Ast
 %nonassoc NOELSE
 %nonassoc ELIF
 %nonassoc ELSE
-%left PERIOD
 %right ASSIGN COLON
+%left PERIOD LBRACK
 %left OR
 %left AND
 %left INCREM DECREM
@@ -95,9 +95,8 @@ expression_statement:
     expression SEMI                         { Expr($1) }
 
 expression:
-    ID                                      { Id($1) }
-    | ID LBRACK expression RBRACK	    { ArrId($1, $3) }
-    | object_id				    { $1 }
+    ID		                            { Id($1) }
+    | access_expression			    { $1 }
     | constant                              { $1 }
     | array_expression                      { $1 }
     | object_expression			    { $1 }
@@ -111,16 +110,20 @@ expression:
 array_expression:
     LBRACK expression_list_opt RBRACK       { ArrExp($2) }
 
+access_expression:
+    expression LBRACK expression RBRACK     { ArrAcc($1, $3) }
+    | expression PERIOD expression	    { ObjAcc($1, $3) }
+
+assignment_expression:
+    expression ASSIGN expression   	    { Assign($1, $3) }
+    | type_spec ID ASSIGN expression        { AssignDecl($1, $2, $4) }
+    | type_spec LBRACK RBRACK ID ASSIGN expression
+        { ArrAssignDecl($1, $4, $6) }
+    | type_spec ID COLON expression         { KeyVal($1, $2, $4) }
+
 object_expression:
     LBRACE BAR expression_list_opt BAR RBRACE
 	{ ObjExp($3) }
-
-object_id:
-    | ID PERIOD ID			    { ObjId($1, $3) }
-
-object_id_list:
-    | object_id				    { [$1] }
-    | object_id_list PERIOD object_id	    { ($3 :: $1) }
 
 expression_list_opt:
     /* empty */                             { [] }
@@ -155,16 +158,6 @@ logical_expression:
 string_concat_expression:
     expression CONCAT expression            { Binop($1, Conc, $3) }
 
-assignment_expression:
-    ID ASSIGN expression                    { Assign($1, $3) }
-    | type_spec ID ASSIGN expression        { AssignDecl($1, $2, $4) }
-    | ID LBRACK expression RBRACK ASSIGN expression
-        { ArrAssign($1, $3, $6) }
-    | type_spec LBRACK RBRACK ID ASSIGN expression
-        { ArrAssignDecl($1, $4, $6) }
-    | type_spec ID COLON expression         { KeyVal($1, $2, $4) }
-    | object_id_list ASSIGN expression      { ObjAssign((List.rev $1), $3) }
-
 for_statement:
     FOR LPAREN expression SEMI expression SEMI expression RPAREN statement
       { For($3, $5, $7, $9) }
@@ -188,12 +181,12 @@ while_statement:
 jump_statement:
     BREAK SEMI                              { Break }
     | CONTINUE SEMI                         { Continue }
+    | RETURN SEMI	                    { Return(Noexpr) }
     | RETURN expression SEMI                { Return($2) }
 
 constant:
     TRUE                                    { BoolLit(true) }
     | FALSE                                 { BoolLit(false) }
-    | NULL                                  { NullLit("null") }
     | literal                               { $1 }
 
 literal:
