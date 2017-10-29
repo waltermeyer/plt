@@ -13,7 +13,7 @@ open Ast
 %token AND OR NOT
 %token CONCAT
 %token IF ELIF ELSE FOR WHILE CONTINUE BREAK RETURN
-%token INT FLOAT OBJECT STRING BOOL NULL
+%token INT FLOAT OBJECT ARRAY STRING BOOL NULL
 %token TRUE FALSE
 %token <int> INTLIT
 %token <float> FLOATLIT
@@ -64,6 +64,7 @@ type_spec:
     INT                                     { Int }
     | FLOAT                                 { Float }
     | OBJECT                                { Object }
+    | ARRAY                                 { Array }
     | STRING                                { String }
     | BOOL                                  { Bool }
     | NULL                                  { Null }
@@ -117,8 +118,6 @@ access_expression:
 assignment_expression:
     expression ASSIGN expression   	    { Assign($1, $3) }
     | type_spec ID ASSIGN expression        { AssignDecl($1, $2, $4) }
-    | type_spec LBRACK expression RBRACK ID ASSIGN expression
-        { ArrAssignDecl($1, $3, $5, $7) }
     | type_spec ID COLON expression         { KeyVal($1, $2, $4) }
 
 object_expression:

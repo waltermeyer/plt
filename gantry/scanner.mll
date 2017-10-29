@@ -65,6 +65,7 @@ rule token = parse
 | "true"      { TRUE }
 | "false"     { FALSE }
 | "object"    { OBJECT }
+| "array"     { ARRAY }
 | "string"    { STRING }
 
 (* Strings *)
