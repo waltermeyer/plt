@@ -17,18 +17,18 @@ Tests:
 [] Assignment float
 [] Assignment bool
 [] Assignment string
-[] Equal int
-[] Equal float
-[] Equal bool
+[x] Equal int
+[x] Equal float
+[x] Equal bool
 
 >>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617
-[] Equal string
-[] Not Equal int
-[] Not Equal float
-[] Not Equal bool
+[x] Equal string
+[x] Not Equal int
+[x] Not Equal float
+[x] Not Equal bool
 
 >>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617
-[] Not Equal string
+[x] Not Equal string
 [] Comparison int
 [] Comparison float
 [] AND bool
