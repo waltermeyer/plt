@@ -24,6 +24,7 @@ open Ast
 %nonassoc NOELSE
 %nonassoc ELIF
 %nonassoc ELSE
+%left PERIOD
 %right ASSIGN COLON
 %left OR
 %left AND
@@ -96,6 +97,7 @@ expression_statement:
 expression:
     ID                                      { Id($1) }
     | ID LBRACK expression RBRACK	    { ArrId($1, $3) }
+    | object_id				    { $1 }
     | constant                              { $1 }
     | array_expression                      { $1 }
     | object_expression			    { $1 }
@@ -110,7 +112,15 @@ array_expression:
     LBRACK expression_list_opt RBRACK       { ArrExp($2) }
 
 object_expression:
-    LBRACE BAR expression_list_opt BAR RBRACE       { ObjExp($3) }
+    LBRACE BAR expression_list_opt BAR RBRACE
+	{ ObjExp($3) }
+
+object_id:
+    | ID PERIOD ID			    { ObjId($1, $3) }
+
+object_id_list:
+    | object_id				    { [$1] }
+    | object_id_list PERIOD object_id	    { ($3 :: $1) }
 
 expression_list_opt:
     /* empty */                             { [] }
@@ -153,6 +163,7 @@ assignment_expression:
     | type_spec LBRACK RBRACK ID ASSIGN expression
         { ArrAssignDecl($1, $4, $6) }
     | type_spec ID COLON expression         { KeyVal($1, $2, $4) }
+    | object_id_list ASSIGN expression      { ObjAssign((List.rev $1), $3) }
 
 for_statement:
     FOR LPAREN expression SEMI expression SEMI expression RPAREN statement
