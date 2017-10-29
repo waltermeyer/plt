@@ -25,7 +25,8 @@ let translate (globals, functions) =
    | A.Null -> void_t (*LHS refers to the name in our language right?*) 
 in
 
-(* This is currently the same as the one in microC, I don't think it references anything specific to gantry *)
+(* This is currently the same as the one in microC, *)
+(*TODO: we also need global_stmts in the globals list*)
  let global_vars =
   let global_var m (t, n) = 
   let init = L.const_int (ltype_of_typ t) 0
