@@ -8,9 +8,9 @@ let translate (globals, functions) =
  let context = L.global_context () in
  let the_module = L.create_module context "Gantry"
 (* ref ; http://llvm.org/doxygen/MachineValueType_8h_source.html - i32 i8 i1*)
- and i32_t = L.i32_type  context
- and i8_t = L.i8_type  context
- and i1_t = L.i1_type  context
+ and i32_t = L.i32_type  context (* integers *)
+ and i8_t = L.i8_type  context (* pointers *)
+ and i1_t = L.i1_type  context (* booleans *)
  and str_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
  and obj_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
  and arr_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
@@ -24,7 +24,7 @@ let translate (globals, functions) =
    | A.Array -> arr_t  
    | A.String -> str_t 
    | A.Bool -> i1_t
-   | A.Null -> void_t (*LHS refers to the name in our language right?*) 
+   | A.Null -> void_t 
 in
 
 (* This is currently the same as the one in microC, *)
@@ -35,8 +35,10 @@ in
   in StringMap.add n (L.define_global n init the_module) m in 
  List.fold_left global_var StringMap.empty globals
 
+in
+
 (*print f, get called by built in print function *) 
- let printf_t = L.var_arg_function_type i32_5 [| L.pointer_type i8_t |] in
+ let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
  let printf_func = L.declare_function "printf" printf_t the_module in
 
 (* TODO: Declare our built-in print function, similar to printbig in microc *)
@@ -63,8 +65,8 @@ in
  (* Construct code for an expression and return the value *)
  let rec expr builder = function
  	A.IntLit i -> L.const_int i32_t i
- 	| A.FloatLit f -> L.const_int flt_t f, A.
-	| A.StrLit s -> (*TODO*)
+ 	| A.FloatLit f -> L.const_float flt_t f
+	| A.StrLit s -> L.build_alloc (L.array_type i8_t (String.length s)) "str" builder in (*TODO: review *)
 	| A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
 	| A.NullLit -> L.const_int i32_t 0
  	| A.Id s -> L.build_load (lookup s) s builder (*TODO: check that this is correct*)
@@ -95,7 +97,7 @@ in
 	| A.AssignDecl (*TODO*) 
 	| A.ArrAssign  (*TODO*) 
 	| A.ArrAssignDecl  (*TODO*) 
-	| A.AssignObj  (*TODO*) 
+	| A.AssignObj  (*TODO*)
 	| A.FunExp  (*TODO*) 
 	| A.KeyVal  (*TODO*) 
 	| A.ArrExp  (*TODO*) 
