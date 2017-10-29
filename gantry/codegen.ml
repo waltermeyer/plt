@@ -96,7 +96,6 @@ in
  	| A.Assign (s,e) -> let e' = expr builder e in ignore (L.build_store e' (lookup s) builder); e'
 	| A.AssignDecl (*TODO*) 
 	| A.ArrAssign  (*TODO*) 
-	| A.ArrAssignDecl  (*TODO*) 
 	| A.AssignObj  (*TODO*)
 	| A.FunExp  (*TODO*) 
 	| A.KeyVal  (*TODO*) 
@@ -117,7 +116,22 @@ in
   | A.Return e -> ignore (match fdecl.A.typ with
       A.Null -> L.build_ret_void builder
     | _ -> L.build_ret (expr builder e) builder); builder 
-  | (*TODO: A.If*)
+  | (*TODO: Review If/While*)
+    A.If (predicate, then_stmt, else_stmt) ->
+	let bool_val = expr builder predicate in
+	let merge_bb = L.append_block context "merge" the_function in
+
+	let then_bb = L.append_block context "then" the_function in
+	add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
+	(L.build_br merge_bb);
+
+	let else_bb = L.append_block context "then" the_function in
+	add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
+	(L.build_br merge_bb);
+
+	ignore (L.build_cond_br bool_val then_bb else_bb builder);
+	L.builder_at_end context merge_bb
+
   | A.While (predicate, body) -> (*This goes first b/c it's used by For*)
 	let pred_bb = L.append_block context "while" the_function in
  	(* ignore function returns ()*)
@@ -136,8 +150,8 @@ in
 
   | A.For (e1, e2, e3, body) -> stmt builder
 	( A.Block [A. Expr e1; A.While(e2, A.Block [body; A.Expr e3]) )
-  (*TODO: A.Break *)
-  (*TODO: A.Continue *)
+  (*TODO: A.Break -- not in GOBLAN or MicroC*)
+  (*TODO: A.Continue -- ^^ *)
   in
   
   (*Build the code for each statement in the function*)
