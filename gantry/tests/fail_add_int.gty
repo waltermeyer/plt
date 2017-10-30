@@ -1,14 +1,11 @@
-// pass - add two integers
+// add int (fail - adding mismatching types)
 
 int test_add_int(){
 	int y = 4;
-	int x = 6;
+	string x = "z";
 
 	int z = y + z;
 	print(z);
 }
 
 test_add_int();
-
-// prints 10
-

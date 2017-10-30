@@ -1,3 +1,5 @@
+// pass - add two floats
+
 int test_add_float(){
 	int y = 4.00;
 	int x = 6.00;

@@ -1,0 +1,5 @@
+// fail integer declaration - type mismatch
+
+int y = "z";
+
+//y = 3+y;

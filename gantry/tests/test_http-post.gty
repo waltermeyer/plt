@@ -1,0 +1,12 @@
+// http-post (from LRM)
+// review
+
+/*
+returns a json object of a newly created container 
+  running on a particular Docker engine.
+*/
+string post_data = "{"Image": "centos", "Cmd": ["echo", "hello world"]}";
+string uri = "/v1.19/containers/create";
+string con = http_post("192.168.0.9", 80, uri, post_data);
+object con_obj = objectify(con);
+print(con_obj);

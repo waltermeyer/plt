@@ -8,14 +8,7 @@ Tests:
 [X] int
 [X] float
 [X] string
-=======
-[] int
-[] float
-[] string
 [] bool
-#[] char
->>>>>>> Stashed changes
-
 ### Operators
 
 [X] Arithmetic int
@@ -24,22 +17,18 @@ Tests:
 [] Assignment float
 [] Assignment bool
 [] Assignment string
-[] Equal int
-[] Equal float
-[] Equal bool
-<<<<<<< HEAD
-#[] Equal char
-=======
+[x] Equal int
+[x] Equal float
+[x] Equal bool
+
 >>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617
-[] Equal string
-[] Not Equal int
-[] Not Equal float
-[] Not Equal bool
-<<<<<<< HEAD
-#[] Not Equal char
-=======
+[x] Equal string
+[x] Not Equal int
+[x] Not Equal float
+[x] Not Equal bool
+
 >>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617
-[] Not Equal string
+[x] Not Equal string
 [] Comparison int
 [] Comparison float
 [] AND bool
@@ -51,20 +40,16 @@ Tests:
 
 [X] if, elif, else
 [X] while
-[] for
-<<<<<<< HEAD
+[X] for
 [] return
-[] continue
-[] break
-=======
-[] break
-[] continue
+[X] continue
+[X] break
+[X] continue
 >>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617
 
 ### Built in Functions
 
 [] jsonify
-<<<<<<< HEAD
 [] arrify
 [] objectify
 [] slice
@@ -72,8 +57,6 @@ Tests:
 [] length
 [] tostring
 [] httpget
-- httppost 
-=======
-[]  arrify
-- 
+[] httppost
+ 
 >>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617

@@ -1,0 +1,14 @@
+// pass - string array declaration
+// review
+
+string test_arr_decl(){
+
+	string [] arr = ["foo", "bar"];
+	print (arr);
+
+}
+
+test_arr_decl();
+
+// print foo bar
+

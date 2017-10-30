@@ -1,0 +1,21 @@
+// pass - arrify (from LRM)
+
+int test_arrify(){
+
+	string str = "[{course:\"PLT\",students:125,location:\"NWC\"},
+	{course:\"CS Theory\",students:200,location:\"NWC\"}]";
+	
+	string [] courses_arr = arrify(str);
+	object first_course = courses_arr[0];
+	object second_course = courses_arr[1];
+	string first_course_name = first_course.course;
+	string second_course_name = second_course.course;
+	
+	string output_string = first_course_name ^ " and " ^ second_course_name;
+	print(output_string);
+
+}
+
+test_arrify();
+
+// prints "PLT and CS Theory"
