@@ -8,23 +8,27 @@ let translate (globals, functions) =
  let context = L.global_context () in
  let the_module = L.create_module context "Gantry"
 (* ref ; http://llvm.org/doxygen/MachineValueType_8h_source.html - i32 i8 i1*)
- and i32_t = L.i32_type  context
- and i8_t = L.i8_type  context
- and i1_t = L.i1_type  context
- and str_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
- and obj_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
- and arr_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
- and flt_t = L.double_type context
- and void_t = L.void_type context in
+ and i32_t = L.i32_type context (* 32-bit integer *)
+ and i8_t = L.i8_type context   (* 8-bit integer *)
+ and i1_t = L.i1_type context   (* 1-bit integer *)
+ and str_t = L.pointer_type (L.i8_type context) (* pointer to 8-bit integer *)
+(*
+ and obj_t = L.pointer_type (L.i8_type context) (*TODO: objects *)
+ and arr_t = L.pointer_type (L.i8_type context) (*TODO: arrays *)
+*)
+ and flt_t = L.double_type context (* double *)
+ and void_t = L.void_type context in (* void *)
  
  let ltype_of_typ = function
-   A.Int  -> i32_t
+     A.Int  -> i32_t
    | A.Float-> flt_t
+(*
    | A.Object -> obj_t 
    | A.Array -> arr_t  
+*)
    | A.String -> str_t 
    | A.Bool -> i1_t
-   | A.Null -> void_t (*LHS refers to the name in our language right?*) 
+   | A.Null -> void_t 
 in
 
 (* This is currently the same as the one in microC, *)
@@ -33,22 +37,22 @@ in
   let global_var m (t, n) = 
   let init = L.const_int (ltype_of_typ t) 0
   in StringMap.add n (L.define_global n init the_module) m in 
- List.fold_left global_var StringMap.empty globals
+    List.fold_left global_var StringMap.empty globals
+  in
 
 (*print f, get called by built in print function *) 
- let printf_t = L.var_arg_function_type i32_5 [| L.pointer_type i8_t |] in
+ let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
  let printf_func = L.declare_function "printf" printf_t the_module in
 
 (* TODO: Declare our built-in print function, similar to printbig in microc *)
-
 
 (* Define each function (arguments and return type) so we can call it *)
 (* In micro C function_decls and function_decl are unique to codegen and semant *)
  let func_decls = 
   let func_decl m fdecl =
-   let name = fdec.A.fname
+   let name = fdec.A.f_id
    and formal_types = 
-    Array.of_list (List.map (fun (t, _) -> ltype_of_typ t) fdecl.A.formals)
+    Array.of_list (List.map (fun (t, _) -> ltype_of_typ t) fdecl.A.f_params)
     in let ftype = L.function_type (ltype_of_typ fdecl.A.typ) formal_types in
     StringMap.add name (L.define_function name ftype the_module, fdecl) m in
    List.fold_left func_decl StringMap.empty functions in
@@ -56,15 +60,14 @@ in
  (* Fill in the body of the given function *)
  (* TODO : Figure out what we need to change from microC code*)
 
-
  (* Construct the function's "locals": formal arguments and locally declared variables.  Allocate each on the stack, initialize their value, if appropriate, and remember their values in the "locals" map *)
  (* TODO : Figure out what we need to change from microC code*)
 
  (* Construct code for an expression and return the value *)
  let rec expr builder = function
- 	A.IntLit i -> L.const_int i32_t i
- 	| A.FloatLit f -> L.const_int flt_t f, A.
-	| A.StrLit s -> (*TODO*)
+ 	  A.IntLit i -> L.const_int i32_t i
+ 	| A.FloatLit f -> L.const_float flt_t f
+	| A.StrLit s -> L.build_alloca (L.array_type i8_t (String.length s)) s builder in (*TODO: review *)
 	| A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
 	| A.NullLit -> L.const_int i32_t 0
  	| A.Id s -> L.build_load (lookup s) s builder (*TODO: check that this is correct*)
@@ -94,8 +97,7 @@ in
  	| A.Assign (s,e) -> let e' = expr builder e in ignore (L.build_store e' (lookup s) builder); e'
 	| A.AssignDecl (*TODO*) 
 	| A.ArrAssign  (*TODO*) 
-	| A.ArrAssignDecl  (*TODO*) 
-	| A.AssignObj  (*TODO*) 
+	| A.AssignObj  (*TODO*)
 	| A.FunExp  (*TODO*) 
 	| A.KeyVal  (*TODO*) 
 	| A.ArrExp  (*TODO*) 
@@ -115,7 +117,22 @@ in
   | A.Return e -> ignore (match fdecl.A.typ with
       A.Null -> L.build_ret_void builder
     | _ -> L.build_ret (expr builder e) builder); builder 
-  | (*TODO: A.If*)
+  | (*TODO: Review If/While*)
+    A.If (predicate, then_stmt, else_stmt) ->
+	let bool_val = expr builder predicate in
+	let merge_bb = L.append_block context "merge" the_function in
+
+	let then_bb = L.append_block context "then" the_function in
+	add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
+	(L.build_br merge_bb);
+
+	let else_bb = L.append_block context "then" the_function in
+	add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
+	(L.build_br merge_bb);
+
+	ignore (L.build_cond_br bool_val then_bb else_bb builder);
+	L.builder_at_end context merge_bb
+
   | A.While (predicate, body) -> (*This goes first b/c it's used by For*)
 	let pred_bb = L.append_block context "while" the_function in
  	(* ignore function returns ()*)
@@ -134,8 +151,8 @@ in
 
   | A.For (e1, e2, e3, body) -> stmt builder
 	( A.Block [A. Expr e1; A.While(e2, A.Block [body; A.Expr e3]) )
-  (*TODO: A.Break *)
-  (*TODO: A.Continue *)
+  (*TODO: A.Break -- not in GOBLAN or MicroC*)
+  (*TODO: A.Continue -- ^^ *)
   in
   
   (*Build the code for each statement in the function*)
