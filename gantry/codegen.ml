@@ -8,20 +8,24 @@ let translate (globals, functions) =
  let context = L.global_context () in
  let the_module = L.create_module context "Gantry"
 (* ref ; http://llvm.org/doxygen/MachineValueType_8h_source.html - i32 i8 i1*)
- and i32_t = L.i32_type  context (* integers *)
- and i8_t = L.i8_type  context (* pointers *)
- and i1_t = L.i1_type  context (* booleans *)
- and str_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
- and obj_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
- and arr_t = L.pointer_type (L.i8_type context) (*TODO: Not sure about this?*)
- and flt_t = L.double_type context
- and void_t = L.void_type context in
+ and i32_t = L.i32_type context (* 32-bit integer *)
+ and i8_t = L.i8_type context   (* 8-bit integer *)
+ and i1_t = L.i1_type context   (* 1-bit integer *)
+ and str_t = L.pointer_type (L.i8_type context) (* pointer to 8-bit integer *)
+(*
+ and obj_t = L.pointer_type (L.i8_type context) (*TODO: objects *)
+ and arr_t = L.pointer_type (L.i8_type context) (*TODO: arrays *)
+*)
+ and flt_t = L.double_type context (* double *)
+ and void_t = L.void_type context in (* void *)
  
  let ltype_of_typ = function
-   A.Int  -> i32_t
+     A.Int  -> i32_t
    | A.Float-> flt_t
+(*
    | A.Object -> obj_t 
    | A.Array -> arr_t  
+*)
    | A.String -> str_t 
    | A.Bool -> i1_t
    | A.Null -> void_t 
@@ -33,9 +37,8 @@ in
   let global_var m (t, n) = 
   let init = L.const_int (ltype_of_typ t) 0
   in StringMap.add n (L.define_global n init the_module) m in 
- List.fold_left global_var StringMap.empty globals
-
-in
+    List.fold_left global_var StringMap.empty globals
+  in
 
 (*print f, get called by built in print function *) 
  let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
@@ -43,14 +46,13 @@ in
 
 (* TODO: Declare our built-in print function, similar to printbig in microc *)
 
-
 (* Define each function (arguments and return type) so we can call it *)
 (* In micro C function_decls and function_decl are unique to codegen and semant *)
  let func_decls = 
   let func_decl m fdecl =
-   let name = fdec.A.fname
+   let name = fdec.A.f_id
    and formal_types = 
-    Array.of_list (List.map (fun (t, _) -> ltype_of_typ t) fdecl.A.formals)
+    Array.of_list (List.map (fun (t, _) -> ltype_of_typ t) fdecl.A.f_params)
     in let ftype = L.function_type (ltype_of_typ fdecl.A.typ) formal_types in
     StringMap.add name (L.define_function name ftype the_module, fdecl) m in
    List.fold_left func_decl StringMap.empty functions in
@@ -58,15 +60,14 @@ in
  (* Fill in the body of the given function *)
  (* TODO : Figure out what we need to change from microC code*)
 
-
  (* Construct the function's "locals": formal arguments and locally declared variables.  Allocate each on the stack, initialize their value, if appropriate, and remember their values in the "locals" map *)
  (* TODO : Figure out what we need to change from microC code*)
 
  (* Construct code for an expression and return the value *)
  let rec expr builder = function
- 	A.IntLit i -> L.const_int i32_t i
+ 	  A.IntLit i -> L.const_int i32_t i
  	| A.FloatLit f -> L.const_float flt_t f
-	| A.StrLit s -> L.build_alloc (L.array_type i8_t (String.length s)) "str" builder in (*TODO: review *)
+	| A.StrLit s -> L.build_alloca (L.array_type i8_t (String.length s)) s builder in (*TODO: review *)
 	| A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
 	| A.NullLit -> L.const_int i32_t 0
  	| A.Id s -> L.build_load (lookup s) s builder (*TODO: check that this is correct*)
