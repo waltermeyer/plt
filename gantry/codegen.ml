@@ -90,7 +90,7 @@ in
  let rec expr builder = function
  	  A.IntLit i -> L.const_int i32_t i
  	| A.FloatLit f -> L.const_float flt_t f
-	| A.StrLit s -> L.const_string context s
+	| A.StrLit s -> L.build_global_stringptr s "string" builder
 	| A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
 	| A.Noexpr -> L.const_int i32_t 0
 	| A.Id s -> L.build_load (lookup s) s builder
