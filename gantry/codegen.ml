@@ -123,7 +123,7 @@ in
 	| A.FunExp(f, act) ->
 	    let (fdef, fdecl) = StringMap.find f func_decls in
 	    let actuals = List.rev (List.map (expr builder) (List.rev act)) in
-	    let result = (match fdecl.A.type_spec with A.Void -> ""
+	    let result = (match fdecl.A.type_spec with A.Null -> ""
                                             | _ -> f ^ "_result") in
          L.build_call fdef (Array.of_list actuals) result builder
     in
@@ -146,10 +146,10 @@ in
     let rec stmt builder = function
 	A.Block sl -> List.fold_left stmt builder sl
       | A.Expr e -> ignore (expr builder e); builder
-      | A.Return e -> ignore (match fdecl.A.typ with
-	  A.Void -> L.build_ret_void builder
+      | A.Return e -> ignore (match fdecl.A.type_spec with
+	  A.Null -> L.build_ret_void builder
 	| _ -> L.build_ret (expr builder e) builder); builder
-      | A.If (predicate, then_stmt, else_stmt) ->
+      | A.If (predicate, then_stmt, elif_pred, elif_stmt, else_stmt) ->
          let bool_val = expr builder predicate in
 	 let merge_bb = L.append_block context "merge" the_function in
 
@@ -184,11 +184,11 @@ in
     in
 
     (* Build the code for each statement in the function *)
-    let builder = stmt builder (A.Block fdecl.A.body) in
+    let builder = stmt builder (A.Block fdecl.A.f_statements) in
 
     (* Add a return if the last block falls off the end *)
-    add_terminal builder (match fdecl.A.typ with
-        A.Void -> L.build_ret_void
+    add_terminal builder (match fdecl.A.type_spec with
+        A.Null -> L.build_ret_void
       | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
     in
 
