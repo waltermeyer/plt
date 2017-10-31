@@ -1,11 +1,12 @@
 // pass - add two floats
 
-int test_add_float(){
+int main(){
 	int y = 4.00;
 	int x = 6.00;
 
 	int z = y + z;
 	print(z);
+	return 0;
 }
 
-test_add_float();
+// prints 10.00 

@@ -1,14 +1,13 @@
 // pass - add two integers
 
-int test_add_int(){
+int main(){
 	int y = 4;
 	int x = 6;
 
 	int z = y + z;
 	print(z);
+	return 0;
 }
-
-test_add_int();
 
 // prints 10
 
