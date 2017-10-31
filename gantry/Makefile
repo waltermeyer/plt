@@ -25,7 +25,7 @@ OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx gantry.cmx
 
 gantry : $(OBJS)
 #	ocamlfind ocamlopt -linkpkg -package llvm -package llvm.analysis $(OBJS) -o gantry
-	ocamlfind ocamlopt -linkpkg -package llvm $(OBJS) -o gantry
+	ocamlfind ocamlopt -linkpkg -package llvm  -package llvm.analysis $(OBJS) -o gantry
 
 scanner.ml : scanner.mll
 	ocamllex scanner.mll
