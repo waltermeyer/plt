@@ -61,7 +61,8 @@ in
   let (the_function, _) = StringMap.find fdecl.A.f_id func_decls in
   let builder = L.builder_at_end context (L.entry_block the_function) in
 
-  let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
+  let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
+  and str_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
@@ -120,6 +121,9 @@ in
 	| A.FunExp("print", [e]) ->
 	    L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	    "printf" builder
+	| A.FunExp("prints", [e]) ->
+	    L.build_call printf_func [| str_format_str ; (expr builder e) |]
+	    "prints" builder
 	| A.FunExp(f, act) ->
 	    let (fdef, fdecl) = StringMap.find f func_decls in
 	    let actuals = List.rev (List.map (expr builder) (List.rev act)) in
