@@ -75,7 +75,7 @@ in
 	let local_var = L.build_alloca (ltype_of_typ t) n builder
 	in StringMap.add n local_var m in
 
-      let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.f_params
+      List.fold_left2 add_formal StringMap.empty fdecl.A.f_params
                    (Array.to_list (L.params the_function)) in
     (*
       List.fold_left add_local formals fdecl.A.locals in
@@ -90,7 +90,7 @@ in
  let rec expr builder = function
  	  A.IntLit i -> L.const_int i32_t i
  	| A.FloatLit f -> L.const_float flt_t f
-	| A.StrLit s -> L.const_string s
+	| A.StrLit s -> L.const_string context s
 	| A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
 	| A.Noexpr -> L.const_int i32_t 0
 	| A.Id s -> L.build_load (lookup s) s builder
@@ -104,11 +104,11 @@ in
 	     | A.Div     -> L.build_sdiv
 	     | A.And 	 -> L.build_and
 	     | A.Or 	 -> L.build_or
-	     | A.Equal 	 -> L.build_icmp L.Icmp.Eq
+	     | A.Eq 	 -> L.build_icmp L.Icmp.Eq
 	     | A.Neq 	 -> L.build_icmp L.Icmp.Ne
-	     | A.Less 	 -> L.build_icmp L.Icmp.Slt
+	     | A.Lt 	 -> L.build_icmp L.Icmp.Slt
 	     | A.Leq     -> L.build_icmp L.Icmp.Sle
-	     | A.Greater -> L.build_icmp L.Icmp.Sgt
+	     | A.Gt      -> L.build_icmp L.Icmp.Sgt
 	     | A.Geq  	 -> L.build_icmp L.Icmp.Sge
 	    ) e1' e2' "tmp" builder
  	| A.Unop(op, e) ->
@@ -190,8 +190,8 @@ in
     add_terminal builder (match fdecl.A.typ with
         A.Void -> L.build_ret_void
       | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
-  in
+    in
 
-  List.iter build_function_body functions;
-  the_module
+    List.iter build_function_body functions;
+    the_module
 
