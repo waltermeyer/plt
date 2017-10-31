@@ -121,9 +121,9 @@ in
 	    L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	    "printf" builder
 	| A.FunExp(f, act) ->
-	    let (fdef, fdecl) = StringMap.find f function_decls in
+	    let (fdef, fdecl) = StringMap.find f func_decls in
 	    let actuals = List.rev (List.map (expr builder) (List.rev act)) in
-	    let result = (match fdecl.A.typ with A.Void -> ""
+	    let result = (match fdecl.A.type_spec with A.Void -> ""
                                             | _ -> f ^ "_result") in
          L.build_call fdef (Array.of_list actuals) result builder
     in
