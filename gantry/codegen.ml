@@ -61,7 +61,8 @@ in
   let (the_function, _) = StringMap.find fdecl.A.f_id func_decls in
   let builder = L.builder_at_end context (L.entry_block the_function) in
 
-  let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
+  let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
+  and str_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
@@ -90,7 +91,7 @@ in
  let rec expr builder = function
  	  A.IntLit i -> L.const_int i32_t i
  	| A.FloatLit f -> L.const_float flt_t f
-	| A.StrLit s -> L.const_string context s
+	| A.StrLit s -> L.build_global_stringptr s "string" builder
 	| A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
 	| A.Noexpr -> L.const_int i32_t 0
 	| A.Id s -> L.build_load (lookup s) s builder
@@ -116,10 +117,13 @@ in
  	    (match op with
 	       A.Neg 	-> L.build_neg
 	     | A.Not 	-> L.build_not) e' "tmp" builder
-	| A.Assign(s, e) -> let e' = expr builder e in ignore (L.build_store e' (lookup s) builder); e'
+	(*| A.Assign(s, e) -> let e' = expr builder e in ignore (L.build_store e' (lookup s) builder); e'*)
 	| A.FunExp("print", [e]) ->
 	    L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	    "printf" builder
+	| A.FunExp("prints", [e]) ->
+	    L.build_call printf_func [| str_format_str ; (expr builder e) |]
+	    "prints" builder
 	| A.FunExp(f, act) ->
 	    let (fdef, fdecl) = StringMap.find f func_decls in
 	    let actuals = List.rev (List.map (expr builder) (List.rev act)) in
@@ -151,23 +155,24 @@ in
 	| _ -> L.build_ret (expr builder e) builder); builder
       | A.If (predicate, then_stmt, elif_pred, elif_stmt, else_stmt) ->
          let bool_val = expr builder predicate in
-	 let elif_bool_val = expr builder elif_pred in
+	 (*let elif_bool_val = expr builder elif_pred in*)
 	 let merge_bb = L.append_block context "merge" the_function in
 
 	 let then_bb = L.append_block context "then" the_function in
 	 add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
 	   (L.build_br merge_bb);
 
- 	 let elif_bb = L.append_block context "elif" the_function in
+ 	 (*let elif_bb = L.append_block context "elif" the_function in
 	 add_terminal (stmt (L.builder_at_end context elif_bb) elif_stmt)
-	   (L.build_br merge_bb);
+	   (L.build_br merge_bb);*)
 
 	 let else_bb = L.append_block context "else" the_function in
 	 add_terminal (stmt (L.builder_at_end context else_bb) else_stmt)
 	   (L.build_br merge_bb);
 
-	 ignore (L.build_cond_br bool_val then_bb elif_bb builder);
-	 ignore (L.build_cond_br elif_bool_val elif_bb else_bb builder);
+	 (*ignore (L.build_cond_br bool_val then_bb elif_bb builder);
+	 ignore (L.build_cond_br elif_bool_val elif_bb else_bb builder);*)
+	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
 	 L.builder_at_end context merge_bb
 
       | A.While (predicate, body) ->

@@ -7,7 +7,7 @@
 all : gantry.native
 
 gantry.native :
-	ocamlbuild -use-ocamlfind -pkgs llvm -cflags -w,+a-4 \
+	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
 		gantry.native
 
 # "make clean" removes all generated files
