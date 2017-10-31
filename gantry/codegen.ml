@@ -76,8 +76,10 @@ in
 	in StringMap.add n local_var m in
 
       let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.f_params
-          (Array.to_list (L.params the_function)) in
+                   (Array.to_list (L.params the_function)) in
+    (*
       List.fold_left add_local formals fdecl.A.locals in
+    *)
 
     (* Return the value for a variable or formal argument *)
     let lookup n = try StringMap.find n local_vars
@@ -90,8 +92,8 @@ in
  	| A.FloatLit f -> L.const_float flt_t f
 	| A.StrLit s -> L.const_string s
 	| A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
-	| A.NullLit -> L.const_int i32_t 0
- 	| A.Id s -> L.build_load (lookup s) s builder (*TODO: check that this is correct*)
+	| A.Noexpr -> L.const_int i32_t 0
+	| A.Id s -> L.build_load (lookup s) s builder
  	| A.Binop (e1, op, e2) -> 
 	    let e1' = expr builder e1
 	    and e2' = expr builder e2 in
@@ -134,58 +136,51 @@ in
 	| A.ArrExp  (*TODO*) 
 	| A.Noexpr  (*TODO*)
 *)
+    let add_terminal builder f =
+      match L.block_terminator (L.insertion_block builder) with
+	Some _ -> ()
+      | None -> ignore (f builder) in
 
-(* TODO: What does this mean? *)
-(* Invoke "f builder" if the current block doesn't already have a terminal (e.g., a branch). *)                             
- let add_terminal builder f =                                        
-    match L.block_terminator (L.insertion_block builder) with         
-      Some _ -> ()                                                    
-    | None -> ignore (f builder) in 
+    (* Build the code for the given statement; return the builder for
+       the statement's successor *)
+    let rec stmt builder = function
+	A.Block sl -> List.fold_left stmt builder sl
+      | A.Expr e -> ignore (expr builder e); builder
+      | A.Return e -> ignore (match fdecl.A.typ with
+	  A.Void -> L.build_ret_void builder
+	| _ -> L.build_ret (expr builder e) builder); builder
+      | A.If (predicate, then_stmt, else_stmt) ->
+         let bool_val = expr builder predicate in
+	 let merge_bb = L.append_block context "merge" the_function in
 
- (*Build the code for the given statement; return the builder for the statement's successor*)
- let rec stmt builder = function
-  A.Block sl -> List.fold_left stmt builder sl
-  | A.Expr e -> ignore (expr builder e); builder
-  | A.Return e -> ignore (match fdecl.A.typ with
-      A.Null -> L.build_ret_void builder
-    | _ -> L.build_ret (expr builder e) builder); builder 
-  | (*TODO: Review If/While*)
-    A.If (predicate, then_stmt, else_stmt) ->
-	let bool_val = expr builder predicate in
-	let merge_bb = L.append_block context "merge" the_function in
+	 let then_bb = L.append_block context "then" the_function in
+	 add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
+	   (L.build_br merge_bb);
 
-	let then_bb = L.append_block context "then" the_function in
-	add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
-	(L.build_br merge_bb);
+	 let else_bb = L.append_block context "else" the_function in
+	 add_terminal (stmt (L.builder_at_end context else_bb) else_stmt)
+	   (L.build_br merge_bb);
 
-	let else_bb = L.append_block context "then" the_function in
-	add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
-	(L.build_br merge_bb);
+	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
+	 L.builder_at_end context merge_bb
 
-	ignore (L.build_cond_br bool_val then_bb else_bb builder);
-	L.builder_at_end context merge_bb
+      | A.While (predicate, body) ->
+	  let pred_bb = L.append_block context "while" the_function in
+	  ignore (L.build_br pred_bb builder);
 
-  | A.While (predicate, body) -> (*This goes first b/c it's used by For*)
-	let pred_bb = L.append_block context "while" the_function in
- 	(* ignore function returns ()*)
-	ignore (L.build_br pred_bb builder);
+	  let body_bb = L.append_block context "while_body" the_function in
+	  add_terminal (stmt (L.builder_at_end context body_bb) body)
+	    (L.build_br pred_bb);
 
-	let body_bb = L.append_block context "while_body" the_function in
- 	add_terminal (stmt (L.builder_at_end context body_bb) body)
- 	  (L.build_br pred_bb);
+	  let pred_builder = L.builder_at_end context pred_bb in
+	  let bool_val = expr pred_builder predicate in
 
-	let pred_builder = L.builder_at_end context pred_bb in
-	let bool_val = expr pred_builder predicate in
+	  let merge_bb = L.append_block context "merge" the_function in
+	  ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
+	  L.builder_at_end context merge_bb
 
- 	let merge_bb = L.append_block context "merge" the_function in
-	ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
-	L.builder_at_end context merge_bb
-
-  | A.For (e1, e2, e3, body) -> stmt builder
-	( A.Block [A. Expr e1; A.While(e2, A.Block [body; A.Expr e3])] )
-  (*TODO: A.Break -- not in GOBLAN or MicroC*)
-  (*TODO: A.Continue -- ^^ *)
-
+      | A.For (e1, e2, e3, body) -> stmt builder
+	    ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] )
     in
 
     (* Build the code for each statement in the function *)
@@ -199,3 +194,4 @@ in
 
   List.iter build_function_body functions;
   the_module
+
