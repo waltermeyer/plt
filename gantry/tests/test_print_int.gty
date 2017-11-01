@@ -1,0 +1,8 @@
+// Test integer printing
+
+int main(){
+	print_i(4);
+	return 0;
+}
+
+// Prints 4
