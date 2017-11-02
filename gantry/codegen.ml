@@ -151,12 +151,15 @@ let translate (globals, functions) =
         ignore (L.build_store e' (lookup s) builder);
         e'
 *)
-      | A.FunExp("print", [e]) ->
-        L.build_call printf_func [| int_format_str ; (expr builder e) |]
-        "printf" builder
-      | A.FunExp("prints", [e]) ->
-        L.build_call printf_func [| str_format_str ; (expr builder e) |]
-        "prints" builder
+      | A.FunExp("print_i", [e]) ->
+	L.build_call printf_func [| int_format_str ; (expr builder e) |]
+	  "print_i" builder
+      | A.FunExp("print_s", [e]) ->
+	L.build_call printf_func [| str_format_str ; (expr builder e) |]
+	  "print_s" builder
+      | A.FunExp("print_d", [e]) ->
+	L.build_call printf_func [| flt_format_str ; (expr builder e) |]
+	  "print_d" builder
       | A.FunExp(f, act) ->
         let (fdef, fdecl) = StringMap.find f func_decls in
         let actuals = List.rev (List.map (expr builder) (List.rev act)) in
@@ -207,7 +210,6 @@ let translate (globals, functions) =
         ignore (L.build_cond_br elif_bool_val elif_bb else_bb builder);*)
         ignore (L.build_cond_br bool_val then_bb else_bb builder);
         L.builder_at_end context merge_bb
-
       | A.While (predicate, body) ->
         let pred_bb = L.append_block context "while" the_function in
         ignore (L.build_br pred_bb builder);
