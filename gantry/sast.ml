@@ -1,54 +1,56 @@
-(* Gantry SAST *)
-(* reference sake and QL *)
+(* Gantry Semantic Abstract Syntax Tree - SAST *)
+(* reference Gantry AST, and sake SAST *)
+(* Semantic checking *)
 
-type op = Add | Sub | Mul | Div | Eq | Neq | Lt | Le | Gt | Ge | And | Or
-type uop = Neg | Not
-type dtype = (* built-in primitives + custom user type *)
-	| Bool | Int | Char | String
-	| Enum of string (* name of the enum *)
-type expr = 
-	| BoolLit of bool
-	| CharLit of char
-	| IntLit of int
-	| StringLit of string
-	| Variable of string
-	| Uop of uop * expr
-	| Binop of expr * op * expr
-	| Assign of string * expr
-	| Print of string * expr list
-	| Empty
-type stmt = 
-	| Block of stmt list
-	| State of string
-	| If of expr * stmt * stmt
-	| For of string * (int * int * int) * stmt
-	| While of expr * stmt
-	| Switch of expr * (expr * stmt list) list
-	| Expr of expr
-	| Goto of string (* for FSM transitions *)
-	| Halt
-type type_decl = {
-	type_name : string;
-	type_values : string list;
-	}
-type fsm_decl = {
-	fsm_name : string;
-	fsm_states: (string * int) list;
-	fsm_locals: (dtype * string * expr) list;
-	fsm_body: stmt list;
-	}
-type program = {
-	input : (dtype * string) list;
-	output: (dtype * string) list;
-	public: (dtype * string * expr) list;
-	types: type_decl list;
-	fsms : fsm_decl list;
-	}
-type variable_decl = (string * dtype)
-type symbol_table = {
-	parent : symbol_table option;
-	mutable variables : variable_decl list
-	}
-type translation_environment = {
-	score : symbol_table; (* symbold table for vars *)
-}
+type op =
+  | Add | Sub | Mult | Div
+  | Eq | Neq | Geq | Leq | Gt | Lt
+  | And | Or | Conc
+
+type uop =
+  Not | Neg | Inc | Dec
+
+type typ =
+  Int | Float | Object | Array | String | Bool | Null
+
+type typ_bind = typ * string
+
+type expression =
+          IntLit of int
+        | FloatLit of float
+        | StrLit of string
+        | BoolLit of bool
+        | Id of string
+        | ObjAcc of expression * expression
+        | ArrAcc of expression * expression
+        | Binop of expression * op * expression
+        | Unop of uop * expression
+        | Assign of expression * expression
+        | AssignDecl of typ * string * expression
+        | ObjAssign of expression list * expression
+        | FunExp of string * expression list
+        | KeyVal of typ * string * expression
+        | ArrExp of expression list
+        | ObjExp of expression list
+        | Noexpr
+
+type statement =
+          Block of statement list
+        | Expr of expression
+        | Return of expression
+        | If of expression * statement * expression * statement * statement
+        | For of expression * expression * expression * statement
+        | While of expression * statement
+        | Break
+        | Continue
+
+type function_decl = {
+    type_spec : typ;
+    f_id : string;
+    f_params : typ_bind list;
+    f_statements : statement list;
+  }
+
+type program = typ_bind list * function_decl list
+
+(* end of sast *)
