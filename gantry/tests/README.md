@@ -11,7 +11,8 @@ int main(){
 	return 0;
 }
 
-//Prints 1
+// ****TEST****
+1
 ```
 
 ### Generate the correct output scripts by running.
