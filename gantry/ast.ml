@@ -49,7 +49,7 @@ type function_decl = {
     f_statements : statement list;
   }
 
-type program = statement list * function_decl list
+type program = typ_bind list * function_decl list
 
 (* Pretty-printing functions *)
 
@@ -130,14 +130,16 @@ let rec string_of_statement = function
 	| Break -> "break ; "
 	| Continue -> "continue ; "
 
-let string_of_param (t, id) = string_of_typ t ^ " " ^ id
+let string_of_global (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
+
+let string_of_typ_bind (t, id) = string_of_typ t ^ " " ^ id
 
 let string_of_fdecl fdecl =
 	string_of_typ fdecl.type_spec ^ " "
-        ^ fdecl.f_id ^ " " ^ "(" ^ String.concat ", " (List.map string_of_param fdecl.f_params) ^ ")\n{\n"
+        ^ fdecl.f_id ^ " " ^ "(" ^ String.concat ", " (List.map string_of_typ_bind fdecl.f_params) ^ ")\n{\n"
 	^ String.concat "" (List.map string_of_statement fdecl.f_statements)
 	^ "}\n"
 
-let string_of_program (stmts, fdecls) =
-	String.concat "" (List.map string_of_statement stmts) ^ "\n"
+let string_of_program (globals, fdecls) =
+	String.concat "" (List.map string_of_global globals) ^ "\n"
 	^ String.concat "\n" (List.map string_of_fdecl fdecls)

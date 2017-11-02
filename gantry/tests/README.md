@@ -1,79 +1,23 @@
-README for the tests directory.
+# README for the tests directory.
 
-Tests: 
+### Format for tests should follow the format:
 
-### Type creation
+```
+// Pass/Fail What it does
 
-<<<<<<< Updated upstream
-[X] int
-[X] float
-[X] string
-=======
-[] int
-[] float
-[] string
-[] bool
-#[] char
->>>>>>> Stashed changes
+int main(){
+	//This is the code
+	print(1);
+	return 0;
+}
 
-### Operators
+//Prints 1
+```
 
-[X] Arithmetic int
-[X] Arithmetic float
-[] Assignment int
-[] Assignment float
-[] Assignment bool
-[] Assignment string
-[] Equal int
-[] Equal float
-[] Equal bool
-<<<<<<< HEAD
-#[] Equal char
-=======
->>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617
-[] Equal string
-[] Not Equal int
-[] Not Equal float
-[] Not Equal bool
-<<<<<<< HEAD
-#[] Not Equal char
-=======
->>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617
-[] Not Equal string
-[] Comparison int
-[] Comparison float
-[] AND bool
-[] OR bool
-[] NOT bool
-[] Concatenation string
+### Generate the correct output scripts by running.
+ 
+```
+chmod 777 generate_ref.sh
+`./generate_ref` 
+```
 
-### Control Flow
-
-[X] if, elif, else
-[X] while
-[] for
-<<<<<<< HEAD
-[] return
-[] continue
-[] break
-=======
-[] break
-[] continue
->>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617
-
-### Built in Functions
-
-[] jsonify
-<<<<<<< HEAD
-[] arrify
-[] objectify
-[] slice
-[X] print
-[] length
-[] tostring
-[] httpget
-- httppost 
-=======
-[]  arrify
-- 
->>>>>>> cc0ab18d7e683e1633782bac17a1d6ae69bcc617

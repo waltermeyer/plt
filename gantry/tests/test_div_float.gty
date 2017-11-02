@@ -1,9 +1,13 @@
+// pass - float division
+
 int test_div_float(){
 	int y = 4.00;
 	int x = 6.00;
 
-	int z = y/z;
+	int z = x/y;
 	print(z);
 }
 
 test_div_float();
+
+// prints 1.50

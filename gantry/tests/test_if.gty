@@ -1,3 +1,5 @@
+// pass - test IF
+
 boolean test_if() { 
 	int x = 1;
 	

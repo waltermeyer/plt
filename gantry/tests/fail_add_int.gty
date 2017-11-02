@@ -1,0 +1,11 @@
+// add int (fail - adding mismatching types)
+
+int test_add_int(){
+	int y = 4;
+	string x = "z";
+
+	int z = y + z;
+	print(z);
+}
+
+test_add_int();

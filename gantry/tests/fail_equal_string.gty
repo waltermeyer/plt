@@ -1,0 +1,12 @@
+// string structural equality test -- fail
+
+bool equals(string x, string y) {
+
+	return x == y;
+}
+
+
+string x = "Hey";
+string y = "Hex";
+equals(x, y);
+

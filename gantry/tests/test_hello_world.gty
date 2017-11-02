@@ -1,0 +1,8 @@
+// Tests printing Hello World!
+
+int main(){
+	print_s("Hello World!");
+	return 0;
+}
+
+// Prints Hello World!

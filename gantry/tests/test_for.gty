@@ -1,6 +1,12 @@
-for(int x=0; x<5; x++){
+// pass - for loop
 
+test_for(){
+	
+	for(int x=0; x<5; x++){
 	print(x);
-	// prints 01234	
+	
+	}
 }
 
+test_for();
+// prints 01234

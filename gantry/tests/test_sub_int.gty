@@ -1,9 +1,13 @@
-int test_sub_int(){
-	int y = 4;
-	int x = 6;
+// pass - subtract integers
 
-	int z = y - z;
+int test_sub_int(){
+	int x = 4;
+	int y = 6;
+
+	int z = y - x;
 	print(z);
 }
 
 test_sub_int();
+
+// prints 2

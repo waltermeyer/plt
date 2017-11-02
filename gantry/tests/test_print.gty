@@ -1,3 +1,13 @@
+// pass - print (string, integer, array tests)
+
 print("Hello");
+// prints Hello
+
 int x = 7;
 print(x);
+// prints 7
+
+int arr[] = [1,2,3];
+print(arr);
+// prints 1 2 3
+

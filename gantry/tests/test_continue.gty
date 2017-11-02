@@ -1,21 +1,26 @@
-for(int x = 0; x<4; x++)
-{
+// pass - continue and break
+
+int test_continue(){
+	
+	for(int x = 0; x<7; x++){
 
 	print("x = "^x);
 	if(x < 3)
-	{
+		{
 		continue;
 	}
 
 	if(x == 3)
-	{
+		{
 		break;
 	}
 	
-
-}
+	} // end for loop
 
 print("broken");
+}
+
+test_continue();
 
 /* prints
 x = 0

@@ -1,0 +1,7 @@
+// fail (integers not equal)
+
+bool failequals(int i,int j) {
+	return i == j;
+}
+
+failequals(10, 0);

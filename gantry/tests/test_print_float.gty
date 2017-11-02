@@ -1,0 +1,8 @@
+// Prints a double
+
+int main(){
+	print_d(4.00);
+	return 0;
+}
+
+// Prints 4.00 

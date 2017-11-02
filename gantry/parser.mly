@@ -49,8 +49,11 @@ program:
 /* Build up a tuple of ordered lists for stmts and fdecls for the AST */
 declaration_list:
     /* empty */                              { [], [] }
-    | declaration_list statement             { $2 :: fst $1, snd $1 }
+    | declaration_list global_declaration    { $2 :: fst $1, snd $1 }
     | declaration_list function_declaration  { fst $1, $2 :: snd $1 }
+
+global_declaration:
+    type_spec ID SEMI                        { ($1, $2) }
 
 function_declaration:
     type_spec ID LPAREN func_param_list_opt RPAREN LBRACE statement_list RBRACE
