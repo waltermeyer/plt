@@ -4,8 +4,8 @@ module A = Ast
 module StringMap = Map.Make(String)
 
 (* Hash Table for our function local vars *)
-let f_lcls_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
-let g_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
+let f_var_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
+let g_var_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
 
 let translate (globals, functions) =
 
@@ -36,7 +36,7 @@ let translate (globals, functions) =
     (* Global Declarations *)
     let add_global (t, n) =
     let init = L.const_int (ltype_of_typ t) 0 in
-    Hashtbl.add g_tbl n (L.define_global n init the_module) in
+    Hashtbl.add g_var_tbl n (L.define_global n init the_module) in
     ignore(List.iter add_global globals);
 
 (*    StringMap.add n (L.define_global n init the_module) m in
@@ -92,8 +92,8 @@ let translate (globals, functions) =
         let local = L.build_alloca (ltype_of_typ t) n builder in
         (* Insert instruction that stores paramater in a new function local *)
         ignore (L.build_store p local builder);
-        (* Add formal to f_lcls_tbl Hash Map *)
-	Hashtbl.add f_lcls_tbl n local in
+        (* Add formal to f_var_tbl Hash Map *)
+	Hashtbl.add f_var_tbl n local in
 	(* Generate and Add Function Parameters *)
         ignore(List.iter2 add_param fdecl.A.f_params
 	      (Array.to_list (L.params the_function)));
@@ -101,13 +101,13 @@ let translate (globals, functions) =
       (* Function Locals *)
       let add_local (t, n) builder =
 	let local = L.build_alloca (ltype_of_typ t) n builder in
-	ignore(Hashtbl.add f_lcls_tbl n local);
+	ignore(Hashtbl.add f_var_tbl n local);
       in
 
       (* Return the value for a local variable or a parameter *)
       let lookup n =
-        try Hashtbl.find f_lcls_tbl n with
-            Not_found -> Hashtbl.find g_tbl n
+        try Hashtbl.find f_var_tbl n with
+            Not_found -> Hashtbl.find g_var_tbl n
       in
 
     (* Construct code for an expression and return the value *)
@@ -142,17 +142,18 @@ let translate (globals, functions) =
            | A.Not  -> L.build_not) e' "tmp" builder
       | A.AssignDecl(t, n, e) ->
         let e' = expr builder e in
-          (* First add this declaration to f_lcls_tbl hash map *)
+          (* First add this declaration to f_var_tbl hash map *)
           ignore (add_local (t, n) builder);
 	  (* Then set it and forget it *)
           ignore (L.build_store e' (lookup n) builder);
           e'
-(*      | A.Assign(s, e) ->
-        let e' = expr builder e in
-        ignore (L.build_store e' (lookup s) builder);
-        e'
-*)
-      | A.FunExp("print_i", [e]) ->
+(*      | A.Assign(e1, e2) ->
+	(* We need to resolve expression to assign into *)
+        let e1' = expr builder e1
+        and e2' = expr builder e2 in
+          ignore (L.build_store e2' (lookup e1') builder);
+          e2'
+*)      | A.FunExp("print_i", [e]) ->
 	L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	  "print_i" builder
       | A.FunExp("print_s", [e]) ->
