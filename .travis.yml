@@ -8,3 +8,5 @@ before_install:
 - opam install -y ocamlfind llvm.3.4
 - PATH=~/.opam/system/bin/:$PATH
 - cd gantry && make
+notifications:
+  slack: pltworkspace:lcBQ7i4QQKLgftBnCPu1HHRL
