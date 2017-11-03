@@ -4,8 +4,8 @@ module A = Ast
 module StringMap = Map.Make(String)
 
 (* Hash Table for our function local vars *)
-let f_lcls_tbl :
-    (string, (A.typ * A.expression)) Hashtbl.t = Hashtbl.create 100;;
+let f_lcls_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
+let g_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
 
 let translate (globals, functions) =
 
@@ -34,12 +34,14 @@ let translate (globals, functions) =
     in
 
     (* Global Declarations *)
-    let global_vars =
-    let global_var m (t, n) =
+    let add_global (t, n) =
     let init = L.const_int (ltype_of_typ t) 0 in
-    StringMap.add n (L.define_global n init the_module) m in
-    List.fold_left global_var StringMap.empty globals in
+    Hashtbl.add g_tbl n (L.define_global n init the_module) in
+    ignore(List.iter add_global globals);
 
+(*    StringMap.add n (L.define_global n init the_module) m in
+    List.fold_left global_var StringMap.empty globals in
+*)
     (* Printf Built-in *)
     let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
     let printf_func = L.declare_function "printf" printf_t the_module in
@@ -82,36 +84,30 @@ let translate (globals, functions) =
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
 
-      (* Function Variables *)
-      let local_vars =
-        (* Function Parameters *)
-        (* map, (type, name), parameter *)
-        let add_formal m (t, n) p =
-          (* Set (optional, but friendly) name of the parameter value *)
-          L.set_value_name n p;
-          (* Create an alloca(tion) instruction of type t to store n on stack *)
-          let local = L.build_alloca (ltype_of_typ t) n builder in
-          (* Insert instruction that stores paramater in a new function local *)
-          ignore (L.build_store p local builder);
-          (* Add formal to local_vars map *)
-          StringMap.add n local m in
-        (* Generate function parameter code and add them to a map *)
-        List.fold_left2
-        add_formal StringMap.empty fdecl.A.f_params
-        (* List of function paramaters previously set *)
-        (Array.to_list (L.params the_function)) in
+      (* Function Parameters *)
+      let add_param (t, n) p =
+        (* Set (optional, but friendly) name of the parameter value *)
+        L.set_value_name n p;
+        (* Create an alloca(tion) instruction of type t to store n on stack *)
+        let local = L.build_alloca (ltype_of_typ t) n builder in
+        (* Insert instruction that stores paramater in a new function local *)
+        ignore (L.build_store p local builder);
+        (* Add formal to f_lcls_tbl Hash Map *)
+	Hashtbl.add f_lcls_tbl n local in
+	(* Generate and Add Function Parameters *)
+        ignore(List.iter2 add_param fdecl.A.f_params
+	      (Array.to_list (L.params the_function)));
 
-(*
-      (* Add Local Function Variables (called during expr eval) *)
-      let add_local m (t, n) =
-	let local_var = L.build_alloca (ltype_of_typ t) n builder in
-        StringMap.add n local_var m in
-        List.fold_left add_local formals fdecl.A.locals in
-*)
+      (* Function Locals *)
+      let add_local (t, n) builder =
+	let local = L.build_alloca (ltype_of_typ t) n builder in
+	ignore(Hashtbl.add f_lcls_tbl n local);
+      in
+
       (* Return the value for a local variable or a parameter *)
       let lookup n =
-        try StringMap.find n local_vars with
-          Not_found -> StringMap.find n global_vars
+        try Hashtbl.find f_lcls_tbl n with
+            Not_found -> Hashtbl.find g_tbl n
       in
 
     (* Construct code for an expression and return the value *)
@@ -144,13 +140,14 @@ let translate (globals, functions) =
         (match op with
              A.Neg  -> L.build_neg
            | A.Not  -> L.build_not) e' "tmp" builder
-(*      | A.AssignDecl(t, n, e) ->
+      | A.AssignDecl(t, n, e) ->
         let e' = expr builder e in
-          (* First add this declaration to local_vars *)
-          ignore (add_local local_vars (t, n));
-          ignore (L.build_store e' (lookup s) builder);
+          (* First add this declaration to f_lcls_tbl hash map *)
+          ignore (add_local (t, n) builder);
+	  (* Then set it and forget it *)
+          ignore (L.build_store e' (lookup n) builder);
           e'
-      | A.Assign(s, e) ->
+(*      | A.Assign(s, e) ->
         let e' = expr builder e in
         ignore (L.build_store e' (lookup s) builder);
         e'
