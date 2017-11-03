@@ -32,10 +32,30 @@ struct JSON * new_token () {
 	return token;
 }
 
+// This successfully updates the key of token 1 but not the sibling pointer
+int add_sibling(struct JSON *parent_token, struct JSON *sibling_token){
+	parent_token->next = sibling_token;
+	sibling_token->prev = parent_token;
+	parent_token->key = "Bob";
+	//printf("%s\n", sibling_token->key);
+	//printf("%s\n", parent_token->key);
+	return 0;
+}
+
 
 int main(){
-	struct JSON *token= new_token();
-	token->key = "Joe";
-	printf("%s\n", token->key);
+	struct JSON *token1= new_token();
+	token1->key = "Joe";
+	printf("%s\n", token1->key);
+	
+	struct JSON *token2 = new_token();
+	token2->key = "Age";
+	token2->i = 22;
+	
+	//token1->next = token2;
+	add_sibling(token1, token2);
+	printf("%s\n", token1->key);
+	struct JSON *token1_again = token2->prev;
+	printf("%s\n", token1_again->key);
 	return 0;
 }
