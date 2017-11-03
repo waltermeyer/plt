@@ -147,13 +147,12 @@ let translate (globals, functions) =
 	  (* Then set it and forget it *)
           ignore (L.build_store e' (lookup n) builder);
           e'
-(*      | A.Assign(e1, e2) ->
+      | A.Assign(e1, e2) ->
 	(* We need to resolve expression to assign into *)
-        let e1' = expr builder e1
-        and e2' = expr builder e2 in
-          ignore (L.build_store e2' (lookup e1') builder);
+        let e2' = expr builder e2 in
+          ignore (L.build_store e2' (lookup (A.expr_to_str e1)) builder);
           e2'
-*)      | A.FunExp("print_i", [e]) ->
+      | A.FunExp("print_i", [e]) ->
 	L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	  "print_i" builder
       | A.FunExp("print_s", [e]) ->
