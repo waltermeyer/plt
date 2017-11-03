@@ -2,13 +2,14 @@
 #include <string.h>
 #include <alloca.h>
 
+
+
 /*
  * Sample JSON Object:
  *
  * { "Name": "Joe",
  *   "Age" : 20,
  *
- *   "Classes" : ["PLT", "Class 2", "Class 3"]
  *   "Contact Info": 
  *  	{ "Address" : "22 Jumpstreet",
  * 	  "Phone" : 9999999999 }
@@ -39,10 +40,6 @@ struct token{
   char *key;
 };
 
-struct token * new_token () {
- 	struct token *t = alloca(sizeof(struct token));
-	return t;
-}
 
 // This successfully updates the key of token 1 but not the sibling pointer
 int add_sibling(struct token *parent_token, struct token *sibling_token){
@@ -54,21 +51,55 @@ int add_sibling(struct token *parent_token, struct token *sibling_token){
 	return 0;
 }
 
+int add_child(struct token *parent_token, struct token *child_token){
+	parent_token->child = child_token;
+	return 0;
+}
 
-// Based on the output I'm getting, I think there's a problem with how
-// I'm using alloca, because key values are being flushed fast, but
-// maybe there's really a problem in this code.
+/* 
+ * This should pretty print the object to check
+ * but maybe not necessary
+ */
+
+int print_obj(struct token *obj_start){
+	struct token *curr = obj_start;
+
+	while(curr->next || curr->child){
+	  if (curr->key) {
+	    printf("%s\n", curr -> key);
+	  }
+	}
+	return 0;
+}
+
+
+
+
+// * Generate struct based on JSON above */
+// * NOTE : alloca frees memory on return so can't write specialized functions
+// * dealing with these structs that involve returning alloca
+// * TODO: Finish checking inner object.
+
+
 int main(){
-	struct token *token1= new_token();
-	token1->key = "Joe";
+	struct token *token0 = alloca(sizeof(struct token));
+	struct token *token1 = alloca(sizeof(struct token));
+	struct token *token2 = alloca(sizeof(struct token));
+	struct token *token3 = alloca(sizeof(struct token));
+	struct token *token4 = alloca(sizeof(struct token));
+	struct token *token5 = alloca(sizeof(struct token));
+	struct token *token6 = alloca(sizeof(struct token));
+	struct token *token7 = alloca(sizeof(struct token));
+	struct token *token8 = alloca(sizeof(struct token));
+
+	add_child(token0, token1);
+
+	token1->key = "Name";
 	printf("%s\n", token1->key);
 
-
-	struct token *token2 = new_token();
 	token2->key = "Age";
 	token2->i = 22;
 	
-	struct token *token3 = new_token();
 	token3->key = "Favorite Color";
 	token3->val = "Blue";
 	
@@ -81,10 +112,19 @@ int main(){
 	printf("This is token 1 key: %s\n", token1->key);
 	printf("This is token 3 key from 1 in main: %s\n", token3_from_token1->key);
 	printf("This is token 3 key: %s\n", token3->key);
-	//token1->next = token2;
 	add_sibling(token1, token2);
+	add_sibling(token2, token3);
 	printf("%s\n", token1->key);
 	struct token *token1_again = token2->prev;
 	printf("%s\n", token1_again->key);
+	
+	add_sibling(token3, token4);
+	token4-> key = "Contact Info";
+	add_child(token4, token5); 
+	
+	token5->key = "Address";
+	token5->val = "22 Jump Street";
+	token6->key = "Phone";
+	token6->i = 999;
 	return 0;
 }
