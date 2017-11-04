@@ -64,9 +64,29 @@ int add_child(struct token *parent_token, struct token *child_token){
 int print_obj(struct token *obj_start){
 	struct token *curr = obj_start;
 
-	while(curr->next || curr->child){
+	while(curr->next || curr-> child){
+	  if (curr->next){
+	    curr = curr->next;
+	  }
+	  
+	  else if (curr->child){
+	    curr = curr->child;
+	    printf("        {");
+	  }
 	  if (curr->key) {
-	    printf("%s\n", curr -> key);
+	    printf("%s : ", curr -> key);
+	  }
+	  if (curr->val){
+	    printf("%s,/n", curr->val);
+	  }
+	  if (curr->i){
+	    printf("%d,\n",curr->i);
+	  }
+	  if (curr->f){
+	    printf("%f,\n", curr->f);
+	  }
+	  if (curr->b){
+	    printf("%d,\n", curr->b);
 	  }
 	}
 	return 0;
@@ -124,7 +144,12 @@ int main(){
 	
 	token5->key = "Address";
 	token5->val = "22 Jump Street";
+
+	add_sibling(token5, token6);
 	token6->key = "Phone";
 	token6->i = 999;
+
+	//print_obj(token0);
+
 	return 0;
 }
