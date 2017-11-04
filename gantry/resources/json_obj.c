@@ -26,18 +26,46 @@ struct json_list{
   struct token *HEAD;
 };
 
-/* JSON token struct*/
+/* 
+ * JSON token struct
+ * Circularly linked list.  
+ * 
+ * HEAD will be a boolean in llvm 1 indicates that its the head, 0 otherwise
+ *  
+ * The 'next' pointer of the last sibling node will point to the HEAD of the outer list
+ *
+ * For inner objects, the HEAD flag will get set and the internal objects last token
+ * will point to the HEAD of the inner list
+ * 
+ * So, if a token will always have a pointer to next, all except the head will have 
+ * a pointer to prev, and tokens where the json value is an object will have next and child pointer.
+ */
+
 struct token{
+  int HEAD;
+
   struct token *prev;
   struct token *next;
-  struct token *child;
+  
+  char *key;
 
+  /* 
+   * What is the type of the value? 
+   * 1 nested obj or array
+   * 2 string
+   * 3 int
+   * 4 float
+   * 5 boolean
+   */
+  int val_typ;
+
+
+  /* These are the 'values' in the JSON object*/ 
+  struct token *child;
   char *val;
   int i;
   float f;
-  int b;
-  
-  char *key;
+  int b; // really a bool in LLVM
 };
 
 
@@ -57,8 +85,9 @@ int add_child(struct token *parent_token, struct token *child_token){
 }
 
 /* 
- * This should pretty print the object to check
- * but maybe not necessary
+ * This doesn't work correctly and also is incorrect based on the new 
+ * struct where next and child are not mutually exclusive
+ *
  */
 
 int print_obj(struct token *obj_start){
@@ -74,7 +103,7 @@ int print_obj(struct token *obj_start){
 	    printf("        {");
 	  }
 	  if (curr->key) {
-	    printf("%s : ", curr -> key);
+	    printf("%s : ", curr->key);
 	  }
 	  if (curr->val){
 	    printf("%s,/n", curr->val);
@@ -109,8 +138,6 @@ int main(){
 	struct token *token4 = alloca(sizeof(struct token));
 	struct token *token5 = alloca(sizeof(struct token));
 	struct token *token6 = alloca(sizeof(struct token));
-	struct token *token7 = alloca(sizeof(struct token));
-	struct token *token8 = alloca(sizeof(struct token));
 
 	add_child(token0, token1);
 
@@ -149,7 +176,7 @@ int main(){
 	token6->key = "Phone";
 	token6->i = 999;
 
-	//print_obj(token0);
+	print_obj(token0);
 
 	return 0;
 }
