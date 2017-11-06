@@ -22,17 +22,15 @@
 /* Keep track of where objects are located in memory.
  * Stores pointers to the memory location of the first token in an object.
  */
-struct json_list{
+struct json_obj{
   struct token *HEAD;
 };
 
 /* 
  * JSON token struct
- * Circularly linked list.  
- * 
- * HEAD will be a boolean in llvm 1 indicates that its the head, 0 otherwise
+ * Linked list.  
  *  
- * The 'next' pointer of the last sibling node will point to the HEAD of the outer list
+ * The 'next' pointer of the last sibling node will point to NULL
  *
  * For inner objects, the HEAD flag will get set and the internal objects last token
  * will point to the HEAD of the inner list
@@ -42,7 +40,6 @@ struct json_list{
  */
 
 struct token{
-  int HEAD;
 
   struct token *prev;
   struct token *next;
@@ -51,11 +48,12 @@ struct token{
 
   /* 
    * What is the type of the value? 
-   * 1 nested obj or array
-   * 2 string
-   * 3 int
-   * 4 float
-   * 5 boolean
+   * 1 nested obj
+   * 2 array
+   * 3 string
+   * 4 int
+   * 5 float
+   * 6 boolean
    */
   int val_typ;
 
@@ -90,23 +88,24 @@ int add_child(struct token *parent_token, struct token *child_token){
  *
  */
 
-int print_obj(struct token *obj_start){
-	struct token *curr = obj_start;
-
-	while(curr->next || curr-> child){
+int print_obj(struct json_obj *head){
+	struct token *curr = head->HEAD; 
+	printf("{\n");
+	while(curr->next){
+	  if (curr->child){
+		struct json_obj *inner_head = alloca(sizeof(struct json_obj));
+		head->HEAD = curr->child;
+		print_obj(inner_head);
+	  }
 	  if (curr->next){
 	    curr = curr->next;
 	  }
 	  
-	  else if (curr->child){
-	    curr = curr->child;
-	    printf("        {");
-	  }
 	  if (curr->key) {
 	    printf("%s : ", curr->key);
 	  }
 	  if (curr->val){
-	    printf("%s,/n", curr->val);
+	    printf("%s,\n", curr->val);
 	  }
 	  if (curr->i){
 	    printf("%d,\n",curr->i);
@@ -118,6 +117,7 @@ int print_obj(struct token *obj_start){
 	    printf("%d,\n", curr->b);
 	  }
 	}
+	printf("}");
 	return 0;
 }
 
@@ -131,7 +131,9 @@ int print_obj(struct token *obj_start){
 
 
 int main(){
+	struct json_obj *head = alloca(sizeof(struct json_obj));
 	struct token *token0 = alloca(sizeof(struct token));
+	head->HEAD = token0;
 	struct token *token1 = alloca(sizeof(struct token));
 	struct token *token2 = alloca(sizeof(struct token));
 	struct token *token3 = alloca(sizeof(struct token));
@@ -176,7 +178,7 @@ int main(){
 	token6->key = "Phone";
 	token6->i = 999;
 
-	print_obj(token0);
+	print_obj(head);
 
 	return 0;
 }
