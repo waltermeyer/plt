@@ -33,15 +33,14 @@ let translate (globals, functions) =
       | A.Null   -> void_t
     in
 
+
+
     (* Global Declarations *)
     let add_global (t, n) =
-    let init = L.const_int (ltype_of_typ t) 0 in
+    let init = L.const_null (ltype_of_typ t) in
     Hashtbl.add g_var_tbl n (L.define_global n init the_module) in
     ignore(List.iter add_global globals);
 
-(*    StringMap.add n (L.define_global n init the_module) m in
-    List.fold_left global_var StringMap.empty globals in
-*)
     (* Printf Built-in *)
     let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
     let printf_func = L.declare_function "printf" printf_t the_module in
@@ -147,13 +146,12 @@ let translate (globals, functions) =
 	  (* Then set it and forget it *)
           ignore (L.build_store e' (lookup n) builder);
           e'
-(*      | A.Assign(e1, e2) ->
+      | A.Assign(e1, e2) ->
 	(* We need to resolve expression to assign into *)
-        let e1' = expr builder e1
-        and e2' = expr builder e2 in
-          ignore (L.build_store e2' (lookup e1') builder);
+        let e2' = expr builder e2 in
+          ignore (L.build_store e2' (lookup (A.expr_to_str e1)) builder);
           e2'
-*)      | A.FunExp("print_i", [e]) ->
+      | A.FunExp("print_i", [e]) ->
 	L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	  "print_i" builder
       | A.FunExp("print_s", [e]) ->
@@ -164,7 +162,6 @@ let translate (globals, functions) =
 	  "print_d" builder
      (* | A.FunExp("httpget", [e]) ->
         L.build_call httpget_func [| str_format_str ; (expr builder e) |] *)
-
       | A.FunExp(f, act) ->
         let (fdef, fdecl) = StringMap.find f func_decls in
         let actuals = List.rev (List.map (expr builder) (List.rev act)) in
