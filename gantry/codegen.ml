@@ -33,15 +33,14 @@ let translate (globals, functions) =
       | A.Null   -> void_t
     in
 
+
+
     (* Global Declarations *)
     let add_global (t, n) =
-    let init = L.const_int (ltype_of_typ t) 0 in
+    let init = L.const_null (ltype_of_typ t) in
     Hashtbl.add g_var_tbl n (L.define_global n init the_module) in
     ignore(List.iter add_global globals);
 
-(*    StringMap.add n (L.define_global n init the_module) m in
-    List.fold_left global_var StringMap.empty globals in
-*)
     (* Printf Built-in *)
     let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
     let printf_func = L.declare_function "printf" printf_t the_module in
@@ -163,7 +162,6 @@ let translate (globals, functions) =
 	  "print_d" builder
      (* | A.FunExp("httpget", [e]) ->
         L.build_call httpget_func [| str_format_str ; (expr builder e) |] *)
-
       | A.FunExp(f, act) ->
         let (fdef, fdecl) = StringMap.find f func_decls in
         let actuals = List.rev (List.map (expr builder) (List.rev act)) in
