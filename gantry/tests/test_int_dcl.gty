@@ -1,9 +1,12 @@
 // pass - declare an integer
 
-test_int_decl(){
+int main(){
 	int y = 42;
-	}
+	print_i(y);
+	return 0;
+}
 
-test_int_decl();
-
-
+/*
+****TEST****
+42
+*/

@@ -1,13 +1,21 @@
 // pass - print (string, integer, array tests)
 
-print("Hello");
-// prints Hello
+int main(){
+	print_s("Hello");
+	print_i(42);
+	print_d(99.99);
 
-int x = 7;
-print(x);
-// prints 7
+	int arr[] = [1,2,3];
+	print_s(arr);
 
-int arr[] = [1,2,3];
-print(arr);
-// prints 1 2 3
+	return 0;
+}
+
+/*
+****TEST****
+Hello
+42
+99.99
+1,2,3
+*/
 

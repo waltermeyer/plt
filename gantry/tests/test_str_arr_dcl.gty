@@ -1,14 +1,15 @@
 // pass - string array declaration
 // review
 
-string test_arr_decl(){
-
+int main(){
+	
 	string [] arr = ["foo", "bar"];
-	print (arr);
+	print_s(arr);
 
+	return 0;
 }
 
-test_arr_decl();
-
-// print foo bar
-
+/*
+****TEST****
+foo bar
+*/

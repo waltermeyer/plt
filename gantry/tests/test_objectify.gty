@@ -1,10 +1,19 @@
 // pass - objectify (from LRM)
 // review
 
-string str = "{course:\"PLT\",students:125,location:\"NWC\"}";
-object course_obj = objectify(str);
-string course_name = course_obj.course;
-int course_enrollment = course_obj.students;
-string course_location = course_obj.location;
-print(course_name);
-// prints "PLT"
+int main(){
+	string str = "{course:\"PLT\",students:125,location:\"NWC\"}";
+	object course_obj = objectify(str);
+
+	string course_name = course_obj.course;
+	int course_enrollment = course_obj.students;
+	string course_location = course_obj.location;
+	
+	print_s(course_name);
+	return 0;
+}
+
+/*
+****TEST****
+PLT
+*/

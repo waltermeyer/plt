@@ -1,7 +1,16 @@
 // to_string (from LRM)
 // review
 
-int course_enrollment = 3;
-string course_enrollment_string = to_string(course_enrollment)
-print(course_enrollment_string);
-// prints 3
+int main(){
+
+	int course_enrollment = 3;
+	string course_enrollment_string = to_string(course_enrollment);
+	print_s(course_enrollment_string);
+
+	return 0;
+}
+
+/*
+****TEST****
+3
+*/
