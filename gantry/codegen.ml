@@ -17,7 +17,7 @@ let translate (globals, functions) =
     and i8_t   = L.i8_type context
     and i1_t   = L.i1_type context
     and str_t  = L.pointer_type (L.i8_type context)
-    (* and obj_t = L.pointer_type (L.i8_type context) TODO *)
+    and obj_t  = L.named_struct_type context "object"
     (* and arr_t = L.pointer_type (L.i8_type context) TODO *)
     and flt_t  = L.double_type context
     and void_t = L.void_type context in
@@ -26,7 +26,7 @@ let translate (globals, functions) =
     let ltype_of_typ = function
         A.Int    -> i32_t
       | A.Float  -> flt_t
-      (* | A.Object -> obj_t *)
+      | A.Object -> obj_t
       (* | A.Array  -> arr_t *)
       | A.String -> str_t
       | A.Bool   -> i1_t
@@ -139,6 +139,26 @@ let translate (globals, functions) =
         (match op with
              A.Neg  -> L.build_neg
            | A.Not  -> L.build_not) e' "tmp" builder
+      | A.ObjExp(el) ->
+	(*
+	 %struct.token = type { %struct.token*, %struct.token*, i8*, i32, %struct.token*, i8*, i32, float, i32 }
+	*)
+	(* Object Type *)
+	let el = List.map (expr builder) el in
+	let object_struct = L.struct_type context
+			      [|
+				 pointer_type (expr builder e); (* prev *)
+				 pointer_type (expr builder e); (* next *)
+				 pointer_type (expr builder e); (* child *)
+			         i32_t; (* value type *)
+				 str_t; (* key *)
+				 str_t; (* value *)
+				 i32_t; (* int *)
+				 flt_t; (* float *)
+				 i1_t   (* bool *)
+			      |] in
+			    pointer_type object_struct;
+			    object_struct
       | A.AssignDecl(t, n, e) ->
         let e' = expr builder e in
           (* First add this declaration to f_var_tbl hash map *)
