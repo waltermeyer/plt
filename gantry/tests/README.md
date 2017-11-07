@@ -22,7 +22,7 @@ int main(){
 }
 
 // ****TEST****
-1
+// 1
 ```
 
 ### Generate the correct output scripts by running.
