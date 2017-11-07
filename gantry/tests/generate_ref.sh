@@ -1,11 +1,15 @@
+#!/bin/bash  
+
 for file in ./test*.gty; do
- 	[ -e "$file" ] || continue
-	touch ${file%.*}.out
-	grep -v '^\s*$' "$file"|sed -r 's/^.{10}//' | tail -n1 > ${file%.*}.out
+	if [[ `grep "****TEST****" $file` ]]; then
+	  sed -n -e '/\*\*\*\*TEST\*\*\*\*/,$p' $file | tail -n +2 | head -n -1 > ${file%.*}.out
+	  echo "Generated $(echo $file | cut -c 3-).out"
+	fi
 done
 
 for file in ./fail*.gty; do
- 	[ -e "$file" ] || continue
-	touch ${file%.*}.err
-	grep -v '^\s*$' "$file"|sed -r 's/^.{10}//' | tail -n1 > ${file%.*}.err
+	if [[ `grep "****TEST****" $file` ]]; then
+	  sed -n -e '/\*\*\*\*TEST\*\*\*\*/,$p' $file | tail -n +2 | head -n -1 > ${file%.*}.err
+	  echo "Generated $(echo $file | cut -c 3-).err"
+	fi
 done
