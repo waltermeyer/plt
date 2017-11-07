@@ -4,7 +4,7 @@
 
 # Easiest way to build: using ocamlbuild, which in turn uses ocamlfind
 
-all : gantry.native
+all : gantry.native httpget.o
 
 gantry.native :
 	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
@@ -16,7 +16,7 @@ gantry.native :
 clean :
 	ocamlbuild -clean
 	rm -rf testall.log *.diff gantry scanner.ml parser.ml parser.mli
-	rm -rf printbig
+	rm -rf httpget
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
@@ -41,6 +41,9 @@ parser.ml parser.mli : parser.mly
 
 %.cmx : %.ml
 	ocamlfind ocamlopt -c -package llvm $<
+
+httpget : httpget.c
+	gcc -o httpget httpeget.c
 
 # Testing the "printbig" example
 
