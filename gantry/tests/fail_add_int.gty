@@ -1,11 +1,16 @@
-// add int (fail - adding mismatching types)
+// Tests adding integers
+// Fail - adding mismatching types
 
-int test_add_int(){
+int main(){
 	int y = 4;
-	string x = "z";
+	string x = "x";
+	int z = x+y;
 
-	int z = y + z;
-	print(z);
+	print_i(z);
+	return 0;
 }
 
-test_add_int();
+/*
+****TEST****
+Error message
+*/

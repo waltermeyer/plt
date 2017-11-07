@@ -1,5 +1,12 @@
-// fail integer declaration - type mismatch
+// Tests integer declaration
+// Fail - type mismatch
 
-int y = "z";
+int main(){
+	int y = "z";
+	return 0;
+}
 
-//y = 3+y;
+/*
+****TEST****
+Error message
+*/

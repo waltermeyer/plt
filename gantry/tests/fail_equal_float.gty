@@ -1,8 +1,18 @@
-// fail (floats unequal)
+// Tests float equals
+// Fail - floats not equal
 
-bool failequal(float i,float j) {
-	return i == j;
+int main(){
+        bool failequals(float i, float j) {
+        return i == j;
+        }
+
+failequals(-3.2, -3.21);
+
+return 0;
 
 }
 
-failequal(-3.2, -3.21);
+/*
+****TEST****
+Error message
+*/

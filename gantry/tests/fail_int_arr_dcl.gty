@@ -1,3 +1,12 @@
-// fail int array declaration - multiple data types 
+// Tests array declaration
+// Fail - element type mismatch
 
-int [] arr = ["1", 1, 2];
+int main(){
+        int [] arr = ["1", 1, 2];
+        return 0;
+}
+
+/*
+****TEST****
+Error message
+*/

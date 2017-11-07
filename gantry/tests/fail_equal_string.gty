@@ -1,12 +1,20 @@
-// string structural equality test -- fail
+// Tests structural equality
+// Fail - strings not equal
 
-bool equals(string x, string y) {
+int main(){
+        bool failequals(string i, string j) {
+        return i == j;
+        }
 
-	return x == y;
+string i = "Hey";
+string j = "Hex";
+failequals(i, j);
+
+return 0;
+
 }
 
-
-string x = "Hey";
-string y = "Hex";
-equals(x, y);
-
+/*
+****TEST****
+Error message
+*/

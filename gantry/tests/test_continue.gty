@@ -1,10 +1,9 @@
 // pass - continue and break
 
-int test_continue(){
-	
+int main(){
 	for(int x = 0; x<7; x++){
 
-	print("x = "^x);
+	print_s("x = "^x);
 	if(x < 3)
 		{
 		continue;
@@ -17,12 +16,11 @@ int test_continue(){
 	
 	} // end for loop
 
-print("broken");
+print_s("broken");
 }
 
-test_continue();
-
-/* prints
+/*
+****TEST****
 x = 0
 x = 1
 x = 2

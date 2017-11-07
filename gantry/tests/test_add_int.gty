@@ -1,11 +1,11 @@
 // pass - add two integers
 
 int main(){
-	int y = 4;
-	int x = 6;
+	int x = 4;
+	int y = 6;
 
-	int z = y + z;
-	print(z);
+	int z = x + y;
+	print_i(z);
 	return 0;
 }
 

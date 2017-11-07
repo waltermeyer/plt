@@ -1,11 +1,11 @@
 // pass - add two floats
 
 int main(){
-	int y = 4.00;
-	int x = 6.00;
+	float x = 4.00;
+	float y = 6.00;
 
-	int z = y + z;
-	print(z);
+	float z = x + y;
+	print_d(z);
 	return 0;
 }
 
