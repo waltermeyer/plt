@@ -3,9 +3,10 @@ module A = Ast
 
 module StringMap = Map.Make(String)
 
-(* Hash Table for our function local vars *)
-let f_var_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
+(* Hash Tables for our variable bindings *)
 let g_var_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
+let f_var_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
+let f_var_obj_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
 
 let translate (globals, functions) =
 
@@ -139,17 +140,25 @@ let translate (globals, functions) =
         (match op with
              A.Neg  -> L.build_neg
            | A.Not  -> L.build_not) e' "tmp" builder
+      | A.KeyVal(t, n, e) ->
+        let e' = expr builder e in
+          (* First add this key value pair to f_var_obj_tbl hash map *)
+          ignore (add_key_val (t, n) builder);
+	  (* Then set it and forget it *)
+          ignore (L.build_store e' (lookup n) builder);
+          e'
       | A.ObjExp(el) ->
 	(*
 	 %struct.token = type { %struct.token*, %struct.token*, i8*, i32, %struct.token*, i8*, i32, float, i32 }
 	*)
 	(* Object Type *)
-	let el = List.map (expr builder) el in
+	let values = List.map (expr builder) el in
 	let object_struct = L.struct_type context
+			      [| |]
 			      [|
-				 pointer_type (expr builder e); (* prev *)
-				 pointer_type (expr builder e); (* next *)
-				 pointer_type (expr builder e); (* child *)
+				 pointer_type; (* prev *)
+				 pointer_type; (* next *)
+				 pointer_type; (* child *)
 			         i32_t; (* value type *)
 				 str_t; (* key *)
 				 str_t; (* value *)
