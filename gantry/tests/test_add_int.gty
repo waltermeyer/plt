@@ -9,5 +9,7 @@ int main(){
 	return 0;
 }
 
-// prints 10
-
+/*
+****TEST****
+10
+*/
