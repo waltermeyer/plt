@@ -1,13 +1,16 @@
 // pass - multiply integers
 
-int test_mult_int(){
+int main(){
 	int x = 4;
 	int y = 6;
 
 	int z = x * y;
-	print(z);
+	print_i(z);
+
+	return 0;
 }
 
-test_mult_int();
-// prints 24
-
+/*
+****TEST****
+24
+*/

@@ -1,7 +1,18 @@
-// fail (integers not equal)
+// Tests int equals
+// Fail - ints not equal
 
-bool failequals(int i,int j) {
-	return i == j;
+int main(){
+        bool failequals(int i, int j) {
+        return i == j;
+        }
+
+failequals(3, 4);
+
+return 0;
+
 }
 
-failequals(10, 0);
+/*
+****TEST****
+Error message
+*/

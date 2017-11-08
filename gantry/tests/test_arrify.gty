@@ -1,5 +1,6 @@
 // pass - arrify (from LRM)
 
+int main(){
 int test_arrify(){
 
 	string str = "[{course:\"PLT\",students:125,location:\"NWC\"},
@@ -12,10 +13,16 @@ int test_arrify(){
 	string second_course_name = second_course.course;
 	
 	string output_string = first_course_name ^ " and " ^ second_course_name;
-	print(output_string);
+	print_s(output_string);
+
+	}
+
+test_arrify();
+return 0;
 
 }
 
-test_arrify();
-
-// prints "PLT and CS Theory"
+/*
+****TEST****
+PLT and CS Theory
+*/

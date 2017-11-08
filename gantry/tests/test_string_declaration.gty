@@ -1,10 +1,13 @@
 // pass - string declaration
 
-test_string_decl(){
+int main(){
 	string my_string = "new_string";
+	print_s(my_string);
+	
+	return 0;
+}
 
-	}
-
-test_string_decl();
-
-
+/*
+****TEST****
+new_string
+*/

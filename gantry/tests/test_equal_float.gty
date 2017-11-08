@@ -1,7 +1,15 @@
 // pass - float equals
 
-bool equals(float i, float j) {
+int main(){
+	bool equals(float i, float j) {
 	return i == j:
+	}
+
+	equals(3.00, 3.00);
+	return 0;
 }
 
-equals(3.00,3.00);
+/*
+****TEST****
+1
+*/
