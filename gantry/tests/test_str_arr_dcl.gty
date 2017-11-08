@@ -1,15 +1,15 @@
 // pass - string array declaration
-// review
+// print_a not implemented
 
 int main(){
 	
 	string [] arr = ["foo", "bar"];
-	print_s(arr);
+	print_a(arr);
 
 	return 0;
 }
 
 /*
 ****TEST****
-foo bar
+["foo", "bar"]
 */
