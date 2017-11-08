@@ -42,8 +42,12 @@ parser.ml parser.mli : parser.mly
 %.cmx : %.ml
 	ocamlfind ocamlopt -c -package llvm $<
 
+CC =gcc
+CFLAGS =-Wall 
+LDFLAGS =-L/usr/lib/x86_64-linux-gnu -lcurl
+
 httpget : httpget.c
-	gcc -o httpget httpeget.c
+	$(CC) $(CFLAGS) httpget $(LDFLAGS)
 
 # Testing the "printbig" example
 
