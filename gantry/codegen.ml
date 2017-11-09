@@ -8,7 +8,7 @@ let g_var_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
 let f_var_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
 
 (* Stack for building Objects *)
-(* let obj_stack = Stack.create ();; *)
+let kv_stack = Stack.create ();;
 
 let translate (globals, functions) =
 
@@ -47,14 +47,12 @@ let translate (globals, functions) =
     let ltype_of_typ = function
         A.Int    -> i32_t
       | A.Float  -> flt_t
-      | A.Object -> obj_t
+      | A.Object -> L.pointer_type obj_t
       (* | A.Array  -> arr_t *)
       | A.String -> str_t
       | A.Bool   -> i1_t
       | A.Null   -> void_t
     in
-
-
 
     (* Global Declarations *)
     let add_global (t, n) =
@@ -129,11 +127,7 @@ let translate (globals, functions) =
         try Hashtbl.find f_var_tbl n with
             Not_found -> Hashtbl.find g_var_tbl n
       in
-(*
-      let kv_lookup n =
-	try 
-	Stack.Empty -> 
-*)
+
     (* Construct code for an expression and return the value *)
     let rec expr builder = function
         A.IntLit i -> L.const_int i32_t i
@@ -164,19 +158,26 @@ let translate (globals, functions) =
         (match op with
              A.Neg  -> L.build_neg
            | A.Not  -> L.build_not) e' "tmp" builder
-(*      | A.KeyVal(t, n, e) ->
+      | A.KeyVal(t, n, e) ->
         let e' = expr builder e in
-          (* First add this key value pair to a stack *)
-	  ignore (Stack.push ((t, n), e') obj_stack);
-          ignore (add_key_val (t, n) builder);
+	  (* Allocate the key value *)
+          let p = L.build_alloca (ltype_of_typ t) n builder in
+	  (* Add the address of the key value pair to a stack *)
+	  ignore (Stack.push (t, p) kv_stack);
 	  (* Then set it and forget it *)
-          ignore (L.build_store e' (lookup n) builder);
+          ignore (L.build_store e' p builder);
           e'
-*)
       | A.ObjExp(el) ->
-	(* Key Values *)
-	(* let k_v = List.map (expr builder) el in *)
-	(* Object Type *)
+	(*
+	 * Object: Key Values
+	 * Once we have a list of Key Value expressions
+         * that are contained in this Object '{...}',
+	 * we allocate another Object Struct to store
+	 * each Key Value in question, which may, of course,
+	 * contain nested Objects that are dealt with similarly.
+	 *)
+	let kv = List.map (expr builder) el in
+	(* The Object *)
 	let obj_t_ptr = L.build_malloc obj_t "obj" builder in
 	obj_t_ptr
       | A.AssignDecl(t, n, e) ->
