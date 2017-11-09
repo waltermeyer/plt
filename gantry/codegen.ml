@@ -6,7 +6,9 @@ module StringMap = Map.Make(String)
 (* Hash Tables for our variable bindings *)
 let g_var_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
 let f_var_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
-let f_var_obj_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
+
+(* Stack for building Objects *)
+(* let obj_stack = Stack.create ();; *)
 
 let translate (globals, functions) =
 
@@ -18,10 +20,28 @@ let translate (globals, functions) =
     and i8_t   = L.i8_type context
     and i1_t   = L.i1_type context
     and str_t  = L.pointer_type (L.i8_type context)
-    and obj_t  = L.named_struct_type context "object"
+    (* and obj_t  = L.named_struct_type context "object" *)
     (* and arr_t = L.pointer_type (L.i8_type context) TODO *)
     and flt_t  = L.double_type context
     and void_t = L.void_type context in
+    (* Objects *)
+    let obj_t = let name = L.named_struct_type context "obj" in
+                let body =
+                  [|
+                    str_t; (* key *)
+                    i32_t; (* value type *)
+                    (* values *)
+                    L.pointer_type name; (* prev *)
+                    L.pointer_type name; (* next *)
+                    L.pointer_type name; (* child *)
+                    str_t; (* string *)
+                    i32_t; (* int *)
+                    flt_t; (* float *)
+                    i1_t   (* bool *)
+                  |] in
+                  ignore (L.struct_set_body name body true);
+                  name
+    in
 
     (* AST to LLVM types *)
     let ltype_of_typ = function
@@ -90,7 +110,7 @@ let translate (globals, functions) =
         L.set_value_name n p;
         (* Create an alloca(tion) instruction of type t to store n on stack *)
         let local = L.build_alloca (ltype_of_typ t) n builder in
-        (* Insert instruction that stores paramater in a new function local *)
+        (* Insert instruction that stores parameter in a new function local *)
         ignore (L.build_store p local builder);
         (* Add formal to f_var_tbl Hash Map *)
 	Hashtbl.add f_var_tbl n local in
@@ -109,7 +129,11 @@ let translate (globals, functions) =
         try Hashtbl.find f_var_tbl n with
             Not_found -> Hashtbl.find g_var_tbl n
       in
-
+(*
+      let kv_lookup n =
+	try 
+	Stack.Empty -> 
+*)
     (* Construct code for an expression and return the value *)
     let rec expr builder = function
         A.IntLit i -> L.const_int i32_t i
@@ -140,34 +164,21 @@ let translate (globals, functions) =
         (match op with
              A.Neg  -> L.build_neg
            | A.Not  -> L.build_not) e' "tmp" builder
-      | A.KeyVal(t, n, e) ->
+(*      | A.KeyVal(t, n, e) ->
         let e' = expr builder e in
-          (* First add this key value pair to f_var_obj_tbl hash map *)
+          (* First add this key value pair to a stack *)
+	  ignore (Stack.push ((t, n), e') obj_stack);
           ignore (add_key_val (t, n) builder);
 	  (* Then set it and forget it *)
           ignore (L.build_store e' (lookup n) builder);
           e'
+*)
       | A.ObjExp(el) ->
-	(*
-	 %struct.token = type { %struct.token*, %struct.token*, i8*, i32, %struct.token*, i8*, i32, float, i32 }
-	*)
+	(* Key Values *)
+	(* let k_v = List.map (expr builder) el in *)
 	(* Object Type *)
-	let values = List.map (expr builder) el in
-	let object_struct = L.struct_type context
-			      [| |]
-			      [|
-				 pointer_type; (* prev *)
-				 pointer_type; (* next *)
-				 pointer_type; (* child *)
-			         i32_t; (* value type *)
-				 str_t; (* key *)
-				 str_t; (* value *)
-				 i32_t; (* int *)
-				 flt_t; (* float *)
-				 i1_t   (* bool *)
-			      |] in
-			    pointer_type object_struct;
-			    object_struct
+	let obj_t_ptr = L.build_malloc obj_t "obj" builder in
+	obj_t_ptr
       | A.AssignDecl(t, n, e) ->
         let e' = expr builder e in
           (* First add this declaration to f_var_tbl hash map *)
