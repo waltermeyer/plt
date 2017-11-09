@@ -1,0 +1,13 @@
+// pass - declare array
+
+int main(){
+	int [] arr = [3, 10, 100];
+	print_s(arr);
+
+	return 0;
+}
+
+/*
+****TEST****
+3, 10, 100
+*/

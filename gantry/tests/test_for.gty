@@ -2,7 +2,7 @@
 
 int main(){
 	
-	for(int x=0; x<5; x++){
+	for(int x=0; x<5; x+1){
 	        print_i(x);
 	}
 
@@ -11,5 +11,9 @@ int main(){
 
 /*
 ****TEST****
-01234
+0
+1
+2
+3
+4
 */

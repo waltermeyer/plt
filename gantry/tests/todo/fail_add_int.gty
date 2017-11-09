@@ -1,0 +1,16 @@
+// Tests adding integers
+// Fail - adding mismatching types
+
+int main(){
+	int y = 4;
+	string x = "x";
+	int z = x+y;
+
+	print_i(z);
+	return 0;
+}
+
+/*
+****TEST****
+Error message
+*/
