@@ -43,7 +43,7 @@ parser.ml parser.mli : parser.mly
 	ocamlfind ocamlopt -c -package llvm $<
 
 CC =gcc
-CFLAGS =-Wall 
+CFLAGS =-g -Wall 
 LDFLAGS =-L/usr/lib/x86_64-linux-gnu -lcurl
 
 httpget : httpget.c
