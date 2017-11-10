@@ -3,11 +3,13 @@
 #include <stdlib.h>
 #include <curl/curl.h>
 
+// struct to avoid strlen calls
 struct string {
 	char *contents;
 	size_t len;
 };
 
+// curl uses this to write page data to a buffer
 size_t writer(void *ptr, size_t size, size_t nmemb, struct string *userdata) {
 	
 	size_t bufflen = userdata->len + size*nmemb;
@@ -25,7 +27,7 @@ size_t writer(void *ptr, size_t size, size_t nmemb, struct string *userdata) {
 	return size*nmemb;
 }
 
-
+// sends a get request to the target URL, returns the server response
 char* httpget(char *url) {
 
 	CURL *curl;
@@ -51,16 +53,15 @@ char* httpget(char *url) {
 
 	curl_easy_cleanup(curl);
 	//free(s->contents);
-
 	return s->contents;
 }	
 
-/* Main for testing
-int main() {
+// Main for testing
+/*int main() {
 
 
 	char* page = httpget("http://brainjar.com/java/host/test.html");
-	printf("%s\n\n", page);
+	printf("%s", page);
 	return 0;
 }
 */
