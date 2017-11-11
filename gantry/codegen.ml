@@ -46,6 +46,10 @@ let translate (globals, functions) =
     let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
     let printf_func = L.declare_function "printf" printf_t the_module in
 
+    (* String Concatenation *)
+    let string_concat = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+    let string_concat = L.declare_function "string_concat" string_concat the_module in
+
     (* HTTP Get built-in *)
     let httpget_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
     let httpget_func = L.declare_function "httpget" httpget_t the_module in
@@ -164,7 +168,9 @@ let translate (globals, functions) =
 	  "print_d" builder
      (* | A.FunExp("httpget", [e]) ->
         L.build_call httpget_func [| str_format_str ; (expr builder e) |] *)
-
+      | A.FunExp("string_concat", [e]) ->
+	L.build_call string_concat [| str_format_str ; (expr builder e) |]
+	  "string_concat" builder 
       | A.FunExp(f, act) ->
         let (fdef, fdecl) = StringMap.find f func_decls in
         let actuals = List.rev (List.map (expr builder) (List.rev act)) in
