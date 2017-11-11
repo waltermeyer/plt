@@ -1,0 +1,12 @@
+// Tests integer declaration
+// Fail - type mismatch
+
+int main(){
+	int y = "z";
+	return 0;
+}
+
+/*
+****TEST****
+Error message
+*/

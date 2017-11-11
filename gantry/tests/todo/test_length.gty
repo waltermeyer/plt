@@ -1,0 +1,16 @@
+// pass - get length of an array
+
+int main(){
+
+	string [] student_arr = ["Joe", "Bob", "Alan"];
+	int arr_length = length(student_arr);
+	print_i(arr_length);
+
+	return 0;
+
+}
+
+/*
+****TEST****
+3
+*/
