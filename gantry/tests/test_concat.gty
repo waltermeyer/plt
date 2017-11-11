@@ -7,8 +7,8 @@ string str_conc(string a, string b){
 int main(){
 	string a = "foo";
 	string b = "bar";
-	string c = s_concat(a , b);
-	print c;
+	string c = str_conc(a , b);
+	print_s(c);
 	return 0;
 }
 
