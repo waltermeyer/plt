@@ -126,19 +126,20 @@ let translate (globals, functions) =
         let e1' = expr builder e1
         and e2' = expr builder e2 in
         (match op with
-             A.Add  -> L.build_add
-           | A.Sub  -> L.build_sub
-           | A.Mult -> L.build_mul
-           | A.Div  -> L.build_sdiv
-           | A.And  -> L.build_and
-           | A.Or   -> L.build_or
-           | A.Eq   -> L.build_icmp L.Icmp.Eq
-           | A.Neq  -> L.build_icmp L.Icmp.Ne
-           | A.Lt   -> L.build_icmp L.Icmp.Slt
-           | A.Leq  -> L.build_icmp L.Icmp.Sle
-           | A.Gt   -> L.build_icmp L.Icmp.Sgt
-           | A.Geq  -> L.build_icmp L.Icmp.Sge
-        ) e1' e2' "tmp" builder
+             A.Add  -> L.build_add e1' e2' "tmp" builder
+           | A.Sub  -> L.build_sub e1' e2' "tmp" builder
+           | A.Mult -> L.build_mul e1' e2' "tmp" builder
+           | A.Div  -> L.build_sdiv e1' e2' "tmp" builder
+           | A.And  -> L.build_and e1' e2' "tmp" builder
+           | A.Or   -> L.build_or e1' e2' "tmp" builder
+           | A.Eq   -> L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder
+           | A.Neq  -> L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder
+           | A.Lt   -> L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder
+           | A.Leq  -> L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder
+           | A.Gt   -> L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder
+           | A.Geq  -> L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder
+           | A.Conc -> L.build_call string_concat [| e1'; e2'|] "string_concat" builder 
+        )
       | A.Unop(op, e) ->
         let e' = expr builder e in
         (match op with
@@ -168,9 +169,6 @@ let translate (globals, functions) =
 	  "print_d" builder
      (* | A.FunExp("httpget", [e]) ->
         L.build_call httpget_func [| str_format_str ; (expr builder e) |] *)
-      | A.FunExp("string_concat", [e]) ->
-	L.build_call string_concat [| str_format_str ; (expr builder e) |]
-	  "string_concat" builder 
       | A.FunExp(f, act) ->
         let (fdef, fdecl) = StringMap.find f func_decls in
         let actuals = List.rev (List.map (expr builder) (List.rev act)) in
