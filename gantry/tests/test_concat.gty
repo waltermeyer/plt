@@ -1,0 +1,15 @@
+
+string str_conc(string a, string b){
+	string c = a ^ b;
+	return c;
+}
+
+int main(){
+	string a = "foo";
+	string b = "bar";
+	string c = s_concat(a , b);
+	print c;
+	return 0;
+}
+
+
