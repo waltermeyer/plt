@@ -1,0 +1,16 @@
+// pass -  multiply float
+
+int main(){
+	float x = 4.00;
+	float y = 6.00;
+
+	float z = x * y;
+	print_d(z);
+
+	return 0;
+}
+
+/*
+****TEST****
+24.00
+*/

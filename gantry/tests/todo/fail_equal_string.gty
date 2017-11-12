@@ -1,0 +1,20 @@
+// Tests structural equality
+// Fail - strings not equal
+
+int main(){
+        bool failequals(string i, string j) {
+        return i == j;
+        }
+
+string i = "Hey";
+string j = "Hex";
+failequals(i, j);
+
+return 0;
+
+}
+
+/*
+****TEST****
+Error message
+*/

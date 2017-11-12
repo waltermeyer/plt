@@ -1,0 +1,15 @@
+// Tests accessing array element
+// Fail - out of bounds
+
+int main(){
+	arr = [1,2,3];
+	int x = arr[5];
+
+        print_i(x);
+	return 0;
+}
+
+/*
+****TEST****
+Error message
+*/

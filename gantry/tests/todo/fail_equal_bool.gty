@@ -1,0 +1,18 @@
+// Tests boolean equals
+// Fail - bools not equal
+
+int main(){
+	bool failequals(bool i, bool j) {
+        return i == j;
+	}
+
+failequals(true, false);
+
+return 0;
+
+}
+
+/*
+****TEST****
+Error message
+*/
