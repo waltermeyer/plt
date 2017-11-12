@@ -93,10 +93,10 @@ Check() {
     # TODO : Replace printbig.o with our string print
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.s ${basename}.exe ${basename}.out" &&
     Run "$GANTRY" "<" "$1" ">" "${basename}.ll" &&
-    RUN "$LLI" "${basename}.ll" " " > "{basename}.out" &&
-    #Run "$LLC" "${basename}.ll" ">" "${basename}.s" &&
-    #Run "$CC" "-o" "${basename}.exe" "${basename}.s" "printbig.o" &&
-    #Run "./${basename}.exe" > "${basename}.out" &&
+    #RUN "$LLI" "${basename}.ll" " " > "{basename}.out" &&
+    Run "$LLC" "${basename}.ll" ">" "${basename}.s" &&
+    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "string_concat.o" &&
+    Run "./${basename}.exe" > "${basename}.out" &&
     Compare ${basename}.out ${reffile}.out ${basename}.diff
 
     # Report the status and clean up the generated files

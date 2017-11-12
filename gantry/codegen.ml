@@ -45,6 +45,10 @@ let translate (globals, functions) =
     let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
     let printf_func = L.declare_function "printf" printf_t the_module in
 
+    (* String Concatenation *)
+    let string_concat = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
+    let string_concat = L.declare_function "string_concat" string_concat the_module in
+
     (* HTTP Get built-in *)
     let httpget_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
     let httpget_func = L.declare_function "httpget" httpget_t the_module in
@@ -121,19 +125,20 @@ let translate (globals, functions) =
         let e1' = expr builder e1
         and e2' = expr builder e2 in
         (match op with
-             A.Add  -> L.build_add
-           | A.Sub  -> L.build_sub
-           | A.Mult -> L.build_mul
-           | A.Div  -> L.build_sdiv
-           | A.And  -> L.build_and
-           | A.Or   -> L.build_or
-           | A.Eq   -> L.build_icmp L.Icmp.Eq
-           | A.Neq  -> L.build_icmp L.Icmp.Ne
-           | A.Lt   -> L.build_icmp L.Icmp.Slt
-           | A.Leq  -> L.build_icmp L.Icmp.Sle
-           | A.Gt   -> L.build_icmp L.Icmp.Sgt
-           | A.Geq  -> L.build_icmp L.Icmp.Sge
-        ) e1' e2' "tmp" builder
+             A.Add  -> L.build_add e1' e2' "tmp" builder
+           | A.Sub  -> L.build_sub e1' e2' "tmp" builder
+           | A.Mult -> L.build_mul e1' e2' "tmp" builder
+           | A.Div  -> L.build_sdiv e1' e2' "tmp" builder
+           | A.And  -> L.build_and e1' e2' "tmp" builder
+           | A.Or   -> L.build_or e1' e2' "tmp" builder
+           | A.Eq   -> L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder
+           | A.Neq  -> L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder
+           | A.Lt   -> L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder
+           | A.Leq  -> L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder
+           | A.Gt   -> L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder
+           | A.Geq  -> L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder
+           | A.Conc -> L.build_call string_concat [| e1'; e2'|] "string_concat" builder 
+        )
       | A.Unop(op, e) ->
         let e' = expr builder e in
         (match op with
