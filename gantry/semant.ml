@@ -40,7 +40,6 @@ let check (globals, functions) =
   report_duplicate (fun n -> "duplicate global " ^ n) (List.map snd globals);
 
   (**** Checking Functions ****)
-  (* TODO : This will need to be modified from micro C because we don't have main, microC checks that main is defined, but I can't see it referenced anywhere else. I think lines 59-67 put the main function at the front of the function_decls list? *)
   (* Checks to make sure print function is defined *)
   if List.mem "print" (List.map (fun fd -> fd.fname) functions)
   then raise (Failure ("function print may not be defined")) else (); 
@@ -70,7 +69,7 @@ let check (globals, functions) =
      (StringMap.add "httpget" (*TODO: does this actually take in a string or several different typed arguments?*)
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] i} 
      (StringMap.add "httppost"
-     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x")] ; f_statements = [] })))))))
+     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x")] ; f_statements = [] }))))))))
 
   in
 
@@ -78,11 +77,12 @@ let check (globals, functions) =
   
   in
 
-  let function decl s = try StringMap.find s function_decls 
+  let function_decl s = try StringMap.find s function_decls 
+	with Not_found -> raise (Failure ("unrecognized function " ^s))
 
   in
 
-  (*TODO: here, micro c has a check for main, we don't have main *)
+  let _ = function_decl "main" in (*Ensure "main is defined *) 
   
   let check_function func = 
      List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^            
@@ -103,12 +103,12 @@ let check (globals, functions) =
      in                                                                          
 
      (* Return the type of an expression or throw an exception *)
-     let ret expr = function
+     let ret expression = function
          IntLit _ -> Int
        | FloatLit _ -> Float
        | BoolLit _ -> Bool
        | Id s -> type_of_identifier s
-       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
+       | Binop(e1, op, e2) as e -> let t1 = expression e1 and t2 = expression e2 in
          (match op with
            Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
          | Equal | Neq when t1 = t2 -> Bool
@@ -116,9 +116,26 @@ let check (globals, functions) =
          | And | Or when t1 = Bool && t2 = Bool -> Bool
          | _ -> raise (Failure ("illegal binary operator " ^ string_of_typ t1 ^ " " ^ string_of_op op ^ " "     ^ string_of_typ t2 ^ " in " ^ string_of_expr e))
  	)
-      (*TODO: unop*)
+      | Unop (op, e) as ex -> let t = expr e in
+	 (match op with
+	   Neg when t = Int -> Int
+	 | Not when t = Bool -> Bool
+	 | _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expr ex))
       (*TODO: add other expressions*)
       in
-      (* TODO: Verify Statements*)
+      let rec statement = function
+	  Block sl -> let rec check_block = function [Return _ as s] -> statement s
+	| Return _ :: _ -> raise (Failure "nothing may follow a return")
+	| Block sl :: ss -> check_block (sl @ ss)
+	| s :: ss -> statement s ; check_block ss
+	| [] -> ()
+       in check_block sl
+     | Expr e -> ignore (expression e)
+     | Return e -> let t = expression e in if t = function.typ then () else raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ string_of_typ func.typ ^ " in " ^ string_of_expr e))
+     (* Add if, for, and while test *)
+     in 
+
+     statement (Block func.f_statements)
+	  
   in
   List.iter check_function functions
