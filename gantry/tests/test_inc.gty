@@ -1,0 +1,11 @@
+int main(){
+	int x = 1;
+	x++;
+	print_i(x);
+	return 0;
+}
+
+/*
+****TEST****
+2
+*/

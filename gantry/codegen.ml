@@ -143,7 +143,9 @@ let translate (globals, functions) =
         let e' = expr builder e in
         (match op with
              A.Neg  -> L.build_neg
-           | A.Not  -> L.build_not) e' "tmp" builder
+           | A.Not  -> L.build_not
+	   | A.Inc  -> L.build_add (L.const_int i32_t 1) 
+	   | A.Dec  -> L.build_sub (L.const_int i32_t 1)) e' "tmp" builder
       | A.AssignDecl(t, n, e) ->
         let e' = expr builder e in
           (* First add this declaration to f_var_tbl hash map *)
