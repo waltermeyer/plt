@@ -4,8 +4,10 @@ module A = Ast
 module StringMap = Map.Make(String)
 
 (* Hash Tables for our variable bindings *)
-let g_var_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
-let f_var_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
+let g_var_tbl   : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
+let f_var_tbl   : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
+let obj_var_tbl : (L.llvalue, (string * L.llvalue))
+		  Hashtbl.t = Hashtbl.create 10;;
 
 (* Stack for building Objects *)
 let kv_stack = Stack.create ();;
@@ -20,24 +22,23 @@ let translate (globals, functions) =
     and i8_t   = L.i8_type context
     and i1_t   = L.i1_type context
     and str_t  = L.pointer_type (L.i8_type context)
-    (* and obj_t  = L.named_struct_type context "object" *)
     (* and arr_t = L.pointer_type (L.i8_type context) TODO *)
     and flt_t  = L.double_type context
     and void_t = L.void_type context in
-    (* Objects *)
+    (* Object Type *)
     let obj_t = let name = L.named_struct_type context "obj" in
                 let body =
                   [|
-                    str_t; (* key *)
-                    i32_t; (* value type *)
-                    (* values *)
-                    L.pointer_type name; (* prev *)
                     L.pointer_type name; (* next *)
-                    L.pointer_type name; (* child *)
-                    str_t; (* string *)
+                    str_t; (* key *)
+                    (* values *)
+                    i32_t; (* value type *)
                     i32_t; (* int *)
                     flt_t; (* float *)
-                    i1_t   (* bool *)
+                    L.pointer_type name; (* child (object) *)
+                    str_t; (* string *)
+                    i1_t;  (* bool *)
+		    void_t (* null *)
                   |] in
                   ignore (L.struct_set_body name body true);
                   name
@@ -122,6 +123,11 @@ let translate (globals, functions) =
 	ignore(Hashtbl.add f_var_tbl n local);
       in
 
+      (* Object Locals (Keys) *)
+      let add_kv (parent, key_n, key) =
+	ignore(Hashtbl.add obj_var_tbl parent (key_n, key));
+      in
+
       (* Return the value for a local variable or a parameter *)
       let lookup n =
         try Hashtbl.find f_var_tbl n with
@@ -157,29 +163,67 @@ let translate (globals, functions) =
         let e' = expr builder e in
         (match op with
              A.Neg  -> L.build_neg
-           | A.Not  -> L.build_not) e' "tmp" builder
+           | A.Not  -> L.build_not
+	) e' "tmp" builder
       | A.KeyVal(t, n, e) ->
-        let e' = expr builder e in
-	  (* Allocate the key value *)
-          let p = L.build_alloca (ltype_of_typ t) n builder in
-	  (* Add the address of the key value pair to a stack *)
-	  ignore (Stack.push (t, p) kv_stack);
-	  (* Then set it and forget it *)
-          ignore (L.build_store e' p builder);
-          e'
+	ignore(print_endline n);
+	(* Resolve struct index and 'value_typ' in struct *)
+	let vtype_of_typ = function
+	    A.Int    -> 3 
+	  | A.Float  -> 4
+	  | A.Object -> 5
+	  (* | A.Array  -> arr_t *)
+	  | A.String -> 6
+	  | A.Bool   -> 7
+	  | A.Null   -> 8
+        in
+	let e' = expr builder e in
+	ignore(print_endline "here");
+	let k = L.build_malloc obj_t "key" builder in
+	(* Set key name *)
+	ignore(L.build_store (L.const_string context n)
+	(L.build_struct_gep k 1 "key_name" builder) builder);
+	(* Set value type *)
+	ignore(L.build_store (L.const_int i32_t (vtype_of_typ t))
+	(L.build_struct_gep k 2 "value_typ" builder) builder);
+	(* Set value *)
+	ignore(L.build_store e'
+	(L.build_struct_gep k (vtype_of_typ t) "value" builder) builder);
+	(* Add the key value pair to a stack *)
+	ignore(Stack.push (n, k) kv_stack);
+	print_endline ("added: " ^ n);
+        e'
       | A.ObjExp(el) ->
-	(*
-	 * Object: Key Values
-	 * Once we have a list of Key Value expressions
-         * that are contained in this Object '{...}',
-	 * we allocate another Object Struct to store
-	 * each Key Value in question, which may, of course,
-	 * contain nested Objects that are dealt with similarly.
-	 *)
+	(* Set next for a key or object *)
+	let set_next k =
+	try
+	  let (_, next_k) = Stack.top kv_stack in
+	    ignore(L.build_store next_k
+	          (L.build_struct_gep k 0 "next" builder) builder);
+	with
+	  Stack.Empty ->
+	    (* NULL *) 
+	    ignore(L.build_store
+		  (L.const_pointer_null (L.pointer_type obj_t))
+	          (L.build_struct_gep k 0 "next" builder) builder);
+	in
+	print_endline "here";
+	(* The Enclosing (parent) Object *)
+	let parent = L.build_malloc obj_t "ob" builder in
+	(* Resolve the list of key value exprs (putting them into a stack) *)
 	let kv = List.map (expr builder) el in
-	(* The Object *)
-	let obj_t_ptr = L.build_malloc obj_t "obj" builder in
-	obj_t_ptr
+	ignore(set_next parent);
+	(* For each key in this object, add to lookup table *)
+	let build_obj _ =
+	  let (n, k) = Stack.pop kv_stack in
+	  (* Add parent and its key to object lookup table *)
+	  ignore(add_kv (parent, n, k));
+	  ignore(set_next k);
+	in
+	(* Build out all of the key values within this object *)
+	List.iter build_obj kv;
+	(* Return the pointer to the enclosing object *)
+	parent
       | A.AssignDecl(t, n, e) ->
         let e' = expr builder e in
           (* First add this declaration to f_var_tbl hash map *)
@@ -210,12 +254,9 @@ let translate (globals, functions) =
                                             | _ -> f ^ "_result") in
           L.build_call fdef (Array.of_list actuals) result builder
       in
-
-  (* | A.AssignDecl (*TODO*)
+(*
   | A.ArrAssign  (*TODO*)
   | A.AssignObj  (*TODO*)
-  | A.FunExp  (*TODO*)
-  | A.KeyVal  (*TODO*)
   | A.ArrExp  (*TODO*)
   | A.Noexpr  (*TODO*) *)
 
