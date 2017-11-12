@@ -82,7 +82,7 @@ let check (globals, functions) =
 
   in
 
-  let _ = function_decl "main" in (*Ensure "main is defined *) 
+  let _ = function_decl "main" in (*Ensure "main is defined" *)
   
   let check_function func = 
      List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^            
@@ -120,8 +120,8 @@ let check (globals, functions) =
 	 (match op with
 	   Neg when t = Int -> Int
 	 | Not when t = Bool -> Bool
-	 | _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expr ex))
-      (*TODO: add other expressions*)
+	 | _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expr ex)))
+      (* TODO add other expressions *)
       in
       let rec statement = function
 	  Block sl -> let rec check_block = function [Return _ as s] -> statement s
