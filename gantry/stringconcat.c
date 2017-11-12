@@ -5,9 +5,8 @@
 
 /* Get passed two strings, malloc space for concatenation */
 char *string_concat(char *a, char *b){
-	char *c = malloc(sizeof(a) + sizeof(b));
-	c = strcat(a, b);
-	printf("%s", c);
+	char *c = malloc(strlen(a) + strlen(b) + 1);
+	strncat(strncat(c, a, strlen(a) + strlen(c)), b, strlen(b) + strlen(c));
 	return c;
 }
 
@@ -17,7 +16,8 @@ int main(){
 	char b[] = "bar";
 	char *str_a = malloc(sizeof(a));
 	char *str_b = malloc(sizeof(b));
-	string_concat(a, b);
+	char *c = string_concat(a, b);
+	printf("%s", c);
 	return 0;
 }
 #endif
