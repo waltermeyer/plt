@@ -17,7 +17,7 @@ clean :
 	ocamlbuild -clean
 	rm -rf testall.log *.diff gantry scanner.ml parser.ml parser.mli
 	rm -rf gantrylib_http
-	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe
+	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe *.err
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
 
@@ -42,12 +42,12 @@ parser.ml parser.mli : parser.mly
 %.cmx : %.ml
 	ocamlfind ocamlopt -c -package llvm $<
 
-CC =gcc
-CFLAGS =-g -Wall 
-LDFLAGS =-L/usr/lib/x86_64-linux-gnu -lcurl
+CC=gcc
+CFLAGS=-Wall -c
+LDFLAGS=-L/usr/lib/x86_64-linux-gnu -lcurl
 
-gantrylib_http : gantrylib_http.c
-	$(CC) $(CFLAGS) gantrylib_http $(LDFLAGS)
+gantrylib_http.o : gantrylib_http.c
+	$(CC) $(CFLAGS) gantrylib_http.c 
 
 # Testing the "printbig" example
 

@@ -1,0 +1,14 @@
+// pass - send GET and POST requests to RequestBin
+// TODO: figure out how to automatically return a new requestbin each run
+
+int main() {
+
+	string page = "https://requestb.in/1jhotzd1";
+	httpget(page);
+
+	string req = "{ \"name\" : \"Jeff\" }";
+	httppost(page, req);
+
+	return 0;
+}
+

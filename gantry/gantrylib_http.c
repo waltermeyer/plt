@@ -97,7 +97,7 @@ char* httppost(char* target, char *tosend) {
 
 
 // Main for testing 
-/*
+
 int main() {
 
 	// GET request	
@@ -111,4 +111,4 @@ int main() {
 	
 	return 0;
 }
-*/
+
