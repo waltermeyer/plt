@@ -38,7 +38,6 @@ let translate (globals, functions) =
                     L.pointer_type name; (* child (object) *)
                     str_t; (* string *)
                     i1_t;  (* bool *)
-		    void_t (* null *)
                   |] in
                   ignore (L.struct_set_body name body true);
                   name
@@ -166,7 +165,6 @@ let translate (globals, functions) =
            | A.Not  -> L.build_not
 	) e' "tmp" builder
       | A.KeyVal(t, n, e) ->
-	ignore(print_endline n);
 	(* Resolve struct index and 'value_typ' in struct *)
 	let vtype_of_typ = function
 	    A.Int    -> 3 
@@ -178,10 +176,10 @@ let translate (globals, functions) =
 	  | A.Null   -> 8
         in
 	let e' = expr builder e in
-	ignore(print_endline "here");
-	let k = L.build_malloc obj_t "key" builder in
+	let k = L.build_malloc obj_t "obj" builder in
 	(* Set key name *)
-	ignore(L.build_store (L.const_string context n)
+	let name = L.build_global_stringptr n "key_name_str" builder in
+	ignore(L.build_store name
 	(L.build_struct_gep k 1 "key_name" builder) builder);
 	(* Set value type *)
 	ignore(L.build_store (L.const_int i32_t (vtype_of_typ t))
@@ -191,7 +189,6 @@ let translate (globals, functions) =
 	(L.build_struct_gep k (vtype_of_typ t) "value" builder) builder);
 	(* Add the key value pair to a stack *)
 	ignore(Stack.push (n, k) kv_stack);
-	print_endline ("added: " ^ n);
         e'
       | A.ObjExp(el) ->
 	(* Set next for a key or object *)
@@ -207,9 +204,8 @@ let translate (globals, functions) =
 		  (L.const_pointer_null (L.pointer_type obj_t))
 	          (L.build_struct_gep k 0 "next" builder) builder);
 	in
-	print_endline "here";
 	(* The Enclosing (parent) Object *)
-	let parent = L.build_malloc obj_t "ob" builder in
+	let parent = L.build_malloc obj_t "obj" builder in
 	(* Resolve the list of key value exprs (putting them into a stack) *)
 	let kv = List.map (expr builder) el in
 	ignore(set_next parent);
