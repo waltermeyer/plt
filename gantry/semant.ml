@@ -23,8 +23,8 @@ let check (globals, functions) =
   in
 
   (* Check not void, used for functions and variables *)
-  let check_not_void exceptf = function
-      (Void, n) -> raise (Failure (exceptf n))
+  let check_not_null exceptf = function
+      (Null, n) -> raise (Failure (exceptf n))
     | _ -> ()
   in
 
@@ -35,24 +35,24 @@ let check (globals, functions) =
 
   (**** Checking Global Variables ****)
   (* TODO: Add additional checks for statements, along the lines of 138 in Gantry semant.ml *)
-  List.iter (check_not_void (fun n -> "illegal void global " ^ n)) globals;
+  List.iter (check_not_null (fun n -> "illegal null global " ^ n)) globals;
 
   report_duplicate (fun n -> "duplicate global " ^ n) (List.map snd globals);
 
   (**** Checking Functions ****)
   (* Checks to make sure print function is defined *)
-  if List.mem "print" (List.map (fun fd -> fd.fname) functions)
+  if List.mem "print_s" (List.map (fun fd -> fd.f_id) functions)
   then raise (Failure ("function print may not be defined")) else (); 
 
   report_duplicate (fun n -> "duplicate function " ^ n)
-    (List.map (fun fd -> fd.fname) functions);
+    (List.map (fun fd -> fd.f_id) functions);
 
   (* Function declaration for a named function *)
   (* TODO: How do we want to implement print? MicroC uses seperate functions for int, bool, and string*) 
   (* TODO : what do default functions return?*)
   let built_in_decls = 
      StringMap.add "print" 
-     { typ_spec = Void; f_id = "print"; f_params = [(String, "x")] ; f_statements = [] }
+     { type_spec = Void; f_id = "print"; f_params = [(String, "x")] ; f_statements = [] }
      (*TODO: Add array to type_spec *)
      (StringMap.add "arrify" (*TODO: This should return an array but that's not a type*)
      { type_spec = Array; f_id = "arrify"; f_params = [(String, "x")] ; f_statements = [] }
@@ -131,7 +131,7 @@ let check (globals, functions) =
 	| [] -> ()
        in check_block sl
      | Expr e -> ignore (expression e)
-     | Return e -> let t = expression e in if t = function.typ then () else raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ string_of_typ func.typ ^ " in " ^ string_of_expr e))
+     (* | Return e -> let t = expression e in if t = function.typ then () else raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ string_of_typ func.type_spec ^ " in " ^ string_of_expr e))*)
      (* Add if, for, and while test *)
      in 
 
