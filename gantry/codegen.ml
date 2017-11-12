@@ -46,7 +46,7 @@ let translate (globals, functions) =
     let printf_func = L.declare_function "printf" printf_t the_module in
 
     (* String Concatenation *)
-    let string_concat = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+    let string_concat = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
     let string_concat = L.declare_function "string_concat" string_concat the_module in
 
     (* HTTP Get built-in *)
