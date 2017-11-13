@@ -1,4 +1,5 @@
 (* Semantic checking for the Gantry compiler *)
+(* debugging, error statements, symbol table *)
 
 open Ast
 
@@ -132,7 +133,11 @@ let check (globals, functions) =
        in check_block sl
      | Expr e -> ignore (expression e)
      (* | Return e -> let t = expression e in if t = function.typ then () else raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ string_of_typ func.type_spec ^ " in " ^ string_of_expr e))*)
-     (* Add if, for, and while test *)
+	| If(p, b1, b2) -> check_bool_expression p; statement b1; statemenet b2;
+	| For(e1, e2, e3, st) -> ignore (expression e1); check_bool_expression e2;
+		ignore(expression e3); statement st
+	| While(p, s) -> check_bool_expression p; statement s
+
      in 
 
      statement (Block func.f_statements)
