@@ -14,6 +14,7 @@ LLC="llc"
 
 # Path to the C compiler
 CC="cc"
+LDFLAGS="-L/usr/lib/x86_64-linux-gnu -lcurl"
 
 # Path to the microc compiler.  Usually "./microc.native"
 # Try "_build/microc.native" if ocamlbuild was unable to create a symbolic link.
@@ -92,9 +93,9 @@ Check() {
     generatedfiles=""
     # TODO : Replace printbig.o with our string print
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.s ${basename}.exe ${basename}.out" &&
-    Run "$GANTRY" "$1" ">" "${basename}.ll" &&
+    Run "$GANTRY" "<" "$1" ">" "${basename}.ll" &&
     Run "$LLC" "${basename}.ll" ">" "${basename}.s" &&
-    #Run "$CC" "-o" "${basename}.exe" "${basename}.s" "printbig.o" &&
+    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "gantrylib_http.o" "$LDFLAGS" &&
     Run "./${basename}.exe" > "${basename}.out" &&
     Compare ${basename}.out ${reffile}.out ${basename}.diff
 

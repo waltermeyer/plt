@@ -3,12 +3,14 @@
 
 int main() {
 
-	string page = "https://requestb.in/1jhotzd1";
-	httpget(page);
+	string page = "https://httpbin.org/status/418";
+	string ret1 = httpget(page);
 
 	string req = "{ \"name\" : \"Jeff\" }";
-	httppost(page, req);
+	// string ret2 = httppost(page, req);
 
+	print_s(ret1);
+	// print_s(ret2);
 	return 0;
 }
 

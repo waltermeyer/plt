@@ -167,9 +167,10 @@ let translate (globals, functions) =
       | A.FunExp("httpget", [e]) ->
         L.build_call httpget_func [| (expr builder e) |]
           "httpget" builder
-      | A.FunExp("httppost", [e]) ->
-        L.build_call httppost_func [| (expr builder e) |]
-          "httppost" builder
+      | A.FunExp("httppost", [e; e2]) ->
+          let e2' = expr builder e2 in
+            L.build_call httppost_func [| (expr builder e) ; (e2') |]
+            "httppost" builder
       | A.FunExp(f, act) ->
         let (fdef, fdecl) = StringMap.find f func_decls in
         let actuals = List.rev (List.map (expr builder) (List.rev act)) in
