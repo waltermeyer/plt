@@ -1,0 +1,19 @@
+
+string str_conc(string a, string b){
+	string c = a ^ b;
+	return c;
+}
+
+int main(){
+	string a = "foo";
+	string b = "bar";
+	string c = str_conc(a , b);
+	print_s(c);
+	return 0;
+}
+
+
+/*
+****TEST****
+foobar
+*/

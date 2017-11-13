@@ -1,12 +1,19 @@
 // pass - for loop
 
-test_for(){
+int main(){
 	
-	for(int x=0; x<5; x++){
-	print(x);
-	
+	for(int x=0; x<5; x+1){
+	        print_i(x);
 	}
+
+	return 0;
 }
 
-test_for();
-// prints 01234
+/*
+****TEST****
+0
+1
+2
+3
+4
+*/

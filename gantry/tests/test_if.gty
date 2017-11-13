@@ -1,20 +1,25 @@
-// pass - test IF
+// pass - test if, elif, else
 
-boolean test_if() { 
+int main(){ 
 	int x = 1;
 	
-	if(!x){
+	if(x == 0){
 		//test fails
-		return 0;
+		print_s("If/else failed");
 	} 
 	elif(x!= 1){
 		//test fails
-		return 0;
+		print_s("If/else failed");
 	}
 	else {
 		//test passes
-		return 1;
+		print_s("If/else works!");
 	}
+	
+return 0;
 }
 
-boolean pass = test_if();
+/*
+****TEST****
+If/else works!
+*/

@@ -1,16 +1,17 @@
 // pass - initialize boolean x (true) and y (false)
 
-int test_bool_declaration(){
-
+int main(){
 	bool x = true;
 	bool y = false;
 
-	print(x);
-	print(y);
+	print_s(x);
+	print_s(y);
+	
+	return 0;
 
 }
 
-test_bool_declaration();
-
-// prints true false
-
+/*
+****TEST****
+true false
+*/
