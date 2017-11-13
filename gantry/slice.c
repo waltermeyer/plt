@@ -15,6 +15,7 @@ char *slice(int begin, int end, char *src){
 	for (; i< end; i++){
 		dest[dest_i] = '\0';
 	}
+	printf("%s\n", dest);
 	return dest;
 }
 
