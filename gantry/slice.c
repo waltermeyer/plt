@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 
-char *string_slice(int begin, int end, char *src){
+char *slice(int begin, int end, char *src){
 	int len = end - begin;
 	char *dest = malloc(len + 1);
 	int i;
@@ -22,11 +22,11 @@ char *string_slice(int begin, int end, char *src){
 #ifdef BUILD_TEST
 int main(){
 	char *src = "this is a string";
-	char *dest = string_slice(1, 3, src);
+	char *dest = slice(1, 3, src);
 	printf("%s\n", dest);
-	dest = string_slice(0, 10, src);
+	dest = slice(0, 10, src);
 	printf("%s\n", dest);
-	dest = string_slice(4, 20, src);
+	dest = slice(4, 20, src);
 	printf("%s\n", dest);
 	return 0;
 }
