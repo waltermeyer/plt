@@ -21,7 +21,7 @@ clean :
 	rm -rf printbig
 	rm -rf string_concat string_concat.o
 	rm -rf gantrylib_http
-	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe *.err
+	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll tests/*.out *.exe *.err
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
 
