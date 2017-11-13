@@ -51,7 +51,7 @@ CFLAGS=-Wall -c
 LDFLAGS=-L/usr/lib/x86_64-linux-gnu -lcurl
 
 gantrylib_http.o : gantrylib_http.c
-	$(CC) $(CFLAGS) gantrylib_http.c 
+	$(CC) $(CFLAGS) gantrylib_http.c
 
 # Testing the "printbig" example
 
@@ -59,9 +59,6 @@ gantrylib_http.o : gantrylib_http.c
 #	cc -o printbig -DBUILD_TEST printbig.c
 
 # Testing the "stringconcat" example
-CC =gcc
-CFLAGS =-g -Wall
-LDFLAGS =-L/usr/lib/x86_64-linux-gnu -lcurl
 
 string_concat : string_concat.c
 	cc -o string_concat -DBUILD_TEST string_concat.c

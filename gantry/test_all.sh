@@ -93,22 +93,12 @@ Check() {
     generatedfiles=""
     # TODO : Replace printbig.o with our string print
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.s ${basename}.exe ${basename}.out" &&
-<<<<<<< HEAD
-    Run "$GANTRY" "<" "$1" ">" "${basename}.ll" &&
-||||||| merged common ancestors
-    Run "$GANTRY" "$1" ">" "${basename}.ll" &&
-=======
+    
     Run "$GANTRY" "<" "$1" ">" "${basename}.ll" &&
     #RUN "$LLI" "${basename}.ll" " " > "{basename}.out" &&
->>>>>>> 20301e80a5d4cd9719a379890826128712b5d5ef
     Run "$LLC" "${basename}.ll" ">" "${basename}.s" &&
-<<<<<<< HEAD
     Run "$CC" "-o" "${basename}.exe" "${basename}.s" "gantrylib_http.o" "$LDFLAGS" &&
-||||||| merged common ancestors
-    #Run "$CC" "-o" "${basename}.exe" "${basename}.s" "printbig.o" &&
-=======
     Run "$CC" "-o" "${basename}.exe" "${basename}.s" "string_concat.o" &&
->>>>>>> 20301e80a5d4cd9719a379890826128712b5d5ef
     Run "./${basename}.exe" > "${basename}.out" &&
     Compare ${basename}.out ${reffile}.out ${basename}.diff
 
