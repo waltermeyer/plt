@@ -53,9 +53,9 @@ let check (globals, functions) =
   (* TODO : what do default functions return?*)
   let built_in_decls = 
      StringMap.add "print" 
-     { type_spec = Void; f_id = "print"; f_params = [(String, "x")] ; f_statements = [] }
+     { type_spec = Null; f_id = "print"; f_params = [(String, "x")] ; f_statements = [] }
      (*TODO: Add array to type_spec *)
-     (StringMap.add "arrify" (*TODO: This should return an array but that's not a type*)
+     (StringMap.add "arrify" (*TODO: This should return an array but that's not a type -[RS: it is in AST]*)
      { type_spec = Array; f_id = "arrify"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "objectify"
      { type_spec = Object; f_id = "jsonify"; f_params = [(String, "x")] ; f_statements = [] } 
@@ -68,7 +68,7 @@ let check (globals, functions) =
      (StringMap.add "tostring"
      { type_spec = String; f_id = "tostring"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "httpget" (*TODO: does this actually take in a string or several different typed arguments?*)
-     { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] i} 
+     { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
      (StringMap.add "httppost"
      { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x")] ; f_statements = [] }))))))))
 
