@@ -129,7 +129,7 @@ let check (globals, functions) =
 	   Neg when t = Int -> Int
 	 | Not when t = Bool -> Bool
 	 	| _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expression ex)))
-      (* TODO add other expressions *)
+      (* TODO add other expressions; Inc, Dec, ObjAcc, ArrAcc, AssignDecl, ObjAssign, etc. ? *)
 	| Noexpr -> Null
 	| Assign(var, e) as ex -> let lt = type_of_identifier var
 				and rt = expression e in
@@ -150,7 +150,7 @@ let check (globals, functions) =
 	| s :: ss -> statement s ; check_block ss
 	| [] -> ()
        in check_block sl
-     | Expr e -> ignore (expression e)
+     | Expression e -> ignore (expression e)
      (* | Return e -> let t = expression e in if t = function.typ then () else raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ string_of_typ func.type_spec ^ " in " ^ string_of_expr e))*)
 	| If(p, b1, b2) -> check_bool_expression p; statement b1; statemenet b2;
 	| For(e1, e2, e3, st) -> ignore (expression e1); check_bool_expression e2;
