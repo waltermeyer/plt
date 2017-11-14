@@ -50,8 +50,8 @@ let translate (globals, functions) =
     let string_concat = L.declare_function "string_concat" string_concat the_module in
 
     (* String Slice *)
-    let slice = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
-    let slice = L.declare_function "slice" slice the_module in
+    let slice_t = L.var_arg_function_type str_t [| L.pointer_type i8_t ; i32_t ; i32_t |] in
+    let slice = L.declare_function "slice" slice_t the_module in
 
     (* HTTP GET built-in *)
     let httpget_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
@@ -183,7 +183,7 @@ let translate (globals, functions) =
       | A.FunExp("slice", [e; e1; e2]) ->
           let e1' = expr builder e1
           and e2' = expr builder e2 in
-	    L.build_call slice [| (expr builder e); (e1') ; (e2')|]
+	    L.build_call slice [| (expr builder e) ; (e1') ; (e2') |]
 	    "slice" builder
       | A.FunExp(f, act) ->
         let (fdef, fdecl) = StringMap.find f func_decls in
