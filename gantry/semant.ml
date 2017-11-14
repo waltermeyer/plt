@@ -1,5 +1,5 @@
 (* Semantic checking for the Gantry compiler *)
-(* debugging, error statements, symbol table *)
+(* debugging [check line 72], error statements, symbol table *)
 
 open Ast
 
@@ -54,12 +54,11 @@ let check (globals, functions) =
   let built_in_decls = 
      StringMap.add "print" 
      { type_spec = Null; f_id = "print"; f_params = [(String, "x")] ; f_statements = [] }
-     (*TODO: Add array to type_spec *)
-     (StringMap.add "arrify" (*TODO: This should return an array but that's not a type -[RS: it is in AST]*)
+     (StringMap.add "arrify"
      { type_spec = Array; f_id = "arrify"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "objectify"
      { type_spec = Object; f_id = "jsonify"; f_params = [(String, "x")] ; f_statements = [] } 
-     (StringMap.add "jsonify" (*TODO: Can this take in an object or an array*)
+     (StringMap.add "jsonify" (*TODO: what if a function can take multiple parameter types? *)
      { type_spec = String; f_id = "jsonify"; f_params = [(Object, "x")] ; f_statements = [] } 
      (StringMap.add "length"
      { type_spec = Int; f_id = "length"; f_params = [(String, "x")] ; f_statements = [] }
@@ -69,7 +68,12 @@ let check (globals, functions) =
      { type_spec = String; f_id = "tostring"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "httpget" (*TODO: does this actually take in a string or several different typed arguments?*)
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
-     (StringMap.add "httppost"
+     (StringMap.add "httppost" (*TODO: make error on this line;
+	This expression has type
+         Ast.function_decl StringMap.t -> Ast.function_decl StringMap.t
+       but an expression was expected of type
+         Ast.function_decl StringMap.t = Ast.function_decl Map.Make(String).t
+		*)
      { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x")] ; f_statements = [] }))))))))
 
   in
@@ -121,9 +125,21 @@ let check (globals, functions) =
 	 (match op with
 	   Neg when t = Int -> Int
 	 | Not when t = Bool -> Bool
-	 | _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expr ex)))
+	 	| _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expr ex)))
       (* TODO add other expressions *)
+	| Noexpr -> Null
+	| Assign(var, e) as ex -> let lt = type_of_identifier var
+				and rt = expression e in
+		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
+		" = " ^ string_of_typ rt ^ " in " ^string_of_expression ex))
+	(* TODO: microC has call... *)
       in
+
+      let check_bool_expression e = if expression e != Bool
+	then raise (Failure ("expected Boolean expression in " ^ string_of_expression e))
+	else ()
+	in	
+      
       let rec statement = function
 	  Block sl -> let rec check_block = function [Return _ as s] -> statement s
 	| Return _ :: _ -> raise (Failure "nothing may follow a return")
@@ -144,3 +160,48 @@ let check (globals, functions) =
 	  
   in
   List.iter check_function functions
+
+
+
+(* TODO: Symbol table *)
+        (* Symbol table examples -- 
+
+        --EDWARDS SLIDES--
+
+type symbol_table = {
+        parent : symbol_table option;
+        variables : variable_decl list
+        }
+let rec find_variable (scope : symbol_table) name =
+        try
+                List.find (fun (s, _, _, _) -> s = name) scope.variables
+        with Not_found ->
+        match scope.parent with
+                Some(parent) -> find_variable parent name
+                | _ -> raise Not_found
+
+
+        --EXTEND (Fall 2016)--
+
+type symbol = LocalVariable of int | GlobalVariable of int | FunctionParameter of int | ExtendFunction of int
+and  symbolTable = symbol StringMap.t
+and  symbolTableType = Locals | Globals | ExtendFunctions
+
+...
+
+        --SAKE--
+let check_semant env fsm =
+  let env' =
+    let local_sym = { env.S.scope with variables = (add_local_vars fsm.S.fsm_locals env) @ env.S.scope.variables} in
+    { S.scope = local_sym } in
+  ignore(check_fsm_locals fsm env); ignore(check_body env' fsm)
+
+let check program =
+  let all_fsm_names = List.map (fun fsm_dec -> (fsm_dec.S.fsm_name,S.Int) ) program.S.fsms in
+  let sym_tab = {S.parent = None; S.variables = all_fsm_names } in
+  let env = {S.scope=sym_tab} in
+  let new_syms = {sym_tab with variables = check_globals program.S.input program.S.output env} in
+  let new_syms1 = {new_syms with variables = (check_pubs program.S.public env) @ (new_syms.S.variables)} in
+  let env2 = { S.scope=new_syms1} in
+
+        *)
