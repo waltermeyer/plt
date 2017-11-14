@@ -1,0 +1,15 @@
+int main () {
+
+  object b = {|
+		string test_key : "test_value",
+		int x : 1,
+	     |};
+
+  print_s(b.test_key);
+  print_i(b.x);
+}
+/*
+****TEST****
+test_value
+1
+*/

@@ -235,8 +235,8 @@ let translate (globals, functions) =
 	let parent = String.sub parent_s s (e-s) in
 	(* print_endline("Finding " ^ parent ^ " and " ^ child); *)
 	let v = Hashtbl.find obj_var_tbl (parent, child) in
-	print_endline(L.string_of_llvalue v);
-	v
+	(*print_endline(L.string_of_llvalue v);*)
+	L.build_load v (parent ^ "." ^ child) builder
       | A.AssignDecl(t, n, e) ->
         let e' = expr builder e in
           (* First add this declaration to f_var_tbl hash map *)
