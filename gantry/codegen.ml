@@ -6,7 +6,7 @@ module StringMap = Map.Make(String)
 (* Hash Tables for our variable bindings *)
 let g_var_tbl   : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
 let f_var_tbl   : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
-let obj_var_tbl : (L.llvalue, (string * L.llvalue))
+let obj_var_tbl : ((string * string), L.llvalue)
 		  Hashtbl.t = Hashtbl.create 10;;
 
 (* Stack for building Objects *)
@@ -124,7 +124,7 @@ let translate (globals, functions) =
 
       (* Object Locals (Keys) *)
       let add_kv (parent, key_n, key) =
-	ignore(Hashtbl.add obj_var_tbl parent (key_n, key));
+	ignore(Hashtbl.add obj_var_tbl (parent, key_n) key);
       in
 
       (* Return the value for a local variable or a parameter *)
@@ -188,13 +188,14 @@ let translate (globals, functions) =
 	ignore(L.build_store e'
 	(L.build_struct_gep k (vtype_of_typ t) "value" builder) builder);
 	(* Add the key value pair to a stack *)
-	ignore(Stack.push (n, k) kv_stack);
+	(* print_endline ("Adding key [" ^ n ^ "] to stack..."); *)
+	ignore(Stack.push (vtype_of_typ t, n, k) kv_stack);
         e'
       | A.ObjExp(el) ->
 	(* Set next for a key or object *)
 	let set_next k =
 	try
-	  let (_, next_k) = Stack.top kv_stack in
+	  let (_, _, next_k) = Stack.top kv_stack in
 	    ignore(L.build_store next_k
 	          (L.build_struct_gep k 0 "next" builder) builder);
 	with
@@ -211,15 +212,31 @@ let translate (globals, functions) =
 	ignore(set_next parent);
 	(* For each key in this object, add to lookup table *)
 	let build_obj _ =
-	  let (n, k) = Stack.pop kv_stack in
+	  let (t, n, k) = Stack.pop kv_stack in
 	  (* Add parent and its key to object lookup table *)
-	  ignore(add_kv (parent, n, k));
+	  let parent_s = L.value_name parent in
+	  (* print_endline("Adding " ^ parent_s ^ ", " ^ n ^ ", " ^ (L.string_of_llvalue k)); *)
+	  let value = (L.build_struct_gep k t "value" builder) in
+	  ignore(add_kv (parent_s, n, value));
 	  ignore(set_next k);
 	in
 	(* Build out all of the key values within this object *)
 	List.iter build_obj kv;
 	(* Return the pointer to the enclosing object *)
 	parent
+      | A.ObjAcc(e1, e2) ->
+	let parent = expr builder e1 in
+	let child = A.expr_to_str e2 in
+	(* Get parent object pointer name *)
+	let parent_s = L.string_of_llvalue parent in
+	let s = String.index parent_s '=' in
+	let e = String.index parent_s '*' in
+	let s = s + 8 in
+	let parent = String.sub parent_s s (e-s) in
+	(* print_endline("Finding " ^ parent ^ " and " ^ child); *)
+	let v = Hashtbl.find obj_var_tbl (parent, child) in
+	print_endline(L.string_of_llvalue v);
+	v
       | A.AssignDecl(t, n, e) ->
         let e' = expr builder e in
           (* First add this declaration to f_var_tbl hash map *)
