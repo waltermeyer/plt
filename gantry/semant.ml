@@ -1,5 +1,5 @@
 (* Semantic checking for the Gantry compiler *)
-(* debugging [check line 72], error statements, symbol table *)
+(* TODO: debugging [check line 71], error statements, global statements vs vars?, symbol table *)
 
 open Ast
 
@@ -49,8 +49,10 @@ let check (globals, functions) =
     (List.map (fun fd -> fd.f_id) functions);
 
   (* Function declaration for a named function *)
-  (* TODO: How do we want to implement print? MicroC uses seperate functions for int, bool, and string*) 
-  (* TODO : what do default functions return?*)
+  (* TODO: How do we want to implement print? MicroC uses seperate functions for int, bool, and string *)
+  (* TODO : what do default functions return? *)
+
+(* Built-ins: print, arrify, objectify, jsonify, length, slice, tostring, httpget, httppost *)
   let built_in_decls = 
      StringMap.add "print" 
      { type_spec = Null; f_id = "print"; f_params = [(String, "x")] ; f_statements = [] }
@@ -68,7 +70,7 @@ let check (globals, functions) =
      { type_spec = String; f_id = "tostring"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "httpget" (*TODO: does this actually take in a string or several different typed arguments?*)
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
-     (StringMap.add "httppost" (*TODO: make error on this line;
+     (StringMap.add "httppost" (*TODO: 'make' error on this line;
 	This expression has type
          Ast.function_decl StringMap.t -> Ast.function_decl StringMap.t
        but an expression was expected of type
@@ -87,16 +89,16 @@ let check (globals, functions) =
 
   in
 
-  let _ = function_decl "main" in (*Ensure "main is defined" *)
-  
+  let _ = function_decl "main" in (* Ensure "main is defined" *)
+  (* TODO: void/null same thing? *)
   let check_function func = 
-     List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^            
+     List.iter (check_not_null (fun n -> "illegal null formal " ^ n ^            
        " in " ^ func.fname)) func.formals;                                       
                                                                                  
      report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)   
        (List.map snd func.formals);                                              
                                                                                  
-     List.iter (check_not_void (fun n -> "illegal void local " ^ n ^             
+     List.iter (check_not_null (fun n -> "illegal null local " ^ n ^             
        " in " ^ func.fname)) func.locals;                                        
                                                                                  
      report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)    
@@ -108,7 +110,8 @@ let check (globals, functions) =
      in                                                                          
 
      (* Return the type of an expression or throw an exception *)
-     let ret expression = function
+     let rec expression = function
+(* TODO: any others? *)
          IntLit _ -> Int
        | FloatLit _ -> Float
        | BoolLit _ -> Bool
@@ -117,15 +120,15 @@ let check (globals, functions) =
          (match op with
            Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
          | Equal | Neq when t1 = t2 -> Bool
-	 | Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Int
+	 | Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Bool (* not Int -> Int again, right? *)
          | And | Or when t1 = Bool && t2 = Bool -> Bool
-         | _ -> raise (Failure ("illegal binary operator " ^ string_of_typ t1 ^ " " ^ string_of_op op ^ " "     ^ string_of_typ t2 ^ " in " ^ string_of_expr e))
+         | _ -> raise (Failure ("illegal binary operator " ^ string_of_typ t1 ^ " " ^ string_of_op op ^ " "     ^ string_of_typ t2 ^ " in " ^ string_of_expression e))
  	)
-      | Unop (op, e) as ex -> let t = expr e in
+      | Unop (op, e) as ex -> let t = expression e in
 	 (match op with
 	   Neg when t = Int -> Int
 	 | Not when t = Bool -> Bool
-	 	| _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expr ex)))
+	 	| _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expression ex)))
       (* TODO add other expressions *)
 	| Noexpr -> Null
 	| Assign(var, e) as ex -> let lt = type_of_identifier var
@@ -160,7 +163,6 @@ let check (globals, functions) =
 	  
   in
   List.iter check_function functions
-
 
 
 (* TODO: Symbol table *)
