@@ -188,14 +188,25 @@ let translate (globals, functions) =
            | A.Leq  -> L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder
            | A.Gt   -> L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder
            | A.Geq  -> L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder
-           | A.Conc -> L.build_call string_concat [| e1'; e2'|] "string_concat" builder 
+           | A.Conc -> L.build_call string_concat [| e1'; e2'|]
+		       "string_concat" builder
         )
       | A.Unop(op, e) ->
         let e' = expr builder e in
         (match op with
-             A.Neg  -> L.build_neg
-           | A.Not  -> L.build_not
-	) e' "tmp" builder
+             A.Neg  -> L.build_neg e' "tmp" builder
+           | A.Not  -> L.build_not e' "tmp" builder
+	   | A.Inc  ->
+	       let n   = lookup (A.expr_to_str e) in
+	       let tmp = L.build_load n "tmp" builder in
+	       let tmp = L.build_add (L.const_int i32_t 1) tmp "tmp" builder in
+	       L.build_store tmp n builder
+	   | A.Dec  ->
+	       let n   = lookup (A.expr_to_str e) in
+	       let tmp = L.build_load n "tmp" builder in
+	       let tmp = L.build_sub tmp (L.const_int i32_t 1) "tmp" builder in
+	       L.build_store tmp n builder
+	)
       | A.KeyVal(t, n, e) ->
 	(* Resolve struct index and 'value_typ' in struct *)
 	let sidx_of_typ = function

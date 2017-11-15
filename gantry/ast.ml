@@ -54,10 +54,7 @@ type program = typ_bind list * function_decl list
 (* Expression to String for Variable Resolution in Codegen *)
 let expr_to_str = function
 	  Id(s) -> s
-(*	| ObjAcc(e1, e2) -> string_of_expression e1 ^ "." ^ string_of_expression e2
-	| ArrAcc(e1, e2) -> string_of_expression e1 ^ "[" ^ string_of_expression e2 ^ "]"
-	| KeyVal(t, k, e) -> "  " ^ string_of_typ t ^ " " ^ k ^ " : " ^ string_of_expression e
-*)	| _ -> raise(Failure("Invalid assignment."))
+	| _ -> raise(Failure("Invalid assignment."))
 
 (* Pretty-printing functions *)
 
