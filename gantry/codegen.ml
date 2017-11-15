@@ -204,7 +204,7 @@ let translate (globals, functions) =
 	   | A.Dec  ->
 	       let n   = lookup (A.expr_to_str e) in
 	       let tmp = L.build_load n "tmp" builder in
-	       let tmp = L.build_sub (L.const_int i32_t 1) tmp "tmp" builder in
+	       let tmp = L.build_sub tmp (L.const_int i32_t 1) "tmp" builder in
 	       L.build_store tmp n builder
 	)
       | A.KeyVal(t, n, e) ->
