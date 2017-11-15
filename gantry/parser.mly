@@ -116,7 +116,6 @@ array_expression:
 
 access_expression:
     expression LBRACK expression RBRACK     { ArrAcc($1, $3) }
-    | expression PERIOD expression	    { ObjAcc($1, $3) }
 
 assignment_expression:
     expression ASSIGN expression   	    { Assign($1, $3) }
