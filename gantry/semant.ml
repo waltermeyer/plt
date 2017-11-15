@@ -53,9 +53,8 @@ let check (globals, functions) =
   (* TODO : what do default functions return? *)
 
 (* Built-ins: print, arrify, objectify, jsonify, length, slice, tostring, httpget, httppost *)
-  let built_in_decls = 
-     StringMap.add "print" 
-     { type_spec = Null; f_id = "print"; f_params = [(String, "x")] ; f_statements = [] }
+  let built_in_decls = StringMap.add "print_s" 
+     { type_spec = Null; f_id = "print_s"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "arrify"
      { type_spec = Array; f_id = "arrify"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "objectify"
@@ -70,7 +69,7 @@ let check (globals, functions) =
      { type_spec = String; f_id = "tostring"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "httpget" (*TODO: does this actually take in a string or several different typed arguments?*)
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
-     (StringMap.add "httppost" (*TODO: 'make' error on this line;
+     (StringMap.singleton "httppost" (*TODO: 'make' error on this line;
 	This expression has type
          Ast.function_decl StringMap.t -> Ast.function_decl StringMap.t
        but an expression was expected of type
@@ -80,7 +79,7 @@ let check (globals, functions) =
 
   in
 
-  let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m) built_in_decls functions
+  let function_decls = List.fold_left (fun m fd -> StringMap.add fd.f_id fd m) built_in_decls functions
   
   in
 
@@ -93,34 +92,35 @@ let check (globals, functions) =
   (* TODO: void/null same thing? *)
   let check_function func = 
      List.iter (check_not_null (fun n -> "illegal null formal " ^ n ^            
-       " in " ^ func.fname)) func.formals;                                       
+       " in " ^ func.f_id)) func.f_params;                                       
                                                                                  
-     report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)   
-       (List.map snd func.formals);                                              
+     report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.f_id)   
+       (List.map snd func.f_params);                                              
                                                                                  
-     List.iter (check_not_null (fun n -> "illegal null local " ^ n ^             
-       " in " ^ func.fname)) func.locals;                                        
+     (*List.iter (check_not_null (fun n -> "illegal null local " ^ n ^             
+       " in " ^ func.fname)) func.locals;*)                                        
                                                                                  
-     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)    
+     (*
+     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.f_id)    
        (List.map snd func.locals);                                               
-                                                                                 
-     (* Type of each variable (global, formal, or local *)                       
+     *)                                                                            
+     (* TODO: Type of each variable (global, formal, or local                        
      let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)          
-         StringMap.empty (globals @ func.formals @ func.locals )                 
+         StringMap.empty (globals @ func.f_params @ func.locals )                 
      in                                                                          
-
+     *)
      (* Return the type of an expression or throw an exception *)
      let rec expression = function
 (* TODO: any others? *)
          IntLit _ -> Int
        | FloatLit _ -> Float
        | BoolLit _ -> Bool
-       | Id s -> type_of_identifier s
+       (*| Id s -> type_of_identifier s*)
        | Binop(e1, op, e2) as e -> let t1 = expression e1 and t2 = expression e2 in
          (match op with
            Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
-         | Equal | Neq when t1 = t2 -> Bool
-	 | Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Bool (* not Int -> Int again, right? *)
+         | Eq | Neq when t1 = t2 -> Bool
+	 | Lt | Leq | Gt | Geq when t1 = Int && t2 = Int -> Bool (* not Int -> Int again, right? *)
          | And | Or when t1 = Bool && t2 = Bool -> Bool
          | _ -> raise (Failure ("illegal binary operator " ^ string_of_typ t1 ^ " " ^ string_of_op op ^ " "     ^ string_of_typ t2 ^ " in " ^ string_of_expression e))
  	)
@@ -131,11 +131,15 @@ let check (globals, functions) =
 	 	| _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expression ex)))
       (* TODO add other expressions; Inc, Dec, ObjAcc, ArrAcc, AssignDecl, ObjAssign, etc. ? *)
 	| Noexpr -> Null
-	| Assign(var, e) as ex -> let lt = type_of_identifier var
+	(*| Assign(var, e) as ex -> let lt = type_of_identifier var
 				and rt = expression e in
 		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
-		" = " ^ string_of_typ rt ^ " in " ^string_of_expression ex))
-	(* TODO: microC has call... *)
+		" = " ^ string_of_typ rt ^ " in " ^string_of_expression ex))*)
+      	(*| FunExp(f_id, actuals) as funexp -> let fd = function_decl f_id in
+		if List.length actuals !=  fd.f_params then
+	raise (Failure ("expecting " ^ string_of_int (List.length fd.f_params) ^ " arguments in " ^ string_of_expr call))
+		else*)
+		
       in
 
       let check_bool_expression e = if expression e != Bool
@@ -150,9 +154,9 @@ let check (globals, functions) =
 	| s :: ss -> statement s ; check_block ss
 	| [] -> ()
        in check_block sl
-     | Expression e -> ignore (expression e)
+     | Expr e -> ignore (expression e)
      (* | Return e -> let t = expression e in if t = function.typ then () else raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ string_of_typ func.type_spec ^ " in " ^ string_of_expr e))*)
-	| If(p, b1, b2) -> check_bool_expression p; statement b1; statemenet b2;
+	(*| If(p, s1, b1, s1, b2) -> check_bool_expression p; statement b1; statemenet b2;*)
 	| For(e1, e2, e3, st) -> ignore (expression e1); check_bool_expression e2;
 		ignore(expression e3); statement st
 	| While(p, s) -> check_bool_expression p; statement s
