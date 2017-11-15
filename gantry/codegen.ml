@@ -4,13 +4,13 @@ module A = Ast
 module StringMap = Map.Make(String)
 
 (* Hash Tables for our variable bindings *)
-let g_var_tbl   : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
-let f_var_tbl   : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
-let obj_var_tbl : ((string * string), L.llvalue)
-		  Hashtbl.t = Hashtbl.create 10;;
+let g_var_tbl  : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
+let f_var_tbl  : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
+let kv_var_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
 
-(* Stack for building Objects *)
+(* Stack and Buffer for building Objects *)
 let kv_stack = Stack.create ();;
+let key_buf  = Buffer.create 10;;
 
 let translate (globals, functions) =
 
@@ -80,7 +80,6 @@ let translate (globals, functions) =
       (* Define Function with LLVM module and store in StringMap *)
       StringMap.add name (L.define_function name ftype the_module, fdecl) m in
       (* Put Functions from AST into StringMap *)
-      (* List.fold_left f a [b1; ...; bn] is f (... (f (f a b1) b2) ...) bn. *)
       List.fold_left func_decl StringMap.empty functions in
 
       (* Function Body *)
@@ -122,15 +121,35 @@ let translate (globals, functions) =
 	ignore(Hashtbl.add f_var_tbl n local);
       in
 
-      (* Object Locals (Keys) *)
-      let add_kv (parent, key_n, key) =
-	ignore(Hashtbl.add obj_var_tbl (parent, key_n) key);
+      (* Object Keys *)
+      let add_kv (key_n, key_v) =
+	ignore(Hashtbl.add kv_var_tbl key_n key_v);
       in
 
-      (* Return the value for a local variable or a parameter *)
+      (* Variable Lookup *)
       let lookup n =
         try Hashtbl.find f_var_tbl n with
             Not_found -> Hashtbl.find g_var_tbl n
+      in
+
+      (* Move a new object's keys to local or globals table *)
+      let parent_keys n =
+	(* Determine what table we should add to *)
+	let tbl =
+	  try
+	    ignore(Hashtbl.find f_var_tbl n);
+	    f_var_tbl
+	  with
+	    Not_found -> ignore(Hashtbl.find g_var_tbl n);
+	    g_var_tbl
+	in
+	(* Add each orphan with 'n' as a parent to tbl *)
+	let add k v =
+	  let k = (n ^ k) in
+	    Hashtbl.add tbl k v;
+	in
+	ignore(Hashtbl.iter add kv_var_tbl);
+	ignore(Hashtbl.reset kv_var_tbl);
       in
 
     (* Construct code for an expression and return the value *)
@@ -166,7 +185,7 @@ let translate (globals, functions) =
 	) e' "tmp" builder
       | A.KeyVal(t, n, e) ->
 	(* Resolve struct index and 'value_typ' in struct *)
-	let vtype_of_typ = function
+	let sidx_of_typ = function
 	    A.Int    -> 3 
 	  | A.Float  -> 4
 	  | A.Object -> 5
@@ -175,6 +194,19 @@ let translate (globals, functions) =
 	  | A.Bool   -> 7
 	  | A.Null   -> 8
         in
+	(* Set object ID prefix for key e.g. '.b.c.d' *)
+	let set_obj t n =
+	  match t with
+	    (* This key is an object indicate nesting using a dot *)
+	    A.Object -> ignore(Buffer.add_string key_buf ("." ^ n));
+	  | _        -> ()
+	in
+	ignore(set_obj t n);
+	(* Set Key Name *)
+	let set_kn kn =
+	  (Buffer.contents key_buf) ^ "." ^ kn
+	in
+	(* Build the data structure for a key *)
 	let e' = expr builder e in
 	let k = L.build_malloc obj_t "obj" builder in
 	(* Set key name *)
@@ -182,14 +214,13 @@ let translate (globals, functions) =
 	ignore(L.build_store name
 	(L.build_struct_gep k 1 "key_name" builder) builder);
 	(* Set value type *)
-	ignore(L.build_store (L.const_int i32_t (vtype_of_typ t))
+	ignore(L.build_store (L.const_int i32_t (sidx_of_typ t))
 	(L.build_struct_gep k 2 "value_typ" builder) builder);
 	(* Set value *)
-	ignore(L.build_store e'
-	(L.build_struct_gep k (vtype_of_typ t) "value" builder) builder);
+	let value = L.build_struct_gep k (sidx_of_typ t) "value" builder in
+	ignore(L.build_store e' value builder);
 	(* Add the key value pair to a stack *)
-	(* print_endline ("Adding key [" ^ n ^ "] to stack..."); *)
-	ignore(Stack.push (vtype_of_typ t, n, k) kv_stack);
+	ignore(Stack.push (sidx_of_typ t, (set_kn n), k) kv_stack);
         e'
       | A.ObjExp(el) ->
 	(* Set next for a key or object *)
@@ -205,44 +236,45 @@ let translate (globals, functions) =
 		  (L.const_pointer_null (L.pointer_type obj_t))
 	          (L.build_struct_gep k 0 "next" builder) builder);
 	in
-	(* The Enclosing (parent) Object *)
-	let parent = L.build_malloc obj_t "obj" builder in
 	(* Resolve the list of key value exprs (putting them into a stack) *)
 	let kv = List.map (expr builder) el in
+	(* The Enclosing (parent) Object *)
+	let parent = L.build_malloc obj_t "obj" builder in
+	(* Connect parent to first key *)
 	ignore(set_next parent);
-	(* For each key in this object, add to lookup table *)
+	(* Connect each key in this object and add to lookup table *)
 	let build_obj _ =
 	  let (t, n, k) = Stack.pop kv_stack in
-	  (* Add parent and its key to object lookup table *)
-	  let parent_s = L.value_name parent in
-	  (* print_endline("Adding " ^ parent_s ^ ", " ^ n ^ ", " ^ (L.string_of_llvalue k)); *)
+	  (* Add parent and its key to tmp object lookup table *)
 	  let value = (L.build_struct_gep k t "value" builder) in
-	  ignore(add_kv (parent_s, n, value));
+	  (* Add orphan keys to tmp kv table *)
+	  ignore(add_kv (n, value));
 	  ignore(set_next k);
 	in
 	(* Build out all of the key values within this object *)
 	List.iter build_obj kv;
+	(* Prune the Object ID buffer *)
+	let s = Buffer.contents key_buf in
+	let s = Str.split (Str.regexp_string ".") s in
+	let s =
+	  try
+	    List.tl (List.rev s)
+	  with
+	    Failure("tl") -> []
+	in
+	let s = String.concat "" s in
+	ignore(Buffer.reset key_buf);
+	ignore(Buffer.add_string key_buf s);
 	(* Return the pointer to the enclosing object *)
 	parent
-      | A.ObjAcc(e1, e2) ->
-	let parent = expr builder e1 in
-	let child = A.expr_to_str e2 in
-	(* Get parent object pointer name *)
-	let parent_s = L.string_of_llvalue parent in
-	let s = String.index parent_s '=' in
-	let e = String.index parent_s '*' in
-	let s = s + 8 in
-	let parent = String.sub parent_s s (e-s) in
-	(* print_endline("Finding " ^ parent ^ " and " ^ child); *)
-	let v = Hashtbl.find obj_var_tbl (parent, child) in
-	(*print_endline(L.string_of_llvalue v);*)
-	L.build_load v (parent ^ "." ^ child) builder
       | A.AssignDecl(t, n, e) ->
         let e' = expr builder e in
           (* First add this declaration to f_var_tbl hash map *)
           ignore (add_local (t, n) builder);
 	  (* Then set it and forget it *)
           ignore (L.build_store e' (lookup n) builder);
+	  (* If this was an object, 'parent' the orphan keys *)
+	  ignore(parent_keys n);
           e'
       | A.Assign(e1, e2) ->
 	(* We need to resolve expression to assign into *)

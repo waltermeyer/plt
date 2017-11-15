@@ -19,7 +19,6 @@ type expression =
         | StrLit of string
 	| BoolLit of bool
 	| Id of string
-	| ObjAcc of expression * expression
 	| ArrAcc of expression * expression
 	| Binop of expression * op * expression
 	| Unop of uop * expression
@@ -99,7 +98,6 @@ let rec string_of_expression = function
 	| BoolLit(true) -> "true"
 	| BoolLit(false) -> "false"
 	| Id(s) -> s
-	| ObjAcc(e1, e2) -> string_of_expression e1 ^ "." ^ string_of_expression e2
 	| ArrAcc(e1, e2) -> string_of_expression e1 ^ "[" ^ string_of_expression e2 ^ "]"
 	| Binop(e1, o, e2) -> string_of_expression e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expression e2
 	| Unop(o, e) -> (match o with

@@ -7,7 +7,7 @@
 all : gantry.native
 
 gantry.native :
-	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
+	ocamlbuild -use-ocamlfind -pkgs str,llvm,llvm.analysis -cflags -w,+a-4 \
 		gantry.native
 
 # "make clean" removes all generated files
@@ -24,8 +24,7 @@ clean :
 OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx gantry.cmx
 
 gantry : $(OBJS)
-#	ocamlfind ocamlopt -linkpkg -package llvm -package llvm.analysis $(OBJS) -o gantry
-	ocamlfind ocamlopt -linkpkg -package llvm  -package llvm.analysis $(OBJS) -o gantry
+	ocamlfind ocamlopt -linkpkg -package str,llvm,llvm.analysis $(OBJS) -o gantry
 
 scanner.ml : scanner.mll
 	ocamllex scanner.mll
