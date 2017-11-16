@@ -73,10 +73,10 @@ let check (globals, functions) =
      { type_spec = String; f_id = "slice"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "tostring"
      { type_spec = String; f_id = "tostring"; f_params = [(String, "x")] ; f_statements = [] }
-     (StringMap.add "httpget" (*TODO: does this actually take in a string or several different typed arguments?*)
+     (StringMap.add "httpget"
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
-     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x")] ; f_statements = [] })))))))
+     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] })))))))
 
   in
 
