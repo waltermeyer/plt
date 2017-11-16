@@ -20,7 +20,7 @@ let translate (globals, functions) =
     (* LLVM Types *)
     and i32_t  = L.i32_type context
     and i8_t   = L.i8_type context
-    and i1_t   = L.i1_type context
+    and b_t   = L.i8_type context
     and str_t  = L.pointer_type (L.i8_type context)
     (* and arr_t = L.pointer_type (L.i8_type context) TODO *)
     and flt_t  = L.double_type context
@@ -37,7 +37,7 @@ let translate (globals, functions) =
                     flt_t; (* float *)
                     L.pointer_type name; (* child (object) *)
                     str_t; (* string *)
-                    i1_t;  (* bool *)
+                    b_t;  (* bool *)
                   |] in
                   ignore (L.struct_set_body name body true);
                   name
@@ -50,7 +50,7 @@ let translate (globals, functions) =
       | A.Object -> L.pointer_type obj_t
       (* | A.Array  -> arr_t *)
       | A.String -> str_t
-      | A.Bool   -> i1_t
+      | A.Bool   -> b_t
       | A.Null   -> void_t
     in
 
@@ -169,7 +169,7 @@ let translate (globals, functions) =
         A.IntLit i -> L.const_int i32_t i
       | A.FloatLit f -> L.const_float flt_t f
       | A.StrLit s -> L.build_global_stringptr s "string" builder
-      | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
+      | A.BoolLit b -> L.const_int b_t (if b then 1 else 0)
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
       | A.Binop (e1, op, e2) ->
