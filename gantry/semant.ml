@@ -10,8 +10,6 @@ module StringMap = Map.Make(String)
 
    Checks each global _statement_ , then check each function *)
 
-(*TODO: We have global statements as opposed to just global variables *)
-
 let check (globals, functions) = 
 
   (* Raise an exception if the given list has a duplicate *)
@@ -35,32 +33,40 @@ let check (globals, functions) =
   in
 
   (**** Checking Global Variables ****)
-  (* TODO: Add additional checks for statements, along the lines of 138 in Gantry semant.ml *)
   List.iter (check_not_null (fun n -> "illegal null global " ^ n)) globals;
 
   report_duplicate (fun n -> "duplicate global " ^ n) (List.map snd globals);
 
   (**** Checking Functions ****)
-  (* Checks to make sure print function is defined *)
+  (* Checks to make sure print functions are defined *)
   if List.mem "print_s" (List.map (fun fd -> fd.f_id) functions)
-  then raise (Failure ("function print may not be defined")) else (); 
+  then raise (Failure ("function print string may not be defined")) else (); 
+  
+  if List.mem "print_i" (List.map (fun fd -> fd.f_id) functions)
+  then raise (Failure ("function print integer may not be defined")) else (); 
+  
+  if List.mem "print_d" (List.map (fun fd -> fd.f_id) functions)
+  then raise (Failure ("function print float may not be defined")) else (); 
 
   report_duplicate (fun n -> "duplicate function " ^ n)
     (List.map (fun fd -> fd.f_id) functions);
 
   (* Function declaration for a named function *)
-  (* TODO: How do we want to implement print? MicroC uses seperate functions for int, bool, and string *)
-  (* TODO : what do default functions return? *)
 
 (* Built-ins: print, arrify, objectify, jsonify, length, slice, tostring, httpget, httppost *)
   let built_in_decls = StringMap.add "print_s" 
      { type_spec = Null; f_id = "print_s"; f_params = [(String, "x")] ; f_statements = [] }
-     (StringMap.add "arrify"
+     (StringMap.add "print_i"
+     { type_spec = Null; f_id = "print_i"; f_params = [(String, "x")] ; f_statements = [] }
+     (StringMap.add "print_d"
+     { type_spec = Null; f_id = "print_d"; f_params = [(String, "x")] ; f_statements = [] }
+     (* TODO : Decide whether we are implementing in our language or in codegen *)
+     (*(StringMap.add "arrify"
      { type_spec = Array; f_id = "arrify"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "objectify"
-     { type_spec = Object; f_id = "jsonify"; f_params = [(String, "x")] ; f_statements = [] } 
-     (StringMap.add "jsonify" (*TODO: what if a function can take multiple parameter types? *)
-     { type_spec = String; f_id = "jsonify"; f_params = [(Object, "x")] ; f_statements = [] } 
+     { type_spec = Object; f_id = "objectify"; f_params = [(String, "x")] ; f_statements = [] } 
+     (StringMap.add "jsonify"
+     { type_spec = String; f_id = "jsonify"; f_params = [(Object, "x")] ; f_statements = [] }*) 
      (StringMap.add "length"
      { type_spec = Int; f_id = "length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "slice"
@@ -69,13 +75,8 @@ let check (globals, functions) =
      { type_spec = String; f_id = "tostring"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "httpget" (*TODO: does this actually take in a string or several different typed arguments?*)
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
-     (StringMap.singleton "httppost" (*TODO: 'make' error on this line;
-	This expression has type
-         Ast.function_decl StringMap.t -> Ast.function_decl StringMap.t
-       but an expression was expected of type
-         Ast.function_decl StringMap.t = Ast.function_decl Map.Make(String).t
-		*)
-     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x")] ; f_statements = [] }))))))))
+     (StringMap.singleton "httppost" 
+     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x")] ; f_statements = [] })))))))
 
   in
 
@@ -89,6 +90,7 @@ let check (globals, functions) =
   in
 
   let _ = function_decl "main" in (* Ensure "main is defined" *)
+  
   (* TODO: void/null same thing? *)
   let check_function func = 
      List.iter (check_not_null (fun n -> "illegal null formal " ^ n ^            
@@ -99,9 +101,9 @@ let check (globals, functions) =
                                                                                  
      (*List.iter (check_not_null (fun n -> "illegal null local " ^ n ^             
        " in " ^ func.fname)) func.locals;*)                                        
-                                                                                 
      (*
      report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.f_id)    
+bals,
        (List.map snd func.locals);                                               
      *)                                                                            
      (* TODO: Type of each variable (global, formal, or local                        
@@ -128,6 +130,8 @@ let check (globals, functions) =
 	 (match op with
 	   Neg when t = Int -> Int
 	 | Not when t = Bool -> Bool
+         | Inc when t = Int -> Int
+	 | Dec when t = Int -> Int
 	 	| _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expression ex)))
       (* TODO add other expressions; Inc, Dec, ObjAcc, ArrAcc, AssignDecl, ObjAssign, etc. ? *)
 	| Noexpr -> Null
@@ -156,7 +160,7 @@ let check (globals, functions) =
        in check_block sl
      | Expr e -> ignore (expression e)
      (* | Return e -> let t = expression e in if t = function.typ then () else raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ string_of_typ func.type_spec ^ " in " ^ string_of_expr e))*)
-	(*| If(p, s1, b1, s1, b2) -> check_bool_expression p; statement b1; statemenet b2;*)
+	| If(p, s1, b1, s2, b2) -> check_bool_expression p; statement s1; check_bool_expression b1; statement s2; statement b2;
 	| For(e1, e2, e3, st) -> ignore (expression e1); check_bool_expression e2;
 		ignore(expression e3); statement st
 	| While(p, s) -> check_bool_expression p; statement s
