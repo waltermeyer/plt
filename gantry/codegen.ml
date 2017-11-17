@@ -77,7 +77,8 @@ let translate (globals, functions) =
     let httpget_func = L.declare_function "httpget" httpget_t the_module in
 
     (* HTTP POST built-in *)
-    let httppost_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
+    let httppost_t = L.var_arg_function_type str_t [| L.pointer_type i8_t ; 
+							L.pointer_type i8_t |] in
     let httppost_func = L.declare_function "httppost" httppost_t the_module in
 
     (* Function Declarations *)

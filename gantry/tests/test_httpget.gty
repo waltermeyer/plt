@@ -1,16 +1,10 @@
 // pass - send GET and POST requests to RequestBin
-// TODO: figure out how to automatically return a new requestbin each run
 
 int main() {
 
 	string page = "https://httpbin.org/status/418";
-	string ret1 = httpget(page);
+	print_s(httpget(page));
 
-	string req = "{ \"name\" : \"Jeff\" }";
-	// string ret2 = httppost(page, req);
-
-	print_s(ret1);
-	// print_s(ret2);
 	return 0;
 }
 
