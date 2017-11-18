@@ -151,7 +151,6 @@ let check (globals, functions) =
           | Inc when t = Int -> Int
 	  | Dec when t = Int -> Int
 	  | _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expression ex)))
-	| Noexpr -> Null
 	| Assign(e1, e2) as ex -> let lt = expression e1
 				  and rt = expression e2 in
 		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
@@ -162,14 +161,21 @@ let check (globals, functions) =
 		and rt = expression e in 
 		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
 		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
-	(* TODO: Why is obj assign into an expression list 
-	| ObjAssign (el, e) -> *)
-	(*| FunExp(f_id, actuals) as funexp -> let fd = function_decl f_id in fd.type_spec*) 
-		(*let fd = function_decl f_id in
+	| FunExp(f_id, actuals) as funexp -> 
+		let fd = function_decl f_id in
 		if List.length actuals !=  List.length fd.f_params then
 	 	raise (Failure ("expecting " ^ string_of_int 
-		   (List.length fd.f_params) ^ " arguments in " ^ string_of_expression call))
-		else*)
+		   (List.length fd.f_params) ^ " arguments in " ^ string_of_expression funexp))
+		else
+		fd.type_spec
+	| KeyVal (t, s, e) as ex -> 
+		let lt = type_of_identifier s 
+		and rt = expression e in
+		check_assign lt rt (Failure("Key " ^ string_of_typ lt ^ 
+		" has different type from value " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
+	| ArrExp (e) as ex -> Array
+	| ObjExp (e) as ex -> Object
+	| Noexpr -> Null
       in
 
       let check_bool_expression e = if expression e != Bool
