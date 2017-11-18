@@ -5,6 +5,8 @@ open Ast
 
 module StringMap = Map.Make(String)
 
+
+(* Create Hash Table for symbol table *)
 let symbols : (string, Ast.typ) Hashtbl.t = Hashtbl.create 10;;
 
 (* Semantic checking of a program. Returns void if successful,
@@ -55,7 +57,7 @@ let check (globals, functions) =
 
   (* Function declaration for a named function *)
 
-(* Built-ins: print, arrify, objectify, jsonify, length, slice, tostring, httpget, httppost *)
+  (* Built-ins: print, arrify, objectify, jsonify, length, slice, tostring, httpget, httppost *)
   let built_in_decls = StringMap.add "print_s" 
      { type_spec = Null; f_id = "print_s"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "print_i"
@@ -79,28 +81,32 @@ let check (globals, functions) =
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
      { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] })))))))
-
   in
 
+  (* Add built in functions to list of function declaration list *)
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.f_id fd m) built_in_decls functions
   
   in
 
+  (* Check that function exists in function declaration list *)
   let function_decl s = try StringMap.find s function_decls 
 	with Not_found -> raise (Failure ("unrecognized function " ^ s))
 
   in
 
-  let _ = function_decl "main" in (* Ensure "main is defined" *)
+  (* Ensure "main is defined" *)
+  let _ = function_decl "main" in 
   
   let check_function func = 
+
+     (* Check that function does not have null parameters *)
      List.iter (check_not_null (fun n -> "illegal null formal " ^ n ^            
        " in " ^ func.f_id)) func.f_params;                                       
-                                                                                 
+
+     (* Report if there are duplicate function parameters *)                                                                                 
      report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.f_id)   
        (List.map snd func.f_params);
 
-     (*TODO: How to add to hashtable from list?*)
      (*List.iter (check_not_null (fun n -> "illegal null local " ^ n ^             
        " in " ^ func.fname)) func.local;*)                                        
      (*
@@ -108,23 +114,13 @@ let check (globals, functions) =
 bals,
        (List.map snd func.locals);                                               
      *)                                                                            
-     (* TODO: Type of each variable (global, formal, or local *) 
      (* TODO: Figure out how to add our locals *)
-     (*let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)          
-         StringMap.empty (globals @ func.f_params )
-     in*)
-     (*let symbols = List.fold_left (fun m (t, n) -> Hashtbl.add symbols n t)          
-         (globals @ func.f_params)
-     in*)
 
-     (*for (t,n) in globals do
-	Hashtbl.add symbols n t
-     do in*)
-
-     (*List.iter (Hashtbl.add symbols n) ( globals @ func.f_params);*)
+     (* Add globals and function parameters to symbol table *)
+     List.iter (fun (a, b) -> Hashtbl.add symbols b a) (globals @ func.f_params);
 
      let type_of_identifier s = 
-	 try StringMap.find s symbols
+	 try Hashtbl.find symbols s
 	 with Not_found -> raise (Failure ("undeclared identifier " ^ s))
      in
 
@@ -160,6 +156,8 @@ bals,
 					and rt = expression e in 
 		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
 		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
+	(* TODO: Why is obj assign into an expression list 
+	| ObjAssign (el, e) -> *)
 	(*| FunExp(f_id, actuals) as funexp -> let fd = function_decl f_id in fd.type_spec*) 
 		(*let fd = function_decl f_id in
 		if List.length actuals !=  List.length fd.f_params then
@@ -181,7 +179,8 @@ bals,
 	| [] -> ()
        in check_block sl
      | Expr e -> ignore (expression e)
-     (* | Return e -> let t = expression e in if t = function.typ then () else raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ string_of_typ func.type_spec ^ " in " ^ string_of_expr e))*)
+	(*| Return e -> let t = expression e in if t = function.typ then () else 
+	raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ string_of_typ func.type_spec ^ " in " ^ string_of_expression e))*)
 	| If(p, s1, b1, s2, b2) -> check_bool_expression p; statement s1; check_bool_expression b1; statement s2; statement b2;
 	| For(e1, e2, e3, st) -> ignore (expression e1); check_bool_expression e2;
 		ignore(expression e3); statement st
