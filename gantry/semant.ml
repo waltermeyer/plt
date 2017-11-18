@@ -36,6 +36,10 @@ let check (globals, functions) =
      if lvaluet == rvaluet then lvaluet else raise err
   in
 
+  let add_local (t, n) =
+    ignore(Hashtbl.add symbols n t);
+  in
+
   (**** Checking Global Variables ****)
   List.iter (check_not_null (fun n -> "illegal null global " ^ n)) globals;
 
@@ -107,15 +111,16 @@ let check (globals, functions) =
      report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.f_id)   
        (List.map snd func.f_params);
 
+
+     (* TODO: Do we need to check that locals are not null and not duplicated? 
+	      If so, will not happen here *)
+
      (*List.iter (check_not_null (fun n -> "illegal null local " ^ n ^             
        " in " ^ func.fname)) func.local;*)                                        
      (*
-     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.f_id)    
-bals,
-       (List.map snd func.locals);                                               
-     *)                                                                            
-     (* TODO: Figure out how to add our locals *)
-
+     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.f_id) (List.map snd func.locals);    
+     *)      
+     
      (* Add globals and function parameters to symbol table *)
      List.iter (fun (a, b) -> Hashtbl.add symbols b a) (globals @ func.f_params);
 
@@ -126,34 +131,35 @@ bals,
 
      (* Return the type of an expression or throw an exception *)
      let rec expression = function
-         IntLit _ -> Int
-       | FloatLit _ -> Float
-       | StrLit _ -> String
-       | BoolLit _ -> Bool
-       | Id s -> type_of_identifier s
-       | Binop(e1, op, e2) as e -> let t1 = expression e1 and t2 = expression e2 in
+	  IntLit _ -> Int
+	| FloatLit _ -> Float
+	| StrLit _ -> String
+	| BoolLit _ -> Bool
+	| Id s -> type_of_identifier s
+	| Binop(e1, op, e2) as e -> let t1 = expression e1 and t2 = expression e2 in
          (match op with
-           Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
-         | Eq | Neq when t1 = t2 -> Bool
-	 | Lt | Leq | Gt | Geq when t1 = Int && t2 = Int -> Bool (* not Int -> Int again, right? *)
-         | And | Or when t1 = Bool && t2 = Bool -> Bool
-         | _ -> raise (Failure ("illegal binary operator " ^ string_of_typ t1 ^ " " ^ string_of_op op ^ " "     ^ string_of_typ t2 ^ " in " ^ string_of_expression e))
+            Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
+          | Eq | Neq when t1 = t2 -> Bool
+	  | Lt | Leq | Gt | Geq when t1 = Int && t2 = Int -> Bool (* not Int -> Int again, right? *)
+          | And | Or when t1 = Bool && t2 = Bool -> Bool
+          | _ -> raise (Failure ("illegal binary operator " ^ string_of_typ t1 ^ " " ^ string_of_op op ^ " "     ^ string_of_typ t2 ^ " in " ^ string_of_expression e))
  	)
-      | Unop (op, e) as ex -> let t = expression e in
+	| Unop (op, e) as ex -> let t = expression e in
 	 (match op with
 	   Neg when t = Int -> Int
-	 | Not when t = Bool -> Bool
-         | Inc when t = Int -> Int
-	 | Dec when t = Int -> Int
-	 	| _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expression ex)))
-      (* TODO add other expressions; Inc, Dec, ObjAcc, ArrAcc, AssignDecl, ObjAssign, etc. ? *)
+	  | Not when t = Bool -> Bool
+          | Inc when t = Int -> Int
+	  | Dec when t = Int -> Int
+	  | _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expression ex)))
 	| Noexpr -> Null
 	| Assign(e1, e2) as ex -> let lt = expression e1
 				  and rt = expression e2 in
 		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
 		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
-      	| AssignDecl (t, n, e) as ex -> let lt = type_of_identifier n
-					and rt = expression e in 
+      	| AssignDecl (t, n, e) as ex ->
+		add_local (t, n);
+		let lt = type_of_identifier n
+		and rt = expression e in 
 		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
 		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
 	(* TODO: Why is obj assign into an expression list 
@@ -179,8 +185,9 @@ bals,
 	| [] -> ()
        in check_block sl
      | Expr e -> ignore (expression e)
-	(*| Return e -> let t = expression e in if t = function.typ then () else 
-	raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ string_of_typ func.type_spec ^ " in " ^ string_of_expression e))*)
+	| Return e -> let t = expression e in if t = func.type_spec then () else
+	   raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ 
+			  string_of_typ func.type_spec ^ " in " ^ string_of_expression e))
 	| If(p, s1, b1, s2, b2) -> check_bool_expression p; statement s1; check_bool_expression b1; statement s2; statement b2;
 	| For(e1, e2, e3, st) -> ignore (expression e1); check_bool_expression e2;
 		ignore(expression e3); statement st
@@ -192,46 +199,3 @@ bals,
 	  
   in
   List.iter check_function functions
-
-(* TODO: Symbol table *)
-        (* Symbol table examples -- 
-
-        --EDWARDS SLIDES--
-
-type symbol_table = {
-        parent : symbol_table option;
-        variables : variable_decl list
-        }
-let rec find_variable (scope : symbol_table) name =
-        try
-                List.find (fun (s, _, _, _) -> s = name) scope.variables
-        with Not_found ->
-        match scope.parent with
-                Some(parent) -> find_variable parent name
-                | _ -> raise Not_found
-
-
-        --EXTEND (Fall 2016)--
-
-type symbol = LocalVariable of int | GlobalVariable of int | FunctionParameter of int | ExtendFunction of int
-and  symbolTable = symbol StringMap.t
-and  symbolTableType = Locals | Globals | ExtendFunctions
-
-...
-
-        --SAKE--
-let check_semant env fsm =
-  let env' =
-    let local_sym = { env.S.scope with variables = (add_local_vars fsm.S.fsm_locals env) @ env.S.scope.variables} in
-    { S.scope = local_sym } in
-  ignore(check_fsm_locals fsm env); ignore(check_body env' fsm)
-
-let check program =
-  let all_fsm_names = List.map (fun fsm_dec -> (fsm_dec.S.fsm_name,S.Int) ) program.S.fsms in
-  let sym_tab = {S.parent = None; S.variables = all_fsm_names } in
-  let env = {S.scope=sym_tab} in
-  let new_syms = {sym_tab with variables = check_globals program.S.input program.S.output env} in
-  let new_syms1 = {new_syms with variables = (check_pubs program.S.public env) @ (new_syms.S.variables)} in
-  let env2 = { S.scope=new_syms1} in
-
-*)
