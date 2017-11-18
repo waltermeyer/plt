@@ -1,5 +1,4 @@
 (* Semantic checking for the Gantry compiler *)
-(* TODO: debugging [check line 71], error statements, global statements vs vars?, symbol table *)
 
 open Ast
 
@@ -65,9 +64,9 @@ let check (globals, functions) =
   let built_in_decls = StringMap.add "print_s" 
      { type_spec = Null; f_id = "print_s"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "print_i"
-     { type_spec = Null; f_id = "print_i"; f_params = [(String, "x")] ; f_statements = [] }
+     { type_spec = Null; f_id = "print_i"; f_params = [(Int, "x")] ; f_statements = [] }
      (StringMap.add "print_d"
-     { type_spec = Null; f_id = "print_d"; f_params = [(String, "x")] ; f_statements = [] }
+     { type_spec = Null; f_id = "print_d"; f_params = [(Float, "x")] ; f_statements = [] }
      (* TODO : Decide whether we are implementing in our language or in codegen *)
      (*(StringMap.add "arrify"
      { type_spec = Array; f_id = "arrify"; f_params = [(String, "x")] ; f_statements = [] }
@@ -78,7 +77,7 @@ let check (globals, functions) =
      (StringMap.add "length"
      { type_spec = Int; f_id = "length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "slice"
-     { type_spec = String; f_id = "slice"; f_params = [(String, "x")] ; f_statements = [] }
+     { type_spec = String; f_id = "slice"; f_params = [(Int, "x"); (Int, "y"); (String, "z")] ; f_statements = [] }
      (StringMap.add "tostring"
      { type_spec = String; f_id = "tostring"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "httpget"
@@ -156,6 +155,7 @@ let check (globals, functions) =
 		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
 		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
       	| AssignDecl (t, n, e) as ex ->
+		(* TODO : add scope, check not duplicate within function *)
 		add_local (t, n);
 		let lt = type_of_identifier n
 		and rt = expression e in 
@@ -184,21 +184,21 @@ let check (globals, functions) =
 	in	
       
       let rec statement = function
-	  Block sl -> let rec check_block = function [Return _ as s] -> statement s
-	| Return _ :: _ -> raise (Failure "nothing may follow a return")
-	| Block sl :: ss -> check_block (sl @ ss)
-	| s :: ss -> statement s ; check_block ss
-	| [] -> ()
-       in check_block sl
-     | Expr e -> ignore (expression e)
-	| Return e -> let t = expression e in if t = func.type_spec then () else
-	   raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ 
+	Block sl -> let rec check_block = function [Return _ as s] -> statement s
+	 | Return _ :: _ -> raise (Failure "nothing may follow a return")
+	 | Block sl :: ss -> check_block (sl @ ss)
+	 | s :: ss -> statement s ; check_block ss
+	 | [] -> ()
+        in check_block sl
+      | Expr e -> ignore (expression e)
+      | Return e -> let t = expression e in if t = func.type_spec then () else
+	 raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ 
 			  string_of_typ func.type_spec ^ " in " ^ string_of_expression e))
-	| If(p, s1, b1, s2, b2) -> check_bool_expression p; statement s1; check_bool_expression b1; statement s2; statement b2;
-	| For(e1, e2, e3, st) -> ignore (expression e1); check_bool_expression e2;
-		ignore(expression e3); statement st
-	| While(p, s) -> check_bool_expression p; statement s
-
+      | If(p, s1, b1, s2, b2) -> check_bool_expression p; statement s1; check_bool_expression b1; statement s2; statement b2;
+      | For(e1, e2, e3, st) -> ignore (expression e1); check_bool_expression e2;
+      	ignore(expression e3); statement st
+      | While(p, s) -> check_bool_expression p; statement s
+      (* Do Break and Continue need to be semantically checked? *)
      in 
 
      statement (Block func.f_statements)
