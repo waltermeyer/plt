@@ -5,6 +5,8 @@ open Ast
 
 module StringMap = Map.Make(String)
 
+let symbols : (string, Ast.typ) Hashtbl.t = Hashtbl.create 10;;
+
 (* Semantic checking of a program. Returns void if successful,
    throws an exception if something is wrong.
 
@@ -98,6 +100,7 @@ let check (globals, functions) =
      report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.f_id)   
        (List.map snd func.f_params);
 
+     (*TODO: How to add to hashtable from list?*)
      (*List.iter (check_not_null (fun n -> "illegal null local " ^ n ^             
        " in " ^ func.fname)) func.local;*)                                        
      (*
@@ -107,13 +110,22 @@ bals,
      *)                                                                            
      (* TODO: Type of each variable (global, formal, or local *) 
      (* TODO: Figure out how to add our locals *)
-     let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)          
+     (*let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)          
          StringMap.empty (globals @ func.f_params )
-     in
+     in*)
+     (*let symbols = List.fold_left (fun m (t, n) -> Hashtbl.add symbols n t)          
+         (globals @ func.f_params)
+     in*)
+
+     (*for (t,n) in globals do
+	Hashtbl.add symbols n t
+     do in*)
+
+     (*List.iter (Hashtbl.add symbols n) ( globals @ func.f_params);*)
 
      let type_of_identifier s = 
 	 try StringMap.find s symbols
-	 with Not_found -> raise (Failure ("undeclared identifier " ^s))
+	 with Not_found -> raise (Failure ("undeclared identifier " ^ s))
      in
 
      (* Return the type of an expression or throw an exception *)
@@ -144,8 +156,11 @@ bals,
 				  and rt = expression e2 in
 		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
 		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
-      	(*| AssignDecl (t, var, e) as ex -> let  
-	| FunExp(f_id, actuals) as funexp -> let fd = function_decl f_id in fd.type_spec*) 
+      	| AssignDecl (t, n, e) as ex -> let lt = type_of_identifier n
+					and rt = expression e in 
+		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
+		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
+	(*| FunExp(f_id, actuals) as funexp -> let fd = function_decl f_id in fd.type_spec*) 
 		(*let fd = function_decl f_id in
 		if List.length actuals !=  List.length fd.f_params then
 	 	raise (Failure ("expecting " ^ string_of_int 
@@ -220,4 +235,4 @@ let check program =
   let new_syms1 = {new_syms with variables = (check_pubs program.S.public env) @ (new_syms.S.variables)} in
   let env2 = { S.scope=new_syms1} in
 
-        *)
+*)
