@@ -85,13 +85,12 @@ let check (globals, functions) =
   in
 
   let function_decl s = try StringMap.find s function_decls 
-	with Not_found -> raise (Failure ("unrecognized function " ^s))
+	with Not_found -> raise (Failure ("unrecognized function " ^ s))
 
   in
 
   let _ = function_decl "main" in (* Ensure "main is defined" *)
   
-  (* TODO: void/null same thing? *)
   let check_function func = 
      List.iter (check_not_null (fun n -> "illegal null formal " ^ n ^            
        " in " ^ func.f_id)) func.f_params;                                       
@@ -100,24 +99,30 @@ let check (globals, functions) =
        (List.map snd func.f_params);
 
      (*List.iter (check_not_null (fun n -> "illegal null local " ^ n ^             
-       " in " ^ func.fname)) func.locals;*)                                        
+       " in " ^ func.fname)) func.local;*)                                        
      (*
      report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.f_id)    
 bals,
        (List.map snd func.locals);                                               
      *)                                                                            
-     (* TODO: Type of each variable (global, formal, or local                        
+     (* TODO: Type of each variable (global, formal, or local *) 
+     (* TODO: Figure out how to add our locals *)
      let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)          
-         StringMap.empty (globals @ func.f_params @ func.locals )                 
-     in                                                                          
-     *)
+         StringMap.empty (globals @ func.f_params )
+     in
+
+     let type_of_identifier s = 
+	 try StringMap.find s symbols
+	 with Not_found -> raise (Failure ("undeclared identifier " ^s))
+     in
+
      (* Return the type of an expression or throw an exception *)
      let rec expression = function
-(* TODO: any others? *)
          IntLit _ -> Int
        | FloatLit _ -> Float
+       | StrLit _ -> String
        | BoolLit _ -> Bool
-       (*| Id s -> type_of_identifier s*)
+       | Id s -> type_of_identifier s
        | Binop(e1, op, e2) as e -> let t1 = expression e1 and t2 = expression e2 in
          (match op with
            Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
@@ -135,15 +140,17 @@ bals,
 	 	| _ -> raise (Failure ("Illegal unary operator " ^ string_of_uop op ^ string_of_typ t ^ " in " ^ string_of_expression ex)))
       (* TODO add other expressions; Inc, Dec, ObjAcc, ArrAcc, AssignDecl, ObjAssign, etc. ? *)
 	| Noexpr -> Null
-	(*| Assign(var, e) as ex -> let lt = type_of_identifier var
-				and rt = expression e in
+	| Assign(e1, e2) as ex -> let lt = expression e1
+				  and rt = expression e2 in
 		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
-		" = " ^ string_of_typ rt ^ " in " ^string_of_expression ex))*)
-      	(*| FunExp(f_id, actuals) as funexp -> let fd = function_decl f_id in
-		if List.length actuals !=  fd.f_params then
-	raise (Failure ("expecting " ^ string_of_int (List.length fd.f_params) ^ " arguments in " ^ string_of_expr call))
+		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
+      	(*| AssignDecl (t, var, e) as ex -> let  
+	| FunExp(f_id, actuals) as funexp -> let fd = function_decl f_id in fd.type_spec*) 
+		(*let fd = function_decl f_id in
+		if List.length actuals !=  List.length fd.f_params then
+	 	raise (Failure ("expecting " ^ string_of_int 
+		   (List.length fd.f_params) ^ " arguments in " ^ string_of_expression call))
 		else*)
-		
       in
 
       let check_bool_expression e = if expression e != Bool
