@@ -7,10 +7,6 @@ int main(){
 		//test fails
 		print_s("If/else failed");
 	} 
-	elif(x!= 1){
-		//test fails
-		print_s("If/else failed");
-	}
 	else {
 		//test passes
 		print_s("If/else works!");
