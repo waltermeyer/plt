@@ -1,19 +1,24 @@
 int main () {
-
   object a = {|
 		string test_key : "Hello",
-		object b : {| string hello : "World!" |},
-		int x : 123
+		int x : 123,
+		object b : {| string hello : "World!" |}
 	     |};
 
-  object b = {|
+
+  print_s(a.test_key);
+
+//  print_k(a.test_key);
+//  print_k(a.b.hello);
+
+/*  object b = {|
 		string test_key : "Hello",
 		object b : {| string hello : "Mars!" |},
 		int x : 456
 	     |};
-
+*/
   print_s(a.test_key);
-  print_s(a.b.hello);
+/*  print_s(a.b.hello);
   print_i(a.x);
 
   print_s(b.test_key);
@@ -23,6 +28,7 @@ int main () {
   print_s(a.test_key);
   print_s(a.b.hello);
   print_i(a.x);
+*/
 }
 /*
 ****TEST****
