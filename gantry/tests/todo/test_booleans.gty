@@ -1,0 +1,10 @@
+int main(){
+	Bool x = true;
+	print_i(x);
+	return 0;
+}
+
+/*
+****TEST****
+true
+*/	
