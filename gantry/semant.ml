@@ -187,7 +187,7 @@ let check (globals, functions) =
       | Return e -> let t = expression e in if t = func.type_spec then () else
 	 raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ 
 			  string_of_typ func.type_spec ^ " in " ^ string_of_expression e))
-      | If(p, s1, b1, s2, b2) -> check_bool_expression p; statement s1; check_bool_expression b1; statement s2; statement b2;
+      | If(p, s1, s2) -> check_bool_expression p; statement s1; statement s2;
       | For(e1, e2, e3, st) -> ignore (expression e1); check_bool_expression e2; ignore(expression e3); statement st
       | While(p, s) -> check_bool_expression p; statement s
       (* Do Break and Continue need to be semantically checked? *)
