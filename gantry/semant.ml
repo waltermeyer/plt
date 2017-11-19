@@ -80,12 +80,14 @@ let check (globals, functions) =
      { type_spec = String; f_id = "slice"; f_params = [(Int, "x"); (Int, "y"); (String, "z")] ; f_statements = [] }
      (StringMap.add "string_concat"
      { type_spec = String; f_id = "string_concat"; f_params = [(String, "x"); (String, "y")] ; f_statements = [] }
+     (StringMap.add "stringcmp"
+     { type_spec = Int; f_id = "stringcmp"; f_params = [(String, "x"); (String, "y")] ; f_statements = [] }
      (StringMap.add "tostring"
      { type_spec = String; f_id = "tostring"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "httpget"
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
-     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] }))))))))
+     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] })))))))))
   in
 
   (* Add built in functions to list of function declaration list *)
