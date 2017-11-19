@@ -78,12 +78,14 @@ let check (globals, functions) =
      { type_spec = Int; f_id = "length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "slice"
      { type_spec = String; f_id = "slice"; f_params = [(Int, "x"); (Int, "y"); (String, "z")] ; f_statements = [] }
+     (StringMap.add "string_concat"
+     { type_spec = String; f_id = "string_concat"; f_params = [(String, "x"); (String, "y")] ; f_statements = [] }
      (StringMap.add "tostring"
      { type_spec = String; f_id = "tostring"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "httpget"
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
-     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] })))))))
+     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] }))))))))
   in
 
   (* Add built in functions to list of function declaration list *)
@@ -109,17 +111,7 @@ let check (globals, functions) =
      (* Report if there are duplicate function parameters *)                                                                                 
      report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.f_id)   
        (List.map snd func.f_params);
-
-
-     (* TODO: Do we need to check that locals are not null and not duplicated? 
-	      If so, will not happen here *)
-
-     (*List.iter (check_not_null (fun n -> "illegal null local " ^ n ^             
-       " in " ^ func.fname)) func.local;*)                                        
-     (*
-     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.f_id) (List.map snd func.locals);    
-     *)      
-     
+ 
      (* Add globals and function parameters to symbol table *)
      List.iter (fun (a, b) -> Hashtbl.add symbols b a) (globals @ func.f_params);
 
@@ -139,13 +131,14 @@ let check (globals, functions) =
          (match op with
             Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
           | Eq | Neq when t1 = t2 -> Bool
-	  | Lt | Leq | Gt | Geq when t1 = Int && t2 = Int -> Bool (* not Int -> Int again, right? *)
+	  | Lt | Leq | Gt | Geq when t1 = Int && t2 = Int -> Bool
           | And | Or when t1 = Bool && t2 = Bool -> Bool
+	  | Conc when t1 = String && t2 = String -> String 
           | _ -> raise (Failure ("illegal binary operator " ^ string_of_typ t1 ^ " " ^ string_of_op op ^ " "     ^ string_of_typ t2 ^ " in " ^ string_of_expression e))
  	)
 	| Unop (op, e) as ex -> let t = expression e in
 	 (match op with
-	   Neg when t = Int -> Int
+	  Neg when t = Int -> Int
 	  | Not when t = Bool -> Bool
           | Inc when t = Int -> Int
 	  | Dec when t = Int -> Int
@@ -195,8 +188,7 @@ let check (globals, functions) =
 	 raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ 
 			  string_of_typ func.type_spec ^ " in " ^ string_of_expression e))
       | If(p, s1, b1, s2, b2) -> check_bool_expression p; statement s1; check_bool_expression b1; statement s2; statement b2;
-      | For(e1, e2, e3, st) -> ignore (expression e1); check_bool_expression e2;
-      	ignore(expression e3); statement st
+      | For(e1, e2, e3, st) -> ignore (expression e1); check_bool_expression e2; ignore(expression e3); statement st
       | While(p, s) -> check_bool_expression p; statement s
       (* Do Break and Continue need to be semantically checked? *)
      in 
