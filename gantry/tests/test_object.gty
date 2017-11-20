@@ -1,37 +1,41 @@
 int main () {
-
   object a = {|
 		string test_key : "Hello",
-		object b : {| string hello : "World!" |},
-		int x : 123
+		int x : 123,
+		object b : {| string hello : "World!" |}
 	     |};
 
   object b = {|
-		string test_key : "Hello",
-		object b : {| string hello : "Mars!" |},
-		int x : 456
+		string test_key : "Hello...",
+		object b : {| string hello : "Mars!", int x : 111 |},
+		int x : 456,
+		bool a : true
 	     |};
 
-  print_s(a.test_key);
-  print_s(a.b.hello);
-  print_i(a.x);
+  print_k(a.test_key);
+  print_k(a.b.hello);
+  print_k(a.x);
 
-  print_s(b.test_key);
-  print_s(b.b.hello);
-  print_i(b.x);
+  print_k(b.test_key);
+  print_k(b.b.hello);
+  print_k(b.x);
+  print_k(b.b.x);
+  print_k(b.a);
 
-  print_s(a.test_key);
-  print_s(a.b.hello);
-  print_i(a.x);
+  print_k(a.test_key);
+  print_k(a.b.hello);
+  print_k(a.x);
 }
 /*
 ****TEST****
 Hello
 World!
 123
-Hello
+Hello...
 Mars!
 456
+111
+true
 Hello
 World!
 123
