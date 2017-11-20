@@ -7,8 +7,9 @@ int main () {
 
   object b = {|
 		string test_key : "Hello...",
-		object b : {| string hello : "Mars!" |},
-		int x : 456
+		object b : {| string hello : "Mars!", int x : 111 |},
+		int x : 456,
+		bool a : true
 	     |};
 
   print_k(a.test_key);
@@ -18,6 +19,8 @@ int main () {
   print_k(b.test_key);
   print_k(b.b.hello);
   print_k(b.x);
+  print_k(b.b.x);
+  print_k(b.a);
 
   print_k(a.test_key);
   print_k(a.b.hello);
@@ -31,6 +34,8 @@ World!
 Hello...
 Mars!
 456
+111
+true
 Hello
 World!
 123

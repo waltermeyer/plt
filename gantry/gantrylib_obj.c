@@ -58,7 +58,7 @@ int print_k(obj *o) {
     case 4: printf("%f\n", o->f); break;
     //case 5: printf("%d\n", o->o); break;
     case 6: printf("%s\n", o->s); break;
-    case 7: printf("%s", o->b ? "true" : "false"); break;
+    case 7: printf("%s", o->b ? "true\n" : "false\n"); break;
     case 8: printf("null\n"); break;
   };
   return 0;
