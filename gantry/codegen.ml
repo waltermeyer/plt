@@ -22,7 +22,6 @@ let translate (globals, functions) =
     and i8_t   = L.i8_type context
     and b_t   = L.i8_type context
     and str_t  = L.pointer_type (L.i8_type context)
-    (* and arr_t = L.pointer_type (L.i8_type context) TODO *)
     and flt_t  = L.double_type context
     and void_t = L.void_type context in
     (* Object Type *)
@@ -252,7 +251,7 @@ let translate (globals, functions) =
 	(* Set next for a key or object *)
 	let set_next k =
 	try
-	  let (t, n, next_k) = Stack.top kv_stack in
+	  let (t, _, next_k) = Stack.top kv_stack in
 	  if t > -1 then 
 	    (ignore(L.build_store next_k
 	           (L.build_struct_gep k 0 "next" builder) builder);)

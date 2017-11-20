@@ -47,12 +47,13 @@ obj *obj_findkey(obj *o, char *keys) {
     o = o->next;
   }
 
-  printf("Did not find: %s\n", k);
   free(k);
   return NULL;
 }
 
 int print_k(obj *o) {
+  if (o == NULL)
+    return 1;
   switch(o->v_typ) {
     case 3: printf("%d\n", o->i); break;
     case 4: printf("%f\n", o->f); break;
