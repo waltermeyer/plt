@@ -5,39 +5,30 @@ int main () {
 		object b : {| string hello : "World!" |}
 	     |};
 
-
-    a.test_key;
-    //a.b.hello;
-    print_k(a.test_key);
-    //print_s(a.test_key);
-
-//  print_k(a.test_key);
-//  print_k(a.b.hello);
-
-/*  object b = {|
-		string test_key : "Hello",
+  object b = {|
+		string test_key : "Hello...",
 		object b : {| string hello : "Mars!" |},
 		int x : 456
 	     |};
-*/
-/*  print_s(a.b.hello);
-  print_i(a.x);
 
-  print_s(b.test_key);
-  print_s(b.b.hello);
-  print_i(b.x);
+  print_k(a.test_key);
+  print_k(a.b.hello);
+  print_k(a.x);
 
-  print_s(a.test_key);
-  print_s(a.b.hello);
-  print_i(a.x);
-*/
+  print_k(b.test_key);
+  print_k(b.b.hello);
+  print_k(b.x);
+
+  print_k(a.test_key);
+  print_k(a.b.hello);
+  print_k(a.x);
 }
 /*
 ****TEST****
 Hello
 World!
 123
-Hello
+Hello...
 Mars!
 456
 Hello

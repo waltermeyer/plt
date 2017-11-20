@@ -18,23 +18,41 @@ typedef struct obj {
   bool b; // bool
 } obj;
 
-obj *obj_findkey(obj *op, char *key) {
-  // get first key from head
-  obj *o = op->next;
-  // search for key
+/*
+ * Recursively search for a key in an object
+ */
+obj *obj_findkey(obj *o, char *keys) {
+  char *k, *keys_dup;
+  keys_dup = strdup(keys);
+
+  // parse a key to search for
+  k = strsep(&keys_dup, ".");
+
+  // search for keys within an object
+  o = o->next; // get first key from head struct
   while (o != NULL) {
-    printf("KEY: %s\n", o->k);
-    if (strcmp(o->k, key) == 0) {
-       printf("FOUND: %s\n", o->k);
-       return o;
+    if (strcmp(o->k, k) == 0) {
+      // found our key
+      if (strlen(k) == strlen(keys)) {
+        free(k);
+	return o;
+      }
+      // continue nested key search
+      else {
+        o = obj_findkey(o->o, keys_dup);
+        free(k);
+	return o;
+      }
     }
     o = o->next;
   }
+
+  printf("Did not find: %s\n", k);
+  free(k);
   return NULL;
 }
 
 int print_k(obj *o) {
-  printf("%d\n", o->v_typ);
   switch(o->v_typ) {
     case 3: printf("%d\n", o->i); break;
     case 4: printf("%f\n", o->f); break;
@@ -50,14 +68,37 @@ int print_k(obj *o) {
 int main () {
   obj *o = (obj *) malloc(sizeof(obj));
   obj *o2 = (obj *) malloc(sizeof(obj));
+  obj *o3 = (obj *) malloc(sizeof(obj));
+  obj *o4_head = (obj *) malloc(sizeof(obj));
+  obj *o4 = (obj *) malloc(sizeof(obj));
+  obj *o5_head = (obj *) malloc(sizeof(obj));
+  obj *o5 = (obj *) malloc(sizeof(obj));
   o->next = o2;
-  obj *tmp = o->next;
-  tmp->k = "mykey";
-  tmp->v_typ = 6;
-  //o->v.s  = "hello";
-  tmp->i = 33;
-  obj_findkey(&o, "mykey");
+  o2->next = o3;
+
+  o->k = NULL;
+  o2->k = "key2";
+  o2->i = 2;
+  o3->k = "key3";
+  o3->o = o4_head;
+  o4_head->next = o4;
+  o4->k = "nestedkey4";
+  o4->o = o5_head;
+  o5_head->next = o5;
+  o5->k = "nestedkey5";
+  o5->i = 5;
+
+  obj_findkey(o, "key2");
+  obj_findkey(o, "key3.nestedkey4");
+  obj_findkey(o, "key3.nestedkey4.nestedkey5");
+
   free(o);
+  free(o2);
+  free(o3);
+  free(o4);
+  free(o4_head);
+  free(o5);
+  free(o5_head);
 }
 #endif
 

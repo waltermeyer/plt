@@ -157,21 +157,15 @@ let translate (globals, functions) =
             try Hashtbl.find f_var_tbl obj with
             Not_found -> Hashtbl.find g_var_tbl obj
 	  in
-	  (* Build runtime calls to find key *)
-	  let l = List.tl l in
+	  (* Build runtime call to find key *)
+	  let keys = String.concat "." (List.tl l) in
+	  let key = L.build_global_stringptr keys "keys_find" builder in
+	  (*print_endline("Looking for: " ^ keys);*)
 	  (* Dereference parent object pointer *)
 	  let obj_p = L.build_load obj_p "tmp" builder in
-	  let build_calls obj_p key =
-	    let key = L.build_global_stringptr key "k_find" builder in
-	    (* Now build runtime call to find the key *)
-	    L.build_call obj_findkey_func [| obj_p ; key |]
-	    "obj_findkey" builder
-	  in
-	  List.fold_left build_calls obj_p l
-	  (*let k = List.fold_left build_calls obj_p l in
-	  let k_ptr = L.build_alloca (L.pointer_type (L.pointer_type obj_t))
-		      "k_found" builder in
-	  L.build_store k k_ptr builder*)
+	  (* Now build runtime call to find the key *)
+	  L.build_call obj_findkey_func [| obj_p ; key |]
+	  "obj_findkey" builder
       in
 
     (* Construct code for an expression and return the value *)
@@ -221,7 +215,6 @@ let translate (globals, functions) =
 	       L.build_store tmp n builder
 	)
       | A.KeyVal(t, n, e) ->
-	(*print_endline("Pushing: " ^ n);*)
 	(* Resolve struct index and 'value_typ' in struct *)
 	let sidx_of_typ = function
 	    A.Int    -> 3 
@@ -255,7 +248,6 @@ let translate (globals, functions) =
 	let set_next k =
 	try
 	  let (t, n, next_k) = Stack.top kv_stack in
-	  (*print_endline("[" ^ n ^ "]");*)
 	  if t > -1 then 
 	    (ignore(L.build_store next_k
 	           (L.build_struct_gep k 0 "next" builder) builder);)
@@ -272,7 +264,6 @@ let translate (globals, functions) =
 	(* The Enclosing (parent) Object *)
 	let parent = L.build_malloc obj_t "obj" builder in
 	(* Connect parent to first key *)
-	(*print_endline("Setting Parent");*)
 	ignore(set_next parent);
 	(* Connect each key in this object and add to lookup table *)
 	let build_obj _ =
@@ -281,7 +272,6 @@ let translate (globals, functions) =
 	  ignore(L.build_struct_gep k t "value" builder);
 	  (* Add orphan keys to tmp kv table *)
 	  (* ignore(add_kv (n, value)); *)
-	  (*print_endline("Setting Next of [" ^ n ^ "] to:");*)
 	  ignore(set_next k);
 	in
 	(* Build out all of the key values within this object *)
@@ -295,7 +285,6 @@ let translate (globals, functions) =
 	  (* Then set it and forget it *)
 	  let n = lookup n in
           ignore (L.build_store e' n builder);
-	  (*ignore(print_endline (L.string_of_llvalue n));*)
 	  (*ignore(parent_keys n);*)
           e'
       | A.Assign(e1, e2) ->
@@ -303,7 +292,6 @@ let translate (globals, functions) =
         let e2' = expr builder e2 in
 	let n = lookup (A.expr_to_str e1) in
 	ignore (L.build_store e2' n builder);
-	(*ignore(print_endline (L.string_of_llvalue n));*)
         (* If this was an object, 'parent' the orphan keys *)
         (* ignore(parent_keys n); *)
         e2'
