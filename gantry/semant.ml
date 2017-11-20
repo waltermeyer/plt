@@ -55,6 +55,9 @@ let check (globals, functions) =
   if List.mem "print_d" (List.map (fun fd -> fd.f_id) functions)
   then raise (Failure ("function print float may not be defined")) else (); 
 
+  if List.mem "print_k" (List.map (fun fd -> fd.f_id) functions)
+  then raise (Failure ("function print key may not be defined")) else (); 
+
   report_duplicate (fun n -> "duplicate function " ^ n)
     (List.map (fun fd -> fd.f_id) functions);
 
@@ -67,6 +70,8 @@ let check (globals, functions) =
      { type_spec = Null; f_id = "print_i"; f_params = [(Int, "x")] ; f_statements = [] }
      (StringMap.add "print_d"
      { type_spec = Null; f_id = "print_d"; f_params = [(Float, "x")] ; f_statements = [] }
+     (StringMap.add "print_k"
+     { type_spec = Null; f_id = "print_k"; f_params = [(Object, "x")] ; f_statements = [] }
      (* TODO : Decide whether we are implementing in our language or in codegen *)
      (*(StringMap.add "arrify"
      { type_spec = Array; f_id = "arrify"; f_params = [(String, "x")] ; f_statements = [] }
@@ -87,7 +92,7 @@ let check (globals, functions) =
      (StringMap.add "httpget"
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
-     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] })))))))))
+     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] }))))))))))
   in
 
   (* Add built in functions to list of function declaration list *)
@@ -98,7 +103,6 @@ let check (globals, functions) =
   (* Check that function exists in function declaration list *)
   let function_decl s = try StringMap.find s function_decls 
 	with Not_found -> raise (Failure ("unrecognized function " ^ s))
-
   in
 
   (* Ensure "main is defined" *)
