@@ -75,6 +75,10 @@ let translate (globals, functions) =
     (* String Comparison *)
     let stringcmp_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
     let stringcmp = L.declare_function "stringcmp" stringcmp_t the_module in
+    
+    (* String Length *)
+    let string_length_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+    let string_length = L.declare_function "string_length" string_length_t the_module in
 
     (* HTTP GET built-in *)
     let httpget_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
@@ -326,6 +330,9 @@ let translate (globals, functions) =
           let e2' = expr builder e2 in
             L.build_call httppost_func [| (expr builder e) ; (e2') |]
             "httppost" builder
+      | A.FunExp("string_length", [e]) ->
+	    L.build_call string_length [| (expr builder e ) |]
+	    "string_length" builder
       | A.FunExp("slice", [e; e1; e2]) ->
           let e1' = expr builder e1
           and e2' = expr builder e2 in
