@@ -1,0 +1,12 @@
+int main(){
+	string a = "boy";
+	string b = "boy";
+	int comp = stringcmp(a, b);
+	print_i(comp);
+	return 0;
+}
+
+/*
+****TEST****
+0
+*/

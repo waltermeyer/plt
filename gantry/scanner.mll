@@ -49,7 +49,6 @@ rule token = parse
 
 (* Flow Control *)
 | "if"        { IF }
-| "elif"      { ELIF }
 | "else"      { ELSE }
 | "for"       { FOR }
 | "while"     { WHILE }

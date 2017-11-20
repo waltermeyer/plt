@@ -4,7 +4,6 @@
 
 # Easiest way to build: using ocamlbuild, which in turn uses ocamlfind
 
-
 all : gantry.native string_concat.o slice.o gantrylib_http.o gantrylib_obj.o
 
 gantry.native :
@@ -18,8 +17,7 @@ clean :
 	ocamlbuild -clean
 	rm -rf testall.log *.diff gantry scanner.ml parser.ml parser.mli
 	rm -rf printbig
-	rm -rf string_concat string_concat.o
-	rm -rf slice slice.o
+	rm -rf gantrylib_string gantrylib_string.o
 	rm -rf gantrylib_http
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll tests/*.out *.exe *.err
 
@@ -52,6 +50,7 @@ LDFLAGS=-L/usr/lib/x86_64-linux-gnu -lcurl
 gantrylib_http.o : gantrylib_http.c
 	$(CC) $(CFLAGS) gantrylib_http.c
 
+
 # Testing the "printbig" example
 
 # printbig : printbig.c
@@ -59,11 +58,8 @@ gantrylib_http.o : gantrylib_http.c
 
 # Testing the "stringconcat" example
 
-string_concat : string_concat.c
-	cc -o string_concat -DBUILD_TEST string_concat.c
-
-slice : slice.c
-	cc -o slice -DBUILD_TEST slice.c
+gantrylib_string : gantrylib_string.c
+	cc -o gantrylib_string -DBUILD_TEST gantrylib_string.c
 
 gantrylib_obj: gantrylib_obj.c
 	cc -o gantrylib_obj -DBUILD_TEST gantrylib_obj.c

@@ -12,7 +12,7 @@ open Ast
 %token LT LEQ GT GEQ
 %token AND OR NOT
 %token CONCAT
-%token IF ELIF ELSE FOR WHILE CONTINUE BREAK RETURN
+%token IF ELSE FOR WHILE CONTINUE BREAK RETURN
 %token INT FLOAT OBJECT ARRAY STRING BOOL NULL
 %token TRUE FALSE
 %token <int> INTLIT
@@ -22,7 +22,6 @@ open Ast
 
 /* Precedence Rules */
 %nonassoc NOELSE
-%nonassoc ELIF
 %nonassoc ELSE
 %right ASSIGN COLON
 %left PERIOD LBRACK
@@ -165,15 +164,9 @@ for_statement:
 
 if_statement:
     IF LPAREN expression RPAREN statement %prec NOELSE
-      { If($3, $5, Noexpr, Block([]), Block([])) }
+      { If($3, $5, Block([])) }
     | IF LPAREN expression RPAREN statement ELSE statement
-      { If($3, $5, Noexpr, Block([]), $7) }
-    | IF LPAREN expression RPAREN statement
-      ELIF LPAREN expression RPAREN statement %prec NOELSE
-      { If($3, $5, $8, $10, Block([])) }
-    | IF LPAREN expression RPAREN statement
-      ELIF LPAREN expression RPAREN statement ELSE statement
-      { If($3, $5, $8, $10, $12) }
+      { If($3, $5, $7) }
 
 while_statement:
     WHILE LPAREN expression RPAREN statement
