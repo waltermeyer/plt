@@ -65,12 +65,16 @@ let translate (globals, functions) =
     let printf_func = L.declare_function "printf" printf_t the_module in
 
     (* String Concatenation *)
-    let string_concat = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
-    let string_concat = L.declare_function "string_concat" string_concat the_module in
+    let string_concat_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
+    let string_concat = L.declare_function "string_concat" string_concat_t the_module in
 
     (* String Slice *)
     let slice_t = L.var_arg_function_type str_t [| L.pointer_type i8_t ; i32_t ; i32_t |] in
     let slice = L.declare_function "slice" slice_t the_module in
+    
+    (* String Comparison *)
+    let stringcmp_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
+    let stringcmp = L.declare_function "stringcmp" stringcmp_t the_module in
 
     (* HTTP GET built-in *)
     let httpget_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
@@ -327,6 +331,11 @@ let translate (globals, functions) =
           and e2' = expr builder e2 in
 	    L.build_call slice [| (expr builder e) ; (e1') ; (e2') |]
 	    "slice" builder
+      | A.FunExp("stringcmp", [e1; e2]) ->
+          let e1' = expr builder e1
+          and e2' = expr builder e2 in
+	    L.build_call stringcmp [| (e1') ; (e2') |]
+	    "stringcmp" builder
       | A.FunExp(f, act) ->
         let (fdef, fdecl) = StringMap.find f func_decls in
         let actuals = List.rev (List.map (expr builder) (List.rev act)) in
