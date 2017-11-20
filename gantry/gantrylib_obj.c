@@ -3,28 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*
- * Library for Gantry Objects
- */
-/*typedef union value {
-  // values
-  int i;     // int
-  double f;   // float
-  struct obj *o;   // object
-  char *s;   // string
-  bool b; // bool
-  void *null;
-} value;
-
-typedef struct obj {
-  // metadata
-  struct obj *next; // next
-  char *k;    // key name
-  int  v_typ; // value type
-  union value v;
-} obj;
-*/
-
 // The Object Struct
 typedef struct obj {
   // metadata
@@ -56,6 +34,7 @@ obj *obj_findkey(obj *op, char *key) {
 }
 
 int print_k(obj *o) {
+  printf("%d\n", o->v_typ);
   switch(o->v_typ) {
     case 3: printf("%d\n", o->i); break;
     case 4: printf("%f\n", o->f); break;

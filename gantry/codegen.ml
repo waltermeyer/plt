@@ -85,7 +85,7 @@ let translate (globals, functions) =
 			[| L.pointer_type obj_t ; L.pointer_type i8_t |] in
     let obj_findkey_func = L.declare_function "obj_findkey" obj_findkey_t the_module in
     let printk_t = L.var_arg_function_type i32_t [| L.pointer_type obj_t |] in
-    let printk_func = L.declare_function "print_k" printf_t the_module in
+    let printk_func = L.declare_function "print_k" printk_t the_module in
 
     (* Function Declarations *)
     let func_decls =
@@ -157,19 +157,21 @@ let translate (globals, functions) =
             try Hashtbl.find f_var_tbl obj with
             Not_found -> Hashtbl.find g_var_tbl obj
 	  in
-	  (* ignore(print_endline (L.string_of_llvalue obj_p)); *)
 	  (* Build runtime calls to find key *)
 	  let l = List.tl l in
+	  (* Dereference parent object pointer *)
+	  let obj_p = L.build_load obj_p "tmp" builder in
 	  let build_calls obj_p key =
 	    let key = L.build_global_stringptr key "k_find" builder in
 	    (* Now build runtime call to find the key *)
 	    L.build_call obj_findkey_func [| obj_p ; key |]
 	    "obj_findkey" builder
 	  in
-	  (* Starting with obj_p, build calls to find key *)
-	  let obj_p = L.build_load obj_p "tmp" builder in
-	  (*let obj_p = L.build_store tmp "tmp" builder in*)
 	  List.fold_left build_calls obj_p l
+	  (*let k = List.fold_left build_calls obj_p l in
+	  let k_ptr = L.build_alloca (L.pointer_type (L.pointer_type obj_t))
+		      "k_found" builder in
+	  L.build_store k k_ptr builder*)
       in
 
     (* Construct code for an expression and return the value *)
@@ -179,7 +181,10 @@ let translate (globals, functions) =
       | A.StrLit s -> L.build_global_stringptr s "string" builder
       | A.BoolLit b -> L.const_int b_t (if b then 1 else 0)
       | A.Noexpr -> L.const_int i32_t 0
-      | A.Id s -> L.build_load (lookup s) s builder
+      | A.Id s -> if (String.contains s '.') then
+		      (lookup s)
+		  else
+		    (L.build_load (lookup s) s builder)
       | A.Binop (e1, op, e2) ->
         let e1' = expr builder e1
         and e2' = expr builder e2 in
