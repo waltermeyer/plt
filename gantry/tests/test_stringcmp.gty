@@ -1,12 +1,18 @@
 int main(){
-	string a = "boy";
+	string a = "a";
 	string b = "boy";
 	int comp = stringcmp(a, b);
+	print_i(comp);
+	comp = stringcmp(b,a);
+	print_i(comp);
+	comp = stringcmp(b,b);
 	print_i(comp);
 	return 0;
 }
 
 /*
 ****TEST****
+-1
+1
 0
 */

@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 char *slice(char *src, int begin, int end){
 	int len = end - begin;
@@ -17,8 +18,33 @@ char *slice(char *src, int begin, int end){
 	return dest;
 }
 
+/* Returns 0 if equal, -1 if a<b, 1 if a>b */
 int stringcmp(const char *a, const char *b){
-	return strcmp(a, b);
+	int x = strcmp(a, b);
+	int res = 0;	
+	if (x == 0){
+		res = 0;;
+	}
+	else if (x < 0){
+		res = -1;
+	}
+	else {
+		res = 1;
+	}
+	return res;
+}
+
+/* Returns 1 if equal , returns 0 if not equal */
+bool stringeq(const char *a , const char *b){
+	int x = strcmp(a, b);
+	bool res = 0;
+	if (x == 0){
+		res = 1;
+	}
+	else {
+		res = 0;
+	}
+	return res;
 }
 
 /* Get passed two strings, malloc space for concatenation */
@@ -29,6 +55,10 @@ char *string_concat(char *a, char *b){
 	memcpy(c, a, len_a);
 	memcpy(c + len_a, b, len_b + 1);
 	return c;
+}
+
+int string_length(char *a){
+	return strlen(a);
 }
 
 int test_slice(){
@@ -62,14 +92,27 @@ int test_stringcmp(){
 	return 0;
 }
 
+
+int test_string_length(){
+	char a [] = "foo";
+	char b [] = "foobar";
+	int x = string_length(a);
+	int y = string_length(b);
+	printf("This should be 3 : %d \n", x);
+	printf("This should be 6 : %d \n", y);
+	return 0;
+}
+
 #ifdef BUILD_TEST
 int main(){
-	printf("=== Testing String Slice ===\n");
-	test_slice();
 	printf("=== Testing String Comparison ===\n");
 	test_stringcmp();
 	printf("=== Testing String Concat ===\n");
 	test_string_concat();
+	printf("=== Testing String Length ===\n");
+	test_string_length();
+	printf("=== Testing String Slice ===\n");
+	test_slice();
 	return 0;
 }
 #endif
