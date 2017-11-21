@@ -1,0 +1,17 @@
+int main() {
+
+  string docker_host = "http://localhost";
+  string ver = httpget(docker_host ^ "/version");
+  string image = "httpd:alpine";
+
+  print_s("\n *** Starting API calls to: [" ^ docker_host ^ "] ***\n");
+
+  // Download Image
+  print_s("\n *** Pulling Container Image: [" ^ image ^ "] ***\n");
+  print_s(httppost(docker_host ^ "/images/create?fromImage=" ^ image, ""));
+
+  string create = "{\"Image\": \"alpine:latest\", \"Cmd\": [\"echo\", \"hello world\"]}";
+  // Create and start container
+  print_s(httppost(docker_host ^ "/containers/create", create));
+
+}

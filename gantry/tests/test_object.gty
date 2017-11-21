@@ -1,3 +1,7 @@
+int fun(object o) {
+  print_k(o.x);
+}
+
 int main () {
   object a = {|
 		string test_key : "Hello",
@@ -27,6 +31,9 @@ int main () {
   print_k(a.x);
   print_k(a.z);
   print_k(a);
+
+  fun(a);
+
 }
 /*
 ****TEST****
@@ -40,5 +47,6 @@ Mars!
 true
 Hello
 World!
+123
 123
 */

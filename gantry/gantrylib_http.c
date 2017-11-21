@@ -64,6 +64,8 @@ char* httppost(char* target, char *tosend) {
 	
 	CURL *curl;
 	CURLcode res;
+	struct curl_slist *headers = NULL;
+	headers = curl_slist_append(headers, "Content-Type: application/json");
 	struct string data;
 	struct string *s = &data;
 	s->len = 0;
@@ -78,7 +80,9 @@ char* httppost(char* target, char *tosend) {
 	
 	// COPYPOSTFIELDS will copy the data before sending so altering during sending is ok
 	curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, tosend);
-	
+	// Set HEADERS for POST to Content-Type: application/json
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
 	// Put any responses in a dummy array instead of printing to stdout
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writer);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, s);
