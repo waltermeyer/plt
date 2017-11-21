@@ -12,9 +12,9 @@ int main(){
 	if (x<y){
 		print_s("2 is less than 3");
 	}
-	if (!b){
-		print_s("!b is true");
-	}
+	//if (!b){
+	//	print_s("!b is true");
+	//}
 }
 
 /*
