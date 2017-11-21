@@ -1,0 +1,11 @@
+int main(){
+	string x = "foo";
+	string y = "bar";
+	print_i(x==y);
+	return 0;
+}
+
+/*
+****TEST****
+1
+*/

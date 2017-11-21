@@ -187,22 +187,29 @@ let translate (globals, functions) =
       | A.Binop (e1, op, e2) ->
         let e1' = expr builder e1
         and e2' = expr builder e2 in
-        (match op with
+	let typ = L.string_of_lltype (L.type_of e1') in
+	(match op with
              A.Add  -> L.build_add e1' e2' "tmp" builder
            | A.Sub  -> L.build_sub e1' e2' "tmp" builder
            | A.Mult -> L.build_mul e1' e2' "tmp" builder
            | A.Div  -> L.build_sdiv e1' e2' "tmp" builder
            | A.And  -> L.build_and e1' e2' "tmp" builder
            | A.Or   -> L.build_or e1' e2' "tmp" builder
-           | A.Eq   -> L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder
+	   | A.Eq   -> if ((String.compare typ "i8*") == 0) then
+			(L.build_call stringcmp [| (e1') ; (e2') |]
+	    	       "stringcmp" builder)
+		       else
+			( L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder)
+	   (*| A.Neq  -> L.build_call stringcmp [| (e1') ; (e2') |]
+	    	       "stringcmp" builder*)
+           | A.Conc -> L.build_call string_concat [| e1'; e2'|]
+		       "string_concat" builder 
            | A.Neq  -> L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder
            | A.Lt   -> L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder
            | A.Leq  -> L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder
            | A.Gt   -> L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder
-           | A.Geq  -> L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder
-           | A.Conc -> L.build_call string_concat [| e1'; e2'|]
-		       "string_concat" builder
-        )
+           | A.Geq  -> L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder 
+	)
       | A.Unop(op, e) ->
         let e' = expr builder e in
         (match op with
