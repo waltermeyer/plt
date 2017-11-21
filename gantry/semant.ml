@@ -87,6 +87,8 @@ let check (globals, functions) =
      { type_spec = String; f_id = "string_concat"; f_params = [(String, "x"); (String, "y")] ; f_statements = [] }
      (StringMap.add "stringcmp"
      { type_spec = Int; f_id = "stringcmp"; f_params = [(String, "x"); (String, "y")] ; f_statements = [] }
+     (StringMap.add "stringeq"
+     { type_spec = Bool; f_id = "stringcmp"; f_params = [(String, "x"); (String, "y")] ; f_statements = [] }
      (StringMap.add "string_length"
      { type_spec = Int; f_id = "string_length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "tostring"
@@ -94,7 +96,7 @@ let check (globals, functions) =
      (StringMap.add "httpget"
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
-     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] })))))))))))
+     { type_spec = Bool; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] }))))))))))))
   in
 
   (* Add built in functions to list of function declaration list *)

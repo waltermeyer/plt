@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 char *slice(char *src, int begin, int end){
 	int len = end - begin;
@@ -17,8 +18,33 @@ char *slice(char *src, int begin, int end){
 	return dest;
 }
 
+/* Returns 0 if equal, -1 if a<b, 1 if a>b */
 int stringcmp(const char *a, const char *b){
-	return strcmp(a, b);
+	int x = strcmp(a, b);
+	int res = 0;	
+	if (x == 0){
+		res = 0;;
+	}
+	else if (x < 0){
+		res = -1;
+	}
+	else {
+		res = 1;
+	}
+	return res;
+}
+
+/* Returns 1 if equal , returns 0 if not equal */
+bool stringeq(const char *a , const char *b){
+	int x = strcmp(a, b);
+	bool res = 0;
+	if (x == 0){
+		res = 1;
+	}
+	else {
+		res = 0;
+	}
+	return res;
 }
 
 /* Get passed two strings, malloc space for concatenation */
