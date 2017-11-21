@@ -22,7 +22,6 @@ let translate (globals, functions) =
     and i8_t   = L.i8_type context
     and b_t   = L.i8_type context
     and str_t  = L.pointer_type (L.i8_type context)
-    (* and arr_t = L.pointer_type (L.i8_type context) TODO *)
     and flt_t  = L.double_type context
     and void_t = L.void_type context in
     (* Object Type *)
@@ -79,6 +78,11 @@ let translate (globals, functions) =
     (* String Equal *)
     let stringeq_t = L.var_arg_function_type i8_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
     let stringeq = L.declare_function "stringeq" stringeq_t the_module in
+   
+    (* String Length *)
+    let string_length_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+    let string_length = L.declare_function "string_length" string_length_t the_module in
+
 
     (* HTTP GET built-in *)
     let httpget_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
@@ -267,7 +271,7 @@ let translate (globals, functions) =
 	(* Set next for a key or object *)
 	let set_next k =
 	try
-	  let (t, n, next_k) = Stack.top kv_stack in
+	  let (t, _, next_k) = Stack.top kv_stack in
 	  if t > -1 then 
 	    (ignore(L.build_store next_k
 	           (L.build_struct_gep k 0 "next" builder) builder);)
@@ -334,6 +338,9 @@ let translate (globals, functions) =
           let e2' = expr builder e2 in
             L.build_call httppost_func [| (expr builder e) ; (e2') |]
             "httppost" builder
+      | A.FunExp("string_length", [e]) ->
+	    L.build_call string_length [| (expr builder e ) |]
+	    "string_length" builder
       | A.FunExp("slice", [e; e1; e2]) ->
           let e1' = expr builder e1
           and e2' = expr builder e2 in

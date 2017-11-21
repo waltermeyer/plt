@@ -57,6 +57,10 @@ char *string_concat(char *a, char *b){
 	return c;
 }
 
+int string_length(char *a){
+	return strlen(a);
+}
+
 int test_slice(){
 	char *src = "this is a string";
 	char *dest = slice(src, 1, 3);
@@ -88,14 +92,27 @@ int test_stringcmp(){
 	return 0;
 }
 
+
+int test_string_length(){
+	char a [] = "foo";
+	char b [] = "foobar";
+	int x = string_length(a);
+	int y = string_length(b);
+	printf("This should be 3 : %d \n", x);
+	printf("This should be 6 : %d \n", y);
+	return 0;
+}
+
 #ifdef BUILD_TEST
 int main(){
-	printf("=== Testing String Slice ===\n");
-	test_slice();
 	printf("=== Testing String Comparison ===\n");
 	test_stringcmp();
 	printf("=== Testing String Concat ===\n");
 	test_string_concat();
+	printf("=== Testing String Length ===\n");
+	test_string_length();
+	printf("=== Testing String Slice ===\n");
+	test_slice();
 	return 0;
 }
 #endif

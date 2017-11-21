@@ -25,6 +25,8 @@ int main () {
   print_k(a.test_key);
   print_k(a.b.hello);
   print_k(a.x);
+  print_k(a.z);
+  print_k(a);
 }
 /*
 ****TEST****
