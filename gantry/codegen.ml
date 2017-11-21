@@ -18,6 +18,7 @@ let translate (globals, functions) =
   let the_module = L.create_module context "Gantry"
 
     (* LLVM Types *)
+    and i1_t   = L.i1_type context
     and i32_t  = L.i32_type context
     and i8_t   = L.i8_type context
     and b_t   = L.i8_type context
@@ -226,7 +227,7 @@ let translate (globals, functions) =
         let e' = expr builder e in
         (match op with
              A.Neg  -> L.build_neg e' "tmp" builder
-           | A.Not  -> L.build_not e' "tmp" builder
+           | A.Not  -> L.const_bitcast (L.build_icmp L.Icmp.Eq (e') (L.const_int b_t 0) "tmp" builder ) i8_t
 	   | A.Inc  ->
 	       let n   = lookup (A.expr_to_str e) in
 	       let tmp = L.build_load n "tmp" builder in
