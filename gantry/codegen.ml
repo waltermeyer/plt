@@ -73,8 +73,12 @@ let translate (globals, functions) =
     let slice = L.declare_function "slice" slice_t the_module in
     
     (* String Comparison *)
-    let stringcmp_t = L.var_arg_function_type i8_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
+    let stringcmp_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
     let stringcmp = L.declare_function "stringcmp" stringcmp_t the_module in
+    
+    (* String Equal *)
+    let stringeq_t = L.var_arg_function_type i8_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
+    let stringeq = L.declare_function "stringeq" stringeq_t the_module in
 
     (* HTTP GET built-in *)
     let httpget_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
@@ -197,15 +201,18 @@ let translate (globals, functions) =
            | A.Or   -> L.build_or e1' e2' "tmp" builder
 	   | A.Eq   -> if ((String.compare typ "i8*") == 0) then
 		         L.build_icmp L.Icmp.Eq
-			 (L.build_call stringcmp [| (e1') ; (e2') |] "stringcmp" builder)
+			 (L.build_call stringeq [| (e1') ; (e2') |] "stringeq" builder)
 			 (L.const_int b_t 1) "tmp" builder
 		       else
 			( L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder)
-	   (*| A.Neq  -> L.build_call stringcmp [| (e1') ; (e2') |]
-	    	       "stringcmp" builder*)
+	   | A.Neq   -> if ((String.compare typ "i8*") == 0) then
+		         L.build_icmp L.Icmp.Eq
+			 (L.build_call stringeq [| (e1') ; (e2') |] "stringeq" builder)
+			 (L.const_int b_t 0) "tmp" builder
+		       else
+			 ( L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder )	
            | A.Conc -> L.build_call string_concat [| e1'; e2'|]
 		       "string_concat" builder 
-           | A.Neq  -> L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder
            | A.Lt   -> L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder
            | A.Leq  -> L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder
            | A.Gt   -> L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder

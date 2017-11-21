@@ -18,28 +18,31 @@ char *slice(char *src, int begin, int end){
 	return dest;
 }
 
-bool stringcmp(const char *a, const char *b){
+/* Returns 0 if equal, -1 if a<b, 1 if a>b */
+int stringcmp(const char *a, const char *b){
 	int x = strcmp(a, b);
-	bool res = 0;
+	int res = 0;	
 	if (x == 0){
-		res = 1;
+		res = 0;;
+	}
+	else if (x < 0){
+		res = -1;
 	}
 	else {
-		res = 0;
+		res = 1;
 	}
 	return res;
-	//return x;
 }
 
-/* Returns 0 if equal , returns 1 if not equal */
-bool streq(const char *a , const char *b, int eq){
+/* Returns 1 if equal , returns 0 if not equal */
+bool stringeq(const char *a , const char *b){
 	int x = strcmp(a, b);
 	bool res = 0;
 	if (x == 0){
-		res = 0;
+		res = 1;
 	}
 	else {
-		res = 1;
+		res = 0;
 	}
 	return res;
 }
