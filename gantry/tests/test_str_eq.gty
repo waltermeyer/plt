@@ -1,11 +1,18 @@
 int main(){
 	string x = "foo";
 	string y = "bar";
-	print_i(x==y);
+	if (x != y) {
+	  print_s("not equal");
+	}
+	string x = "bar";
+	if (x == y) {
+	  print_s("equal");
+	}
 	return 0;
 }
 
 /*
 ****TEST****
-1
+not equal
+equal
 */

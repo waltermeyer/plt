@@ -22,10 +22,10 @@ bool stringcmp(const char *a, const char *b){
 	int x = strcmp(a, b);
 	bool res = 0;
 	if (x == 0){
-		res = 0;
+		res = 1;
 	}
 	else {
-		res = 1;
+		res = 0;
 	}
 	return res;
 	//return x;

@@ -73,7 +73,7 @@ let translate (globals, functions) =
     let slice = L.declare_function "slice" slice_t the_module in
     
     (* String Comparison *)
-    let stringcmp_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
+    let stringcmp_t = L.var_arg_function_type i8_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
     let stringcmp = L.declare_function "stringcmp" stringcmp_t the_module in
 
     (* HTTP GET built-in *)
@@ -196,8 +196,9 @@ let translate (globals, functions) =
            | A.And  -> L.build_and e1' e2' "tmp" builder
            | A.Or   -> L.build_or e1' e2' "tmp" builder
 	   | A.Eq   -> if ((String.compare typ "i8*") == 0) then
-			(L.build_call stringcmp [| (e1') ; (e2') |]
-	    	       "stringcmp" builder)
+		         L.build_icmp L.Icmp.Eq
+			 (L.build_call stringcmp [| (e1') ; (e2') |] "stringcmp" builder)
+			 (L.const_int b_t 1) "tmp" builder
 		       else
 			( L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder)
 	   (*| A.Neq  -> L.build_call stringcmp [| (e1') ; (e2') |]
