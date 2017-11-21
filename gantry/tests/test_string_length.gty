@@ -1,0 +1,15 @@
+int main(){
+	string a = "foo";
+	string b = "bar";
+	int x = string_length(a);
+	int y = string_length(b);
+	print_i(x);
+	print_i(y);
+	return 0;
+}
+
+/*
+****TEST****
+3
+3
+*/

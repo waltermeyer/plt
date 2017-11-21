@@ -87,6 +87,8 @@ let check (globals, functions) =
      { type_spec = String; f_id = "string_concat"; f_params = [(String, "x"); (String, "y")] ; f_statements = [] }
      (StringMap.add "stringcmp"
      { type_spec = Int; f_id = "stringcmp"; f_params = [(String, "x"); (String, "y")] ; f_statements = [] }
+     (StringMap.add "string_length"
+     { type_spec = Int; f_id = "string_length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "tostring"
      { type_spec = String; f_id = "tostring"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "httpget"
