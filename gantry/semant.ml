@@ -82,7 +82,7 @@ let check (globals, functions) =
      (StringMap.add "length"
      { type_spec = Int; f_id = "length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "slice"
-     { type_spec = String; f_id = "slice"; f_params = [(Int, "x"); (Int, "y"); (String, "z")] ; f_statements = [] }
+     { type_spec = String; f_id = "slice"; f_params = [(String, "x"); (Int, "y"); (Int, "z")] ; f_statements = [] }
      (StringMap.add "string_concat"
      { type_spec = String; f_id = "string_concat"; f_params = [(String, "x"); (String, "y")] ; f_statements = [] }
      (StringMap.add "stringcmp"
@@ -170,6 +170,10 @@ let check (globals, functions) =
 	 	raise (Failure ("expecting " ^ string_of_int 
 		   (List.length fd.f_params) ^ " arguments in " ^ string_of_expression funexp))
 		else
+		  List.iter2 (fun (ft, _) e -> let et = expression e in
+		    ignore (check_assign ft et
+		      (Failure ("illegal actual argument found " ^ string_of_typ et ^
+		      " expected " ^ string_of_typ ft ^ " in " ^ string_of_expression e)))) fd.f_params actuals;
 		fd.type_spec
 	| KeyVal (t, s, e) as ex -> 
 		let lt = type_of_identifier s 
