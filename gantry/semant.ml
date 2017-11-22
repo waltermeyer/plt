@@ -112,8 +112,9 @@ let check (globals, functions) =
   (* Ensure "main is defined" *)
   let _ = function_decl "main" in 
   
-  let check_function func = 
-
+  let check_function func =
+     Hashtbl.clear symbols;
+     
      (* Check that function does not have null parameters *)
      List.iter (check_not_null (fun n -> "illegal null formal " ^ n ^            
        " in " ^ func.f_id)) func.f_params;                                       
@@ -124,6 +125,8 @@ let check (globals, functions) =
  
      (* Add globals and function parameters to symbol table *)
      List.iter (fun (a, b) -> Hashtbl.add symbols b a) (globals @ func.f_params);
+
+     (* TODO: if function parameter is an object, the keys of said object need to be added to symbol table *)
 
      let type_of_identifier s = 
 	 try Hashtbl.find symbols s
@@ -181,7 +184,9 @@ let check (globals, functions) =
 		check_assign lt rt (Failure("Key " ^ string_of_typ lt ^ 
 		" has different type from value " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
 	| ArrExp (e) as ex -> Array
-	| ObjExp (e) as ex -> Object
+	| ObjExp (e) as ex -> 
+		print_endline (string_of_expression ex);
+		Object
 	| Noexpr -> Null
       in
 
