@@ -18,19 +18,6 @@ typedef struct obj {
   bool b; // bool
 } obj;
 
-/*
- * Get a key value from an Object
- */
-void *obj_getkey(obj *o, int t, void *v) {
-    switch(o->v_typ) {
-      case 3: return (void *)&o->i;
-      case 4: return (void *)&o->f;
-      case 5: return (void *)&o->o;
-      case 6: return (void *)&o->s;
-      case 7: return (void *)&o->b;
-    };
-}
-
 int print_k(obj *o) {
   if (o == NULL)
     return 1;
@@ -54,23 +41,24 @@ obj *obj_findkey(obj *o, char *keys) {
   // parse a key to search for
   k = strsep(&keys_dup, ".");
 
-  printf("Searching: %s\n", keys);
-  printf("Current Key: %s\n", k);
+//  printf("Searching: %s\n", keys);
+//  printf("Current Key: %s\n", k);
 
   // search for keys within an object
   o = o->next; // get first key from head struct
   while (o != NULL) {
+//    printf("on: %s\n", o->k);
     if (strcmp(o->k, k) == 0) {
       // found our key
       if (strlen(k) == strlen(keys)) {
-        printf("Found the key!\n");
+//      printf("Found the key!\n");
 	free(k);
 	return o;
       }
       // continue nested key search
       else {
-        printf("Found object that nests the key\n");
-	printf("Now searching for: %s\n", keys_dup);
+//      printf("Found object that nests the key\n");
+//	printf("Now searching for: %s\n", keys_dup);
         o = obj_findkey(o->o, keys_dup);
         free(k);
 	return o;
@@ -114,7 +102,20 @@ int obj_assign(obj *o, int t, void *v) {
   return 0;
 }
 
-//#ifdef BUILD_TEST
+/*
+ * Get a key value from an Object
+ */
+void *obj_getkey(obj *o, int t) {
+    switch(o->v_typ) {
+      case 3: return (void *)&o->i;
+      case 4: return (void *)&o->f;
+      case 5: return (void *)&o->o;
+      case 6: return (void *)&o->s;
+      case 7: return (void *)&o->b;
+    };
+}
+
+#ifdef BUILD_TEST
 int main () {
   obj *o = (obj *) malloc(sizeof(obj)); // head
   obj *o2 = (obj *) malloc(sizeof(obj));
@@ -148,6 +149,7 @@ int main () {
   o3->k = "key3";
   o3->o = o4_head;
   o3->v_typ = 5;
+  o3->next = NULL;
 
   o4_head->next = o4;
   o4->k = "nestedkey4";
@@ -163,13 +165,25 @@ int main () {
   o6->k = "nestedkey6";
   o6->f = 30.65;
   o6->v_typ = 4;
+  o6->next = NULL;
 
   obj *tmp;
+  void *v;
   // Find Key
   tmp = obj_findkey(o, "key2");
-  tmp = obj_findkey(o, "key3.nestedkey4.nestedkey5");
-  tmp = obj_findkey(o, "key3.nestedkey4.nestedkey6");
+  v   = obj_getkey(tmp, tmp->v_typ);
+  printf("%d\n", *(int *)v);
+  double t = 42.24;
+  obj_assign(tmp, 4, (void *)&t);
+  tmp = obj_findkey(o, "key2");
+  v   = obj_getkey(tmp, tmp->v_typ);
+  printf("%lf\n", *(double *)v);
+
+  obj_findkey(o, "key3.nestedkey4.nestedkey5");
+
+  obj_findkey(o, "key3.nestedkey4.nestedkey6");
   obj_findkey(o, "key3.nestedkey4");
+  obj_findkey(o, "keyfail.nestedkey4");
 
   // Get its Value
   // Change its Value
@@ -195,5 +209,5 @@ int main () {
   free(o5_head);
   free(o6);
 }
-//#endif
+#endif
 
