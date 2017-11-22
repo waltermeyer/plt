@@ -6,7 +6,6 @@ module StringMap = Map.Make(String)
 (* Hash Tables for our variable bindings *)
 let g_var_tbl  : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
 let f_var_tbl  : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
-let kv_var_tbl : (string, L.llvalue) Hashtbl.t = Hashtbl.create 10;;
 
 (* Stack and Buffer for building Objects *)
 let kv_stack = Stack.create ();;
