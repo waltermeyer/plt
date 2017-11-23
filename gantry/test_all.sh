@@ -207,8 +207,8 @@ do
 	    Check $file 2>> $globallog
 	    ;;
 	*fail_*)
-	    echo "Fail tests disabled"
-	    #CheckFail $file 2>> $globallog
+	    #echo "Fail tests disabled"
+	    CheckFail $file 2>> $globallog
 	    ;;
 	*)
 	    echo "unknown file type $file"

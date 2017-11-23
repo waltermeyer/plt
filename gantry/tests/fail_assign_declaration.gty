@@ -1,0 +1,8 @@
+int main() {
+	object a.x = {| string foo: "bar" |};
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("Can not declare multi-level variable a.x in expression object a.x = {|   string foo : "bar" |}")
+*/
