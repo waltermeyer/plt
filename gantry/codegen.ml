@@ -229,12 +229,9 @@ let translate (globals, functions) =
 	print_endline typ;
         (match op with
              A.Neg  -> L.build_neg e' "tmp" builder
-           | A.Not  -> if ((String.compare typ ("i8")) == 0) then
-			(*(L.build_not (L.const_bitcast e' i1_t) "tmp" builder)*)
-			L.const_select e' 
+           | A.Not  -> (L.build_not (L.const_bitcast e' i1_t) "tmp" builder)
+			(*L.const_select e'*) 
 			(*( L.build_icmp L.Icmp.Eq e' (L.const_int i1_t 0) "tmp" builder )*)
-		       else
-			(L.build_not e' "tmp" builder)
 	   | A.Inc  ->
 	       let n   = lookup (A.expr_to_str e) in
 	       let tmp = L.build_load n "tmp" builder in
