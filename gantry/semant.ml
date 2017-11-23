@@ -173,10 +173,18 @@ let check (globals, functions) =
 	 	raise (Failure ("expecting " ^ string_of_int 
 		   (List.length fd.f_params) ^ " arguments in " ^ string_of_expression funexp))
 		else
-		  List.iter2 (fun (ft, _) e -> let et = expression e in
-		    ignore (check_assign ft et
-		      (Failure ("illegal actual argument found " ^ string_of_typ et ^
-		      " expected " ^ string_of_typ ft ^ " in " ^ string_of_expression e)))) fd.f_params actuals;
+		  List.iter2 
+		    (fun (ft, _) e -> let et = expression e in
+		      let temp = string_of_expression e in
+		      print_endline temp; 
+		      if not (String.contains (string_of_expression e) '.' )  then
+		      (
+		      ignore (check_assign ft et 
+		        (Failure ("illegal actual argument found " ^ string_of_typ et ^
+		        " expected " ^ string_of_typ ft ^ " in " ^ string_of_expression e)))
+		      )
+		    )
+                    fd.f_params actuals;
 		fd.type_spec
 	| KeyVal (t, s, e) as ex -> 
 		let lt = type_of_identifier s 
