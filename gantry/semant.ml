@@ -139,7 +139,7 @@ let check (globals, functions) =
 	| FloatLit _ -> Float
 	| StrLit _ -> String
 	| BoolLit _ -> Bool
-	| Id s -> type_of_identifier s
+	| Id s -> if not (String.contains s '.') then (type_of_identifier s) else (Object) (* TODO: Is this actually what we want?*)
 	| Binop(e1, op, e2) as e -> let t1 = expression e1 and t2 = expression e2 in
          (match op with
             Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
@@ -176,7 +176,6 @@ let check (globals, functions) =
 		  List.iter2 
 		    (fun (ft, _) e -> let et = expression e in
 		      let temp = string_of_expression e in
-		      print_endline temp; 
 		      if not (String.contains (string_of_expression e) '.' )  then
 		      (
 		      ignore (check_assign ft et 
@@ -193,7 +192,7 @@ let check (globals, functions) =
 		" has different type from value " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
 	| ArrExp (e) as ex -> Array
 	| ObjExp (e) as ex -> 
-		print_endline (string_of_expression ex);
+		(*print_endline (string_of_expression ex);*)
 		Object
 	| Noexpr -> Null
       in
