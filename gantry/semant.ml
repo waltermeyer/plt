@@ -165,8 +165,11 @@ let check (globals, functions) =
 		add_local (t, n);
 		let lt = type_of_identifier n
 		and rt = expression e in 
-		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
-		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
+		if (String.contains n '.') then
+			(raise (Failure ("Can not declare multi-level variable " ^ n ^ " in expression " ^ string_of_expression ex)))
+		else
+			(check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
+		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex)))
 	| FunExp(f_id, actuals) as funexp -> 
 		let fd = function_decl f_id in
 		if List.length actuals !=  List.length fd.f_params then
