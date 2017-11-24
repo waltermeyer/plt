@@ -39,6 +39,8 @@ int main () {
   print_k(b.x);
   print_k(b.a);
   print_k(a.x);
+  a.x = b.x;
+  print_k(a.x);
 
 }
 /*
@@ -52,4 +54,5 @@ true
 Meaning of life
 97.100000
 42.420000
+Meaning of life
 */
