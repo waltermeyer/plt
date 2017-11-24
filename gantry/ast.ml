@@ -50,11 +50,10 @@ type function_decl = {
 
 type program = typ_bind list * function_decl list
 
-
 (* Expression to String for Variable Resolution in Codegen *)
 let expr_to_str = function
 	  Id(s) -> s
-	| _ -> raise(Failure("Invalid assignment."))
+	| _ -> ""
 
 (* Pretty-printing functions *)
 

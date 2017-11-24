@@ -106,13 +106,30 @@ int obj_assign(obj *o, int t, void *v) {
  * Get a key value from an Object
  */
 void *obj_getkey(obj *o, int t) {
-    switch(o->v_typ) {
-      case 3: return (void *)&o->i;
-      case 4: return (void *)&o->f;
-      case 5: return (void *)&o->o;
-      case 6: return (void *)&o->s;
-      case 7: return (void *)&o->b;
-    };
+  /*
+   * Throw a runtime error if the type
+   * requested does not match actual type
+   */
+  if (o->v_typ != t) {
+    printf("Runtime Error: Invalid type requested from Object [%s] [%p]\n",
+            o->k, &o);
+    exit(2);
+  }
+  switch(o->v_typ) {
+    case 3: return (void *)&o->i;
+    case 4: return (void *)&o->f;
+    case 5: return (void *)&o->o;
+    case 6: return (void *)&o->s;
+    case 7: return (void *)&o->b;
+  };
+  return NULL;
+}
+
+/*
+ * Get a key value's type from an Object
+ */
+int obj_getkey_t(obj *o) {
+  return o->v_typ;
 }
 
 #ifdef BUILD_TEST
@@ -169,7 +186,6 @@ int main () {
 
   obj *tmp;
   void *v;
-  // Find Key
   tmp = obj_findkey(o, "key2");
   v   = obj_getkey(tmp, tmp->v_typ);
   printf("%d\n", *(int *)v);
@@ -184,21 +200,6 @@ int main () {
   obj_findkey(o, "key3.nestedkey4.nestedkey6");
   obj_findkey(o, "key3.nestedkey4");
   obj_findkey(o, "keyfail.nestedkey4");
-
-  // Get its Value
-  // Change its Value
-  // Find it again...
-  // Get its Value again...
-
-// printf("%s\n", (char *)*(void **)tmp);
-
-//  printf("%lf\n", *(double *)tmp);
-
-  // change the key's type to int
-//  obj_assign(o, 3, (void *)&(int){1});
-//  printf("%d\n", *(int *)tmp);
-
-//  tmp = obj_findkey(o, "key3.nestedkey4.nestedkey5");
 
   free(o);
   free(o2);
