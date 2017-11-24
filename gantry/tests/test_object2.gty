@@ -18,35 +18,38 @@ int main () {
 
   print_k(a.test_key);
   print_k(a.b.hello);
-  print_k(a.x);
-
-  print_k(b.test_key);
-  print_k(b.b.hello);
   print_k(b.x);
-  print_k(b.b.x);
   print_k(b.a);
+
+  // reassign keys to new values/types from primitives
+
+  int i = 42;
+  bool z = true;
+  string s = "Meaning of life";
+  float f = 97.1;
+
+  a.test_key = i;
+  a.b.hello = z;
+  b.x = s;
+  b.a = f;
+  a.x = 42.42;
 
   print_k(a.test_key);
   print_k(a.b.hello);
+  print_k(b.x);
+  print_k(b.a);
   print_k(a.x);
-  print_k(a.z);
-//  print_k(a);
-
-  fun(a);
 
 }
 /*
 ****TEST****
 Hello
 World!
-123
-Hello...
-Mars!
 456
-111
 true
-Hello
-World!
-123
-123
+42
+true
+Meaning of life
+97.100000
+42.420000
 */

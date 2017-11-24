@@ -24,9 +24,10 @@ int print_k(obj *o) {
   switch(o->v_typ) {
     case 3: printf("%d\n", o->i); break;
     case 4: printf("%f\n", o->f); break;
-    //case 5: printf("%d\n", o->o); break;
+    case 5: printf("object key [%p]\n", &o); break;
     case 6: printf("%s\n", o->s); break;
     case 7: printf("%s", o->b ? "true\n" : "false\n"); break;
+    default: printf("object [%p]\n", &o); break;
   };
   return 0;
 }
@@ -56,7 +57,7 @@ obj *obj_findkey(obj *o, char *keys) {
 	return o;
       }
       // continue nested key search
-      else {
+      else if (o->v_typ == 5) {
 //      printf("Found object that nests the key\n");
 //	printf("Now searching for: %s\n", keys_dup);
         o = obj_findkey(o->o, keys_dup);
@@ -80,9 +81,9 @@ int obj_assign(obj *o, int t, void *v) {
   char *s;
   if (o != NULL) {
     // If this key was a string, garbage collect it
-    if (o->v_typ == 6)
-      free(o->s);
-    // Set key type
+//    if (o->v_typ == 6)
+//      free(o->s);
+    // Set new key type
     o->v_typ = t;
     // Set key value
     switch(o->v_typ) {
@@ -128,7 +129,7 @@ void *obj_getkey(obj *o, int t) {
 /*
  * Get a key value's type from an Object
  */
-int obj_getkey_t(obj *o) {
+int obj_gettyp(obj *o) {
   return o->v_typ;
 }
 
