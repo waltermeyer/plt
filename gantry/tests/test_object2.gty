@@ -39,8 +39,21 @@ int main () {
   print_k(b.x);
   print_k(b.a);
   print_k(a.x);
+
   a.x = b.x;
   print_k(a.x);
+  a.x = b.b;
+  print_k(a.x.hello);
+
+  /*
+  b.x = {| string sokey : "much value!" |};
+  print_k(b.x);
+  print_k(b.x.sokey);
+  */
+
+  int i = 42;
+  i = b.b.x;
+  print_i(i);
 
 }
 /*
@@ -55,4 +68,6 @@ Meaning of life
 97.100000
 42.420000
 Meaning of life
+Mars!
+111
 */

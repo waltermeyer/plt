@@ -24,7 +24,6 @@ type expression =
 	| Unop of uop * expression
 	| Assign of expression * expression
 	| AssignDecl of typ * string * expression
-	| ObjAssign of expression list * expression
 	| FunExp of string * expression list
 	| KeyVal of typ * string * expression
 	| ArrExp of expression list
@@ -104,7 +103,6 @@ let rec string_of_expression = function
 	| ObjExp(el) -> "{| " ^ String.concat ", " (List.map string_of_expression el) ^ " |}"
 	| Assign(e1, e2) -> string_of_expression e1 ^ " = " ^ string_of_expression e2
 	| AssignDecl(t, v, e) -> string_of_typ t ^ " " ^ v ^ " = " ^ string_of_expression e
-	| ObjAssign(el, e) -> String.concat "." (List.map string_of_expression el) ^ " = " ^ string_of_expression e
 	| FunExp(f, el) -> f ^ "(" ^ String.concat ", " (List.map string_of_expression el) ^ ")"
   	| Noexpr -> ""
 

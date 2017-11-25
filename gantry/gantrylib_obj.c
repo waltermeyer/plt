@@ -89,7 +89,7 @@ int obj_assign(obj *o, int t, void *v) {
     switch(o->v_typ) {
       case 3: o->i = *(int *)v; break;
       case 4: o->f = *(double *)v; break;
-      case 5: o->o =  (obj *)v; break;
+      case 5: o->o = (obj *)v; break;
       case 6:
 	// malloc space for the string and store
 	l = strlen((const char *)(*(void **)v)) + 1;
@@ -112,14 +112,14 @@ void *obj_getkey(obj *o, int t) {
    * requested does not match actual type
    */
   if (o->v_typ != t) {
-    printf("Runtime Error: Invalid type requested from Object [%s] [%p]\n",
+    printf("Runtime Error: Invalid type requested from Object ID [%s] [%p]\n",
             o->k, &o);
     exit(2);
   }
   switch(o->v_typ) {
     case 3: return (void *)&o->i;
     case 4: return (void *)&o->f;
-    case 5: return (void *)&o->o;
+    case 5: return (void *)o->o;
     case 6: return (void *)&o->s;
     case 7: return (void *)&o->b;
   };

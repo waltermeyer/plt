@@ -32,7 +32,10 @@ let check (globals, functions) =
 
   (* Are two sides of assignment compatible? *)
   let check_assign lvaluet rvaluet err = 
-     if lvaluet == rvaluet then lvaluet else raise err
+     match lvaluet, rvaluet with
+       (Object, _) -> lvaluet
+     | (_, Object) -> lvaluet
+     | (_, _)      -> if lvaluet == rvaluet then lvaluet else raise err
   in
 
   let add_local (t, n) =
@@ -188,7 +191,7 @@ let check (globals, functions) =
 		    )
                     fd.f_params actuals;
 		fd.type_spec
-	| KeyVal (t, s, e) as ex -> 
+	| KeyVal (_, s, e) as ex ->
 		let lt = type_of_identifier s 
 		and rt = expression e in
 		check_assign lt rt (Failure("Key " ^ string_of_typ lt ^ 

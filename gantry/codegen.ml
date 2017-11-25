@@ -344,13 +344,13 @@ let translate (globals, functions) =
 	else if (String.contains e1_str '.') then (
 	  let e1' = lookup e1_str
 	  and e2' = expr builder e2 in
-	  (*ignore( print_endline (L.string_of_lltype  (L.type_of e2')));*)
 	  let sidx_of_typ = function
 	      "i32"    -> 3
 	    | "double" -> 4
-	    | "obj_t"  -> 5
+	    | "%obj*"  -> 5
 	    | "i8*"    -> 6
 	    | "i8"     -> 7
+	    | _        -> raise (Failure ("Invalid object assignment"))
 	  in
 	  (* Get type of primitive on RHS *)
 	  let t = sidx_of_typ (L.string_of_lltype (L.type_of e2')) in
@@ -366,13 +366,35 @@ let translate (globals, functions) =
 	  e2'
 	)
 	(* Object RHV Only: try type of RHV (runtime error on failure) *)
-	(*else if (String.contains e2_str '.') then (
-	)*)
+	else if (String.contains e2_str '.') then (
+	  let e1' = lookup e1_str
+	  and e2' = lookup e2_str in
+	  let sidx_of_typ = function
+	      "i32*"    -> 3
+	    | "double*" -> 4
+	    | "%obj**"  -> 5
+	    | "i8**"    -> 6
+	    | "i8*"     -> 7
+	    | _         -> raise (Failure ("Invalid object assignment"))
+	  in
+	  (* Get type of primitive on LHS *)
+	  let t = sidx_of_typ (L.string_of_lltype (L.type_of e1')) in
+	  let t_e1' = L.const_int i32_t t in
+	  (* Get Value of Object on RHS (based on e1' type) *)
+	  let v_e2' = L.build_call obj_getkey_func
+		      [| e2' ; t_e1' |] "obj_getkey" builder in
+	  (* Cast void* RHV to ptr of LHV type *)
+	  ignore(L.build_alloca (L.type_of e1') "pcst" builder);
+	  let v_e2' = L.build_bitcast v_e2' (L.type_of e1') "cst" builder in
+	  let v_e2' = L.build_load v_e2' "loadcst" builder in
+	  ignore(L.build_store v_e2' e1' builder);
+	  v_e2'
+	)
 	(* Primitive Assignment *)
 	else (
 	  let e2' = expr builder e2 in
-	  let n = lookup (A.expr_to_str e1) in
-	  ignore (L.build_store e2' n builder);
+	  let e1' = lookup e1_str in
+	  ignore (L.build_store e2' e1' builder);
 	  e2'
 	)
       | A.FunExp("print_i", [e]) ->
