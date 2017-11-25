@@ -1,0 +1,73 @@
+int fun(object o) {
+  print_k(o.x);
+}
+
+int main () {
+  object a = {|
+		string test_key : "Hello",
+		int x : 123,
+		object b : {| string hello : "World!" |}
+	     |};
+
+  object b = {|
+		string test_key : "Hello...",
+		object b : {| string hello : "Mars!", int x : 111 |},
+		int x : 456,
+		bool a : true
+	     |};
+
+  print_k(a.test_key);
+  print_k(a.b.hello);
+  print_k(b.x);
+  print_k(b.a);
+
+  // reassign keys to new values/types from primitives
+
+  int i = 42;
+  bool z = true;
+  string s = "Meaning of life";
+  float f = 97.1;
+
+  a.test_key = i;
+  a.b.hello = z;
+  b.x = s;
+  b.a = f;
+  a.x = 42.42;
+
+  print_k(a.test_key);
+  print_k(a.b.hello);
+  print_k(b.x);
+  print_k(b.a);
+  print_k(a.x);
+
+  a.x = b.x;
+  print_k(a.x);
+  a.x = b.b;
+  print_k(a.x.hello);
+
+  /*
+  b.x = {| string sokey : "much value!" |};
+  print_k(b.x);
+  print_k(b.x.sokey);
+  */
+
+  int i = 42;
+  i = b.b.x;
+  print_i(i);
+
+}
+/*
+****TEST****
+Hello
+World!
+456
+true
+42
+true
+Meaning of life
+97.100000
+42.420000
+Meaning of life
+Mars!
+111
+*/

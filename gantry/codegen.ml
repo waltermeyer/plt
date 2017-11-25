@@ -19,7 +19,7 @@ let translate (globals, functions) =
     (* LLVM Types *)
     and i32_t  = L.i32_type context
     and i8_t   = L.i8_type context
-    and b_t   = L.i8_type context
+    and b_t    = L.i8_type context
     and str_t  = L.pointer_type (L.i8_type context)
     and flt_t  = L.double_type context
     and void_t = L.void_type context in
@@ -46,10 +46,10 @@ let translate (globals, functions) =
         A.Int    -> i32_t
       | A.Float  -> flt_t
       | A.Object -> L.pointer_type obj_t
-      (* | A.Array  -> arr_t *)
       | A.String -> str_t
       | A.Bool   -> b_t
       | A.Null   -> void_t
+      (* | A.Array  -> arr_t *)
     in
 
     (* Global Declarations *)
@@ -75,27 +75,42 @@ let translate (globals, functions) =
     let stringcmp = L.declare_function "stringcmp" stringcmp_t the_module in
     
     (* String Equal *)
-    let stringeq_t = L.var_arg_function_type i8_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
+    let stringeq_t = L.var_arg_function_type i8_t
+		     [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
     let stringeq = L.declare_function "stringeq" stringeq_t the_module in
    
     (* String Length *)
     let string_length_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
     let string_length = L.declare_function "string_length" string_length_t the_module in
 
-
     (* HTTP GET built-in *)
     let httpget_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
     let httpget_func = L.declare_function "httpget" httpget_t the_module in
 
     (* HTTP POST built-in *)
-    let httppost_t = L.var_arg_function_type str_t [| L.pointer_type i8_t ; 
-							L.pointer_type i8_t |] in
+    let httppost_t = L.var_arg_function_type str_t
+		     [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
     let httppost_func = L.declare_function "httppost" httppost_t the_module in
 
     (* Object Library Runtime *)
     let obj_findkey_t = L.var_arg_function_type (L.pointer_type obj_t)
 			[| L.pointer_type obj_t ; L.pointer_type i8_t |] in
-    let obj_findkey_func = L.declare_function "obj_findkey" obj_findkey_t the_module in
+    let obj_findkey_func = L.declare_function "obj_findkey"
+			obj_findkey_t the_module in
+
+    let obj_getkey_t = L.var_arg_function_type (L.pointer_type i8_t)
+			[| L.pointer_type obj_t |] in
+    let obj_getkey_func = L.declare_function "obj_getkey"
+			obj_getkey_t the_module in
+
+    let obj_assign_t =
+		L.var_arg_function_type i32_t
+		[| L.pointer_type obj_t ; i32_t ; (L.pointer_type i8_t) |] in
+    let obj_assign_func = L.declare_function "obj_assign" obj_assign_t the_module in
+
+    let obj_gettyp_t = L.var_arg_function_type i32_t [| L.pointer_type obj_t |] in
+    let obj_gettyp_func = L.declare_function "obj_gettyp" obj_gettyp_t the_module in
+
     let printk_t = L.var_arg_function_type i32_t [| L.pointer_type obj_t |] in
     let printk_func = L.declare_function "print_k" printk_t the_module in
 
@@ -172,7 +187,6 @@ let translate (globals, functions) =
 	  (* Build runtime call to find key *)
 	  let keys = String.concat "." (List.tl l) in
 	  let key = L.build_global_stringptr keys "keys_find" builder in
-	  (*print_endline("Looking for: " ^ keys);*)
 	  (* Dereference parent object pointer *)
 	  let obj_p = L.build_load obj_p "tmp" builder in
 	  (* Now build runtime call to find the key *)
@@ -188,7 +202,7 @@ let translate (globals, functions) =
       | A.BoolLit b -> L.const_int b_t (if b then 1 else 0)
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> if (String.contains s '.') then
-		      (lookup s)
+		    (lookup s)
 		  else
 		    (L.build_load (lookup s) s builder)
       | A.Binop (e1, op, e2) ->
@@ -203,17 +217,17 @@ let translate (globals, functions) =
            | A.And  -> L.build_and e1' e2' "tmp" builder
            | A.Or   -> L.build_or e1' e2' "tmp" builder
 	   | A.Eq   -> if ((String.compare typ "i8*") == 0) then
-		         L.build_icmp L.Icmp.Eq
+		          L.build_icmp L.Icmp.Eq
 			 (L.build_call stringeq [| (e1') ; (e2') |] "stringeq" builder)
 			 (L.const_int b_t 1) "tmp" builder
 		       else
-			( L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder)
+			 (L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder)
 	   | A.Neq   -> if ((String.compare typ "i8*") == 0) then
-		         L.build_icmp L.Icmp.Eq
+		          L.build_icmp L.Icmp.Eq
 			 (L.build_call stringeq [| (e1') ; (e2') |] "stringeq" builder)
 			 (L.const_int b_t 0) "tmp" builder
 		       else
-			 ( L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder )	
+			 (L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder)
            | A.Conc -> L.build_call string_concat [| e1'; e2'|]
 		       "string_concat" builder 
            | A.Lt   -> L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder
@@ -243,10 +257,10 @@ let translate (globals, functions) =
 	    A.Int    -> 3 
 	  | A.Float  -> 4
 	  | A.Object -> 5
-	  (* | A.Array  -> arr_t *)
 	  | A.String -> 6
 	  | A.Bool   -> 7
 	  | A.Null   -> 8
+	  (* | A.Array  -> arr_t *)
         in
 	(* Build the data structure for a key *)
 	let e' = expr builder e in
@@ -288,13 +302,10 @@ let translate (globals, functions) =
 	let parent = L.build_malloc obj_t "obj" builder in
 	(* Connect parent to first key *)
 	ignore(set_next parent);
-	(* Connect each key in this object and add to lookup table *)
+	(* Connect each key in this object *)
 	let build_obj _ =
-	  let (t, n, k) = Stack.pop kv_stack in
-	  (* Add parent and its key to tmp object lookup table *)
+	  let (t, _, k) = Stack.pop kv_stack in
 	  ignore(L.build_struct_gep k t "value" builder);
-	  (* Add orphan keys to tmp kv table *)
-	  (* ignore(add_kv (n, value)); *)
 	  ignore(set_next k);
 	in
 	(* Build out all of the key values within this object *)
@@ -308,16 +319,84 @@ let translate (globals, functions) =
 	  (* Then set it and forget it *)
 	  let n = lookup n in
           ignore (L.build_store e' n builder);
-	  (*ignore(parent_keys n);*)
           e'
       | A.Assign(e1, e2) ->
-	(* We need to resolve expression to assign into *)
-        let e2' = expr builder e2 in
-	let n = lookup (A.expr_to_str e1) in
-	ignore (L.build_store e2' n builder);
-        (* If this was an object, 'parent' the orphan keys *)
-        (* ignore(parent_keys n); *)
-        e2'
+	(* Object Assignment *)
+	let e1_str = A.expr_to_str e1
+	and e2_str = A.expr_to_str e2 in
+	(* Object LHV and RHV: enforce type of RHV *)
+	if ((String.contains e1_str '.') && (String.contains e2_str '.')) then (
+	  (* Get Objects on LHS and RHS *)
+	  let e1' = lookup e1_str
+	  and e2' = lookup e2_str in
+	  (* Get type of Object on RHS *)
+	  let t_e2' = L.build_call obj_gettyp_func
+		      [| e2' |] "obj_gettyp" builder in
+	  (* Get Value of Object on RHS *)
+	  let v_e2' = L.build_call obj_getkey_func
+		      [| e2' ; t_e2' |] "obj_getkey" builder in
+	  (* Store that value in Object on LHS *)
+	  ignore (L.build_call obj_assign_func
+	  [| e1' ; t_e2' ; v_e2' |] "obj_assign" builder);
+	  e2'
+	)
+	(* Object LHV Only: enforce type of RHV *)
+	else if (String.contains e1_str '.') then (
+	  let e1' = lookup e1_str
+	  and e2' = expr builder e2 in
+	  let sidx_of_typ = function
+	      "i32"    -> 3
+	    | "double" -> 4
+	    | "%obj*"  -> 5
+	    | "i8*"    -> 6
+	    | "i8"     -> 7
+	    | _        -> raise (Failure ("Invalid object assignment"))
+	  in
+	  (* Get type of primitive on RHS *)
+	  let t = sidx_of_typ (L.string_of_lltype (L.type_of e2')) in
+	  let t_e2' = L.const_int i32_t t in
+	  (* Cast ptr to RHV to void ptr to store in Object *)
+	  let p_e2' = L.build_alloca (L.type_of e2') "pcst" builder in
+	  ignore(L.build_store e2' p_e2' builder);
+	  let v_e2' = L.build_bitcast p_e2' (L.pointer_type i8_t)
+		      "cst" builder in
+	  (* Store value from primitive on RHS in Object on LHS *)
+	  ignore (L.build_call obj_assign_func
+	  [| e1' ; t_e2' ; v_e2' |] "obj_assign" builder);
+	  e2'
+	)
+	(* Object RHV Only: try type of RHV (runtime error on failure) *)
+	else if (String.contains e2_str '.') then (
+	  let e1' = lookup e1_str
+	  and e2' = lookup e2_str in
+	  let sidx_of_typ = function
+	      "i32*"    -> 3
+	    | "double*" -> 4
+	    | "%obj**"  -> 5
+	    | "i8**"    -> 6
+	    | "i8*"     -> 7
+	    | _         -> raise (Failure ("Invalid object assignment"))
+	  in
+	  (* Get type of primitive on LHS *)
+	  let t = sidx_of_typ (L.string_of_lltype (L.type_of e1')) in
+	  let t_e1' = L.const_int i32_t t in
+	  (* Get Value of Object on RHS (based on e1' type) *)
+	  let v_e2' = L.build_call obj_getkey_func
+		      [| e2' ; t_e1' |] "obj_getkey" builder in
+	  (* Cast void* RHV to ptr of LHV type *)
+	  ignore(L.build_alloca (L.type_of e1') "pcst" builder);
+	  let v_e2' = L.build_bitcast v_e2' (L.type_of e1') "cst" builder in
+	  let v_e2' = L.build_load v_e2' "loadcst" builder in
+	  ignore(L.build_store v_e2' e1' builder);
+	  v_e2'
+	)
+	(* Primitive Assignment *)
+	else (
+	  let e2' = expr builder e2 in
+	  let e1' = lookup e1_str in
+	  ignore (L.build_store e2' e1' builder);
+	  e2'
+	)
       | A.FunExp("print_i", [e]) ->
 	L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	  "print_i" builder

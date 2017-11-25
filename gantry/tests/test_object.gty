@@ -30,7 +30,7 @@ int main () {
   print_k(a.b.hello);
   print_k(a.x);
   print_k(a.z);
-  print_k(a);
+//  print_k(a);
 
   fun(a);
 
