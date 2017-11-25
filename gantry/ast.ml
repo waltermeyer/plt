@@ -9,7 +9,8 @@ type uop =
   Not | Neg | Inc | Dec
 
 type typ =
-  Int | Float | Object | Array | String | Bool | Null
+    Int | Float | Object | String | Bool | Null |
+    Int_Array | Float_Array | Object_Array | String_Array | Bool_Array
 
 type typ_bind = typ * string
 
@@ -54,7 +55,7 @@ type program = typ_bind list * function_decl list
 (* Expression to String for Variable Resolution in Codegen *)
 let expr_to_str = function
 	  Id(s) -> s
-	| _ -> raise(Failure("Invalid assignment."))
+	| _     -> ""
 
 (* Pretty-printing functions *)
 
@@ -83,10 +84,14 @@ let string_of_typ = function
 	  Int -> "int"
 	| Float -> "float"
 	| Object -> "object"
-	| Array -> "array"
 	| String -> "string"
         | Bool -> "bool"
 	| Null -> "null"
+	| Int_Array -> "int array"
+	| Float_Array -> "float array"
+	| Object_Array -> "object array"
+	| String_Array -> "string array"
+        | Bool_Array -> "bool array"
 
 let rec string_of_expression = function
 	  IntLit(i) -> string_of_int i

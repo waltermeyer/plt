@@ -66,11 +66,15 @@ type_spec:
     INT                                     { Int }
     | FLOAT                                 { Float }
     | OBJECT                                { Object }
-    | ARRAY                                 { Array }
     | STRING                                { String }
     | BOOL                                  { Bool }
     | NULL                                  { Null }
-
+    | INT ARRAY                             { Int_Array }
+    | FLOAT ARRAY                           { Float_Array }
+    | OBJECT ARRAY                          { Object_Array }
+    | STRING ARRAY                          { String_Array }
+    | BOOL ARRAY                            { Bool_Array }
+ 
 func_param_list_opt:
      /* nothing */                          { [] }
     | func_param_list                       { List.rev $1 }

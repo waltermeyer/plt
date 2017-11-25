@@ -35,6 +35,7 @@ let check (globals, functions) =
      if lvaluet == rvaluet then lvaluet else raise err
   in
 
+
   let add_local (t, n) =
     ignore(Hashtbl.add symbols n t);
   in
@@ -193,10 +194,26 @@ let check (globals, functions) =
 		and rt = expression e in
 		check_assign lt rt (Failure("Key " ^ string_of_typ lt ^ 
 		" has different type from value " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
-	| ArrExp (e) as ex -> Array
-	| ObjExp (e) as ex -> 
-		(*print_endline (string_of_expression ex);*)
-		Object
+	| ArrExp el -> let arr_typ e =
+			 match e with
+			    Int    -> Int_Array
+			  | Float  -> Float_Array
+			  | Object -> Object_Array
+			  | String -> String_Array
+			  | Bool   -> Bool_Array
+			  | _      -> raise (Failure("Invalid array type"))
+		       in
+		       let t = List.fold_left
+				(fun e1 e2 ->
+				  if (e1 == expression e2) then
+				    e1
+				  else raise
+				    (Failure("Multiple types inside an array of type " ^ string_of_typ e1))
+				)
+		                (expression (List.hd el)) (List.tl el)
+		       in
+		       arr_typ t
+	| ObjExp (e) as ex -> Object
 	| Noexpr -> Null
       in
 
