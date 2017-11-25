@@ -132,9 +132,17 @@ CheckFail() {
     generatedfiles=""
 
     generatedfiles="$generatedfiles ${basename}.err ${basename}.diff" &&
-    RunFail "$GANTRY" "<" $1 "2>" "${basename}.err" ">>" $globallog &&
-    Compare ${basename}.err ${reffile}.err ${basename}.diff
+    # RunFail "$GANTRY" "<" $1 "2>" "${basename}.err" ">>" $globallog &&
+    # Compare ${basename}.err ${reffile}.err ${basename}.diff
 
+    RunFail "$GANTRY" "<" "$1" ">" "${basename}.ll" &&
+    #RUN "$LLI" "${basename}.ll" " " > "{basename}.out" &&
+    RunFail "$LLC" "${basename}.ll" ">" "${basename}.s" &&
+    RunFail "$CC" "-o" "${basename}.exe" "${basename}.s" \
+	  "gantrylib_http.o" "gantrylib_string.o" \
+	  "gantrylib_obj.o" "$LDFLAGS" &&
+    RunFail "./${basename}.exe" "2>" "${basename}.err" &&
+    Compare ${basename}.err ${reffile}.err ${basename}.diff
     # Report the status and clean up the generated files
 
     if [ $error -eq 0 ] ; then

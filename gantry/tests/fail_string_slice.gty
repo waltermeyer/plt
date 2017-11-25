@@ -1,0 +1,10 @@
+int main(){
+	string s = "foobar";
+	string sliced = slice(s, 5, 2);
+	print_s(sliced);
+}
+
+/*
+****TEST****
+
+*/
