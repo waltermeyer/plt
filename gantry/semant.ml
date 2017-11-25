@@ -82,7 +82,7 @@ let check (globals, functions) =
      (StringMap.add "length"
      { type_spec = Int; f_id = "length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "slice"
-     { type_spec = String; f_id = "slice"; f_params = [(Int, "x"); (Int, "y"); (String, "z")] ; f_statements = [] }
+     { type_spec = String; f_id = "slice"; f_params = [(String, "x"); (Int, "y"); (Int, "z")] ; f_statements = [] }
      (StringMap.add "string_concat"
      { type_spec = String; f_id = "string_concat"; f_params = [(String, "x"); (String, "y")] ; f_statements = [] }
      (StringMap.add "stringcmp"
@@ -112,8 +112,9 @@ let check (globals, functions) =
   (* Ensure "main is defined" *)
   let _ = function_decl "main" in 
   
-  let check_function func = 
-
+  let check_function func =
+     Hashtbl.clear symbols;
+     
      (* Check that function does not have null parameters *)
      List.iter (check_not_null (fun n -> "illegal null formal " ^ n ^            
        " in " ^ func.f_id)) func.f_params;                                       
@@ -124,6 +125,8 @@ let check (globals, functions) =
  
      (* Add globals and function parameters to symbol table *)
      List.iter (fun (a, b) -> Hashtbl.add symbols b a) (globals @ func.f_params);
+
+     (* TODO: if function parameter is an object, the keys of said object need to be added to symbol table *)
 
      let type_of_identifier s = 
 	 try Hashtbl.find symbols s
@@ -136,7 +139,7 @@ let check (globals, functions) =
 	| FloatLit _ -> Float
 	| StrLit _ -> String
 	| BoolLit _ -> Bool
-	| Id s -> type_of_identifier s
+	| Id s -> if not (String.contains s '.') then (type_of_identifier s) else (Object) (* TODO: Is this actually what we want?*)
 	| Binop(e1, op, e2) as e -> let t1 = expression e1 and t2 = expression e2 in
          (match op with
             Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
@@ -162,14 +165,28 @@ let check (globals, functions) =
 		add_local (t, n);
 		let lt = type_of_identifier n
 		and rt = expression e in 
-		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
-		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
+		if (String.contains n '.') then
+			(raise (Failure ("Can not declare multi-level variable " ^ n ^ " in expression " ^ string_of_expression ex)))
+		else
+			(check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
+		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex)))
 	| FunExp(f_id, actuals) as funexp -> 
 		let fd = function_decl f_id in
 		if List.length actuals !=  List.length fd.f_params then
 	 	raise (Failure ("expecting " ^ string_of_int 
 		   (List.length fd.f_params) ^ " arguments in " ^ string_of_expression funexp))
 		else
+		  List.iter2 
+		    (fun (ft, _) e -> let et = expression e in
+		      let temp = string_of_expression e in
+		      if not (String.contains (string_of_expression e) '.' )  then
+		      (
+		      ignore (check_assign ft et 
+		        (Failure ("illegal actual argument found " ^ string_of_typ et ^
+		        " expected " ^ string_of_typ ft ^ " in " ^ string_of_expression e)))
+		      )
+		    )
+                    fd.f_params actuals;
 		fd.type_spec
 	| KeyVal (t, s, e) as ex -> 
 		let lt = type_of_identifier s 
@@ -177,7 +194,9 @@ let check (globals, functions) =
 		check_assign lt rt (Failure("Key " ^ string_of_typ lt ^ 
 		" has different type from value " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
 	| ArrExp (e) as ex -> Array
-	| ObjExp (e) as ex -> Object
+	| ObjExp (e) as ex -> 
+		(*print_endline (string_of_expression ex);*)
+		Object
 	| Noexpr -> Null
       in
 
