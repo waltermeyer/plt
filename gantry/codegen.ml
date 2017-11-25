@@ -43,13 +43,18 @@ let translate (globals, functions) =
 
     (* AST to LLVM types *)
     let ltype_of_typ = function
-        A.Int    -> i32_t
-      | A.Float  -> flt_t
-      | A.Object -> L.pointer_type obj_t
-      | A.String -> str_t
-      | A.Bool   -> b_t
-      | A.Null   -> void_t
-      (* | A.Array  -> arr_t *)
+        A.Int      -> i32_t
+      | A.Float    -> flt_t
+      | A.Object   -> L.pointer_type obj_t
+      | A.String   -> str_t
+      | A.Bool     -> b_t
+      | A.Null     -> void_t
+      (* Array Types *)
+      | A.Int_Array    -> L.pointer_type i32_t
+      | A.Float_Array  -> L.pointer_type flt_t
+      | A.Object_Array -> L.pointer_type (L.pointer_type obj_t)
+      | A.String_Array -> L.pointer_type str_t
+      | A.Bool_Array   -> L.pointer_type b_t
     in
 
     (* Global Declarations *)
@@ -251,6 +256,26 @@ let translate (globals, functions) =
 	       let tmp = L.build_sub tmp (L.const_int i32_t 1) "tmp" builder in
 	       L.build_store tmp n builder
 	)
+      | A.ArrExp(el) ->
+	let vl  = List.map (expr builder) el in
+	(* We infer type by first expression - semantic should handle this *)
+	let typ  = L.pointer_type (L.type_of (List.hd vl)) in
+	let size = L.const_int i32_t ((List.length vl) + 1) in
+	(* Declare Array *)
+	let arr  = L.build_array_malloc typ size "arr" builder in
+	let arr  = L.build_pointercast arr typ "arr" builder in
+	let fill i v =
+          (*print_endline (L.string_of_lltype (L.type_of v));*)
+	  let vp =
+	  L.build_gep arr [| L.const_int i32_t (i + 1) |] "arr_v" builder in
+	  ignore(L.build_store v vp builder);
+	(* Populate Array with Values *)
+	in
+	(* For each value *)
+	List.iteri fill vl;
+	(*print_endline (L.string_of_llvalue arr);*)
+	(*print_endline (L.string_of_lltype (L.type_of arr));*)
+	arr
       | A.KeyVal(t, n, e) ->
 	(* Resolve struct index and 'value_typ' in struct *)
 	let sidx_of_typ = function
@@ -260,7 +285,8 @@ let translate (globals, functions) =
 	  | A.String -> 6
 	  | A.Bool   -> 7
 	  | A.Null   -> 8
-	  (* | A.Array  -> arr_t *)
+	  (* Arrays *)
+	  | _	     -> 9
         in
 	(* Build the data structure for a key *)
 	let e' = expr builder e in
@@ -438,10 +464,7 @@ let translate (globals, functions) =
       in
 (*
   | A.ArrAssign  (*TODO*)
-  | A.AssignObj  (*TODO*)
-  | A.ArrExp  (*TODO*)
-  | A.Noexpr  (*TODO*) *)
-
+*)
     let add_terminal builder f =
       match L.block_terminator (L.insertion_block builder) with
         Some _ -> ()
