@@ -1,0 +1,11 @@
+int main(){
+	int x = 4;
+	int y = 5;
+	int z = stringcmp(4, 5);
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("illegal actual argument found int expected string in 4")
+*/

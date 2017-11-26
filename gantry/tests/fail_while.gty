@@ -1,0 +1,20 @@
+int main(){
+	
+	int x = 10;
+
+	while (x < 20){
+		print_i(x);
+		x = x+1;
+	}
+
+	while (x){	
+		print_i(x);
+		x = x+1;
+	}
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("expected Boolean expression in x")
+*/
