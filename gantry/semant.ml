@@ -74,6 +74,8 @@ let check (globals, functions) =
      { type_spec = Null; f_id = "print_i"; f_params = [(Int, "x")] ; f_statements = [] }
      (StringMap.add "print_d"
      { type_spec = Null; f_id = "print_d"; f_params = [(Float, "x")] ; f_statements = [] }
+     (StringMap.add "print_b"
+     { type_spec = Null; f_id = "print_b"; f_params = [(Bool, "x")] ; f_statements = [] }
      (StringMap.add "print_k"
      { type_spec = Null; f_id = "print_k"; f_params = [(Object, "x")] ; f_statements = [] }
      (* TODO : Decide whether we are implementing in our language or in codegen *)
@@ -100,7 +102,7 @@ let check (globals, functions) =
      (StringMap.add "httpget"
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
-     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] }))))))))))))
+     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] })))))))))))))
   in
 
   (* Add built in functions to list of function declaration list *)

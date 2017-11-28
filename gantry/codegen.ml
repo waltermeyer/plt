@@ -67,6 +67,10 @@ let translate (globals, functions) =
     let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
     let printf_func = L.declare_function "printf" printf_t the_module in
 
+    (* Print bool *)
+    let printb_t = L.var_arg_function_type i32_t [| b_t |] in
+    let printb_func = L.declare_function "print_b" printb_t the_module in
+
     (* String Concatenation *)
     let string_concat_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
     let string_concat = L.declare_function "string_concat" string_concat_t the_module in
@@ -445,6 +449,9 @@ let translate (globals, functions) =
       | A.FunExp("print_d", [e]) ->
 	L.build_call printf_func [| flt_format_str ; (expr builder e) |]
 	  "print_d" builder
+      | A.FunExp("print_b", [e]) ->
+        L.build_call printb_func [| (expr builder e) |] 
+          "print_b" builder       
       | A.FunExp("print_k", [e]) ->
 	L.build_call printk_func [| (expr builder e) |]
 	  "print_k" builder

@@ -1,0 +1,16 @@
+// Test bool printing
+
+int main() {
+
+    print_b(true);
+    print_s("");
+    print_b(false);
+    return 0;
+
+}
+
+/*
+****TEST****
+true
+false
+*/
