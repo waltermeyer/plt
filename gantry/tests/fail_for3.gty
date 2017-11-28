@@ -1,0 +1,15 @@
+int main() {
+	int x = 1;
+
+	// This should fail beceause x is undefined
+	for(x= 1; x > 0; y--) {
+	        print_i(x);
+	}
+	
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("undeclared identifier y")
+*/

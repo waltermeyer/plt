@@ -7,6 +7,9 @@ char *slice(char *src, int begin, int end){
 	int len = end - begin;
 	char *dest = malloc(len + 1);
 	int i;
+	if (begin>end){
+    		printf("Runtime Error: Slice begin integer %d is greater than end integer %d,", begin, end);
+	}
 	int dest_i = 0;
 	for (i=begin;i<end&&src[i]!='\0' ; i++){
 		dest[dest_i] = src[i];
