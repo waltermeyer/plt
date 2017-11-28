@@ -17,6 +17,7 @@ let translate (globals, functions) =
   let the_module = L.create_module context "Gantry"
 
     (* LLVM Types *)
+    and i1_t   = L.i1_type context
     and i32_t  = L.i32_type context
     and i8_t   = L.i8_type context
     and b_t    = L.i8_type context
@@ -246,9 +247,13 @@ let translate (globals, functions) =
 	)
       | A.Unop(op, e) ->
         let e' = expr builder e in
+	let typ = L.string_of_lltype (L.type_of e') in
+	(*print_endline typ;*)
         (match op with
              A.Neg  -> L.build_neg e' "tmp" builder
-           | A.Not  -> L.build_not e' "tmp" builder
+           | A.Not  -> L.build_intcast (L.build_not (L.build_intcast e' i1_t "tmp" builder) "tmp" builder) i8_t "tmp" builder
+			(*L.const_select e'*) 
+			(*( L.build_icmp L.Icmp.Eq e' (L.const_int i1_t 0) "tmp" builder )*)
 	   | A.Inc  ->
 	       let n   = lookup (A.expr_to_str e) in
 	       let tmp = L.build_load n "tmp" builder in
@@ -526,6 +531,13 @@ let translate (globals, functions) =
       | _ -> L.build_ret (expr builder e) builder); builder
       | A.If (predicate, then_stmt, else_stmt) ->
         let bool_val = expr builder predicate in
+	let typ = L.string_of_lltype (L.type_of bool_val) in
+	let bv = 
+	if  ((String.compare typ "i8") == 0) then
+		(L.build_intcast bool_val i1_t "tmp" builder)
+	else
+		bool_val in
+
         let merge_bb = L.append_block context "merge" the_function in
 
         let then_bb = L.append_block context "then" the_function in
@@ -536,7 +548,7 @@ let translate (globals, functions) =
         add_terminal (stmt (L.builder_at_end context else_bb) else_stmt)
         (L.build_br merge_bb);
 
-        ignore (L.build_cond_br bool_val then_bb else_bb builder);
+        ignore (L.build_cond_br bv then_bb else_bb builder);
         L.builder_at_end context merge_bb
       | A.While (predicate, body) ->
         let pred_bb = L.append_block context "while" the_function in
@@ -548,9 +560,16 @@ let translate (globals, functions) =
 
         let pred_builder = L.builder_at_end context pred_bb in
         let bool_val = expr pred_builder predicate in
+	let typ = L.string_of_lltype (L.type_of bool_val) in
+	let bv = 
+	if  ((String.compare typ "i8") == 0) then
+		(L.build_intcast bool_val i1_t "tmp" builder)
+	else
+		bool_val in
+
 
         let merge_bb = L.append_block context "merge" the_function in
-        ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
+        ignore (L.build_cond_br bv body_bb merge_bb pred_builder);
         L.builder_at_end context merge_bb
 
       | A.For (e1, e2, e3, body) -> stmt builder
