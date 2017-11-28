@@ -92,14 +92,18 @@ let translate (globals, functions) =
     let string_length_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
     let string_length = L.declare_function "string_length" string_length_t the_module in
 
-    (* HTTP GET built-in *)
+    (* HTTP GET library function *)
     let httpget_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
     let httpget_func = L.declare_function "httpget" httpget_t the_module in
 
-    (* HTTP POST built-in *)
+    (* HTTP POST library function *)
     let httppost_t = L.var_arg_function_type str_t
 		     [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
     let httppost_func = L.declare_function "httppost" httppost_t the_module in
+
+    (* Nap (sleep wrapper) library function *)
+    let nap_t = L.var_arg_function_type i32_t [| i32_t |] in
+    let nap_func = L.declare_function "nap" nap_t the_module in
 
     (* Object Library Runtime *)
     let obj_findkey_t = L.var_arg_function_type (L.pointer_type obj_t)
@@ -462,6 +466,9 @@ let translate (globals, functions) =
           let e2' = expr builder e2 in
             L.build_call httppost_func [| (expr builder e) ; (e2') |]
             "httppost" builder
+      | A.FunExp("nap", [e]) ->
+            L.build_call nap_func [| (expr builder e) |]
+            "nap" builder
       | A.FunExp("string_length", [e]) ->
 	    L.build_call string_length [| (expr builder e ) |]
 	    "string_length" builder

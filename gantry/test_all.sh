@@ -99,7 +99,8 @@ Check() {
     Run "$LLC" "${basename}.ll" ">" "${basename}.s" &&
     Run "$CC" "-o" "${basename}.exe" "${basename}.s" \
 	  "gantrylib_http.o" "gantrylib_string.o" \
-	  "gantrylib_obj.o" "printb.o" "$LDFLAGS" &&
+	  "gantrylib_obj.o" "gantrylib_nap.o" \
+          "printb.o" "$LDFLAGS" &&
     Run "./${basename}.exe" > "${basename}.out" &&
     Compare ${basename}.out ${reffile}.out ${basename}.diff
 
