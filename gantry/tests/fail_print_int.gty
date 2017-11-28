@@ -1,0 +1,10 @@
+int main(){
+	string s = "foo";
+	print_i(s);
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("illegal actual argument found string expected int in s")
+*/

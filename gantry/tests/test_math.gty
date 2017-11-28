@@ -1,0 +1,49 @@
+int main(){
+	int x = -19;
+	int y = 10;
+	int d = 4;
+	int c = -192;
+	int m = 3;
+	print_i(x + y);
+	print_i(x * y);
+	print_i(c/2);
+	print_i(m/2);
+	print_i(c - x);
+	if (true == true){
+		print_s("This is true");
+	}
+	if (true != false){
+		print_s("This is false");
+	}
+	if (c < x) {
+		print_s("-192 is less than -19");
+		if ( d > c){
+			print_s("4 is greater than -192");
+		}
+		else {
+			print_s("nope");
+		}
+		if (3/4 < 1){
+			print_s("3/4 is less than 1");
+		}
+		else {
+			print_s("int division then comp doesn't work");
+		}
+	}
+		
+	return 0;
+}
+
+/*
+****TEST****
+-9
+-190
+-96
+1
+-173
+This is true
+This is false
+-192 is less than -19
+4 is greater than -192
+3/4 is less than 1
+*/

@@ -1,0 +1,12 @@
+int main(){
+	bool v = true;
+	bool w = false;
+	w++;
+	w = !w;
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("Illegal unary operator ++bool in w++")
+*/
