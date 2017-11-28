@@ -99,10 +99,12 @@ let check (globals, functions) =
      { type_spec = Int; f_id = "string_length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "tostring"
      { type_spec = String; f_id = "tostring"; f_params = [(String, "x")] ; f_statements = [] }
+     (StringMap.add "nap"
+     { type_spec = Int; f_id = "nap"; f_params = [(Int, "x")] ; f_statements = [] }
      (StringMap.add "httpget"
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
-     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] })))))))))))))
+     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] }))))))))))))))
   in
 
   (* Add built in functions to list of function declaration list *)
