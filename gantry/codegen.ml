@@ -384,6 +384,13 @@ let translate (globals, functions) =
       | _ -> L.build_ret (expr builder e) builder); builder
       | A.If (predicate, then_stmt, else_stmt) ->
         let bool_val = expr builder predicate in
+	let typ = L.string_of_lltype (L.type_of bool_val) in
+	let bv = 
+	if  ((String.compare typ "i8") == 0) then
+		(L.build_intcast bool_val i1_t "tmp" builder)
+	else
+		bool_val in
+
         let merge_bb = L.append_block context "merge" the_function in
 
         let then_bb = L.append_block context "then" the_function in
@@ -394,7 +401,7 @@ let translate (globals, functions) =
         add_terminal (stmt (L.builder_at_end context else_bb) else_stmt)
         (L.build_br merge_bb);
 
-        ignore (L.build_cond_br bool_val then_bb else_bb builder);
+        ignore (L.build_cond_br bv then_bb else_bb builder);
         L.builder_at_end context merge_bb
       | A.While (predicate, body) ->
         let pred_bb = L.append_block context "while" the_function in
@@ -406,9 +413,16 @@ let translate (globals, functions) =
 
         let pred_builder = L.builder_at_end context pred_bb in
         let bool_val = expr pred_builder predicate in
+	let typ = L.string_of_lltype (L.type_of bool_val) in
+	let bv = 
+	if  ((String.compare typ "i8") == 0) then
+		(L.build_intcast bool_val i1_t "tmp" builder)
+	else
+		bool_val in
+
 
         let merge_bb = L.append_block context "merge" the_function in
-        ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
+        ignore (L.build_cond_br bv body_bb merge_bb pred_builder);
         L.builder_at_end context merge_bb
 
       | A.For (e1, e2, e3, body) -> stmt builder

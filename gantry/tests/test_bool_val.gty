@@ -1,6 +1,9 @@
 int main(){
 	bool a = true;
 	bool b = false;
+	if (true){
+		print_s("true");
+	}
 	if (a != b){
 		print_s("true != false");
 	}
@@ -19,6 +22,7 @@ int main(){
 
 /*
 ****TEST****
+true
 true != false
 false == false
 2 is less than 3
