@@ -269,7 +269,6 @@ let translate (globals, functions) =
 	let arr  = L.build_array_malloc typ size "arr" builder in
 	let arr  = L.build_pointercast arr typ "arr" builder in
 	let fill i v =
-          (*print_endline (L.string_of_lltype (L.type_of v));*)
 	  let vp =
 	  L.build_gep arr [| L.const_int i32_t (i + 1) |] "arr_v" builder in
 	  ignore(L.build_store v vp builder);
@@ -277,8 +276,6 @@ let translate (globals, functions) =
 	in
 	(* For each value *)
 	List.iteri fill vl;
-	(*print_endline (L.string_of_llvalue arr);*)
-	(*print_endline (L.string_of_lltype (L.type_of arr));*)
 	arr
       | A.ArrAcc(e1, e2) ->
         let e1_str = A.expr_to_str e1
@@ -356,13 +353,42 @@ let translate (globals, functions) =
 	(* Return the pointer to the enclosing object *)
 	parent
       | A.AssignDecl(t, n, e) ->
-        let e' = expr builder e in
-          (* First add this declaration to f_var_tbl hash map *)
-          ignore (add_local (t, n) builder);
-	  (* Then set it and forget it *)
+        (* First add this declaration to f_var_tbl hash map *)
+        ignore (add_local (t, n) builder);
+	(* Non-Object on RHS *)
+	if (not (String.contains (A.expr_to_str e) '.')) then (
+          let e' = expr builder e in
 	  let n = lookup n in
           ignore (L.build_store e' n builder);
           e'
+	)
+	(* Object on RHS *)
+	else (
+	  let e1_str = n
+	  and e2_str = A.expr_to_str e in
+	  let e1' = lookup e1_str
+	  and e2' = lookup e2_str in
+	  let sidx_of_typ = function
+	      "i32*"    -> 3
+	    | "double*" -> 4
+	    | "%obj**"  -> 5
+	    | "i8**"    -> 6
+	    | "i8*"     -> 7
+	    | _         -> raise (Failure ("Invalid object assignment"))
+	  in
+	  (* Get type of primitive on LHS *)
+	  let t = sidx_of_typ (L.string_of_lltype (L.type_of e1')) in
+	  let t_e1' = L.const_int i32_t t in
+	  (* Get Value of Object on RHS (based on e1' type) *)
+	  let v_e2' = L.build_call obj_getkey_func
+		      [| e2' ; t_e1' |] "obj_getkey" builder in
+	  (* Cast void* RHV to ptr of LHV type *)
+	  ignore(L.build_alloca (L.type_of e1') "pcst" builder);
+	  let v_e2' = L.build_bitcast v_e2' (L.type_of e1') "cst" builder in
+	  let v_e2' = L.build_load v_e2' "loadcst" builder in
+	  ignore(L.build_store v_e2' e1' builder);
+	  v_e2'
+	)
       | A.Assign(e1, e2) ->
 	(* Object Assignment *)
 	let e1_str = A.expr_to_str e1

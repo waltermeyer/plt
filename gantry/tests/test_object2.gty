@@ -54,7 +54,8 @@ int main () {
   int i = 42;
   i = b.b.x;
   print_i(i);
-
+  int x = b.b.x;
+  print_i(x);
 }
 /*
 ****TEST****
@@ -69,5 +70,6 @@ Meaning of life
 42.420000
 Meaning of life
 Mars!
+111
 111
 */
