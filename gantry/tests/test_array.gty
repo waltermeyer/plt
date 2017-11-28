@@ -1,0 +1,25 @@
+int main () {
+  int array x = [1, 2, 3, 4, 5, 6, 7, 8];
+  int i = x[0] + x[2];
+  print_i(i);
+  print_i(x[1+2] + x[x[1] + x[2]]);
+  string array y = [ "Hello", "Arrays" ];
+  print_s(y[0] ^ " " ^ y[1]);
+  bool array b = [true, false];
+
+  if (b[0] == b[0]) {
+    print_s("woop");
+  }
+  if (b[0] != b[1]) {
+    print_s("woop");
+  }
+
+}
+/*
+****TEST****
+4
+10
+Hello Arrays
+woop
+woop
+*/

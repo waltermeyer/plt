@@ -216,6 +216,14 @@ let check (globals, functions) =
 		                (expression (List.hd el)) (List.tl el)
 		       in
 		       arr_typ t
+	| ArrAcc (e1, e2) -> (match (expression e1) with
+			       Int_Array    -> Int
+			     | Float_Array  -> Float
+			     | Object_Array -> Object
+			     | String_Array -> String
+			     | Bool_Array   -> Bool
+			     | _	    -> raise (Failure("Invalid array access on " ^
+						      string_of_expression e1)))
 	| ObjExp (e) as ex -> Object
 	| Noexpr -> Null
       in

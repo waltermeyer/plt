@@ -24,7 +24,6 @@ open Ast
 %nonassoc NOELSE
 %nonassoc ELSE
 %right ASSIGN COLON
-%left PERIOD LBRACK
 %left OR
 %left AND
 %left INCREM DECREM
@@ -35,6 +34,7 @@ open Ast
 %nonassoc UMINUS
 %right NOT
 %left CONCAT
+%left PERIOD LBRACK
 
 %start program
 %type <Ast.program> program

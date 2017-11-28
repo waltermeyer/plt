@@ -276,6 +276,19 @@ let translate (globals, functions) =
 	(*print_endline (L.string_of_llvalue arr);*)
 	(*print_endline (L.string_of_lltype (L.type_of arr));*)
 	arr
+      | A.ArrAcc(e1, e2) ->
+        let e1_str = A.expr_to_str e1
+        and idx = expr builder e2 in
+	let idx = L.build_add idx (L.const_int i32_t 1) "arridx" builder in
+	let arr =
+          if (String.contains e1_str '.') then
+	    (lookup e1_str)
+	  else
+	    (L.build_load (lookup e1_str) "arracc" builder)
+	in
+	let e1' = L.build_gep arr [| idx |] "arracc_e" builder in
+	let e1' = L.build_load e1' "arracc" builder in
+	e1'
       | A.KeyVal(t, n, e) ->
 	(* Resolve struct index and 'value_typ' in struct *)
 	let sidx_of_typ = function
