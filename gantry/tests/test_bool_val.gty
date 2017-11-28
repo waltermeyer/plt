@@ -1,17 +1,17 @@
 int main(){
 	bool a = true;
 	bool b = false;
-	//if (a != b){
-	//	print_s("true != false");
-	//}
-	//if (!a == b){
-	//	print_s("false == false");
-	//}
-	//int x = 2;
-	//int y = 3;
-	//if (x<y){
-	//	print_s("2 is less than 3");
-	//}
+	if (a != b){
+		print_s("true != false");
+	}
+	if (!a == b){
+		print_s("false == false");
+	}
+	int x = 2;
+	int y = 3;
+	if (x<y){
+		print_s("2 is less than 3");
+	}
 	if (!b){
 		print_s("!b is true");
 	}
@@ -19,8 +19,8 @@ int main(){
 
 /*
 ****TEST****
-//true != false
-//false == false
-//2 is less than 3
+true != false
+false == false
+2 is less than 3
 !b is true
 */

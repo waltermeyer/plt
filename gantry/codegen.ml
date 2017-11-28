@@ -226,10 +226,10 @@ let translate (globals, functions) =
       | A.Unop(op, e) ->
         let e' = expr builder e in
 	let typ = L.string_of_lltype (L.type_of e') in
-	print_endline typ;
+	(*print_endline typ;*)
         (match op with
              A.Neg  -> L.build_neg e' "tmp" builder
-           | A.Not  -> (L.build_not (L.const_bitcast e' i1_t) "tmp" builder)
+           | A.Not  -> L.build_intcast (L.build_not (L.build_intcast e' i1_t "tmp" builder) "tmp" builder) i8_t "tmp" builder
 			(*L.const_select e'*) 
 			(*( L.build_icmp L.Icmp.Eq e' (L.const_int i1_t 0) "tmp" builder )*)
 	   | A.Inc  ->
