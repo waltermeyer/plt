@@ -33,54 +33,120 @@ int print_k(obj *o) {
 }
 
 
-char *stringify(obj *o){
-	// if a value is an object, you want to call this recursively
-	// but how does this impact the order of printing
-	char *buff = (char*)malloc(sizeof(char));
-	char *stringified = rec_stringify(o, buff);
-	return stringified
-} 
+
+char *fill_buff(char *buff, char *cpy_buff){
+	size_t cpy_len;
+	size_t buff_sz;
+	printf("_____FILL BUFF_____\n");
+
+	buff_sz = sizeof(buff);
+	printf("size of buff before memcpy %zu \n", buff_sz);
+	cpy_len = sizeof(char) *(strlen(cpy_buff) + 1);
+	printf(" LENGTH OF cpy_buff : %zu \n", cpy_len);
+	buff = (char *)malloc((buff_sz + cpy_len)*sizeof(char));
+	printf("buffsz + cpy_len = %zu \n", buff_sz + cpy_len);
+	int buff_sz2 = sizeof(buff);
+	printf("size of buff after realloc %d \n" , buff_sz2); 
+	memcpy(buff + buff_sz, cpy_buff, cpy_len);
+	printf("Buff in fill_buff : %s \n", buff);
+	
+	printf("-- END OF FILL BUFF --\n");
+	return buff;
+}
+
+char *string_key(obj *o, char *buff){
+	char *cpy_buff;
+	char *k;
+	int len;
+
+	k = o->k;
+	printf("key %s : ", k);
+	len = sizeof(k);
+	cpy_buff = malloc(sizeof(char)*(len+1));
+	memcpy(cpy_buff, k, len+1);
+	printf("  does this match cpy_buff %s ?\n", cpy_buff);
+	fill_buff(buff, cpy_buff);
+	//free(cpy_buff);
+	
+	len = 4;
+	cpy_buff = malloc(sizeof(char)*len);
+	cpy_buff = memcpy(cpy_buff, " : ", len);
+	fill_buff(buff, cpy_buff);
+	printf(" buff now : %s \n", buff);
+	free(cpy_buff);
+	
+	return buff;
+}
+
+// TODO : these should output to char buff not print
+char *string_val(obj *o, char *buff){
+	//switch(o->v_typ) {
+	//  case 3: cpybreak;
+	//  case 4: printf("%f\n", o->f); break;
+	//  case 5: printf("object key [%p]\n", &o); break;
+	//  case 6: printf("%s\n", o->s); break;
+	//  case 7: printf("%s", o->b ? "true\n" : "false\n"); break;
+	//  default: printf("object [%p]\n", &o); break;
+	//};
+	char *cpy_buff;
+	int len;
+
+	len = 4;
+	cpy_buff = malloc(sizeof(char)*len);
+	memcpy(cpy_buff, " ,\n", len);
+	fill_buff(buff, cpy_buff);
+	printf(" copy buff after , %s \n" , cpy_buff);
+	printf(" buff after kv , %s \n", buff);
+	free(cpy_buff);
+	
+	return buff;
+}
 
 char *rec_stringify(obj *o, char *buff){
 
 	int cpy_len;
-	char *cpy_buff;
+	//char *cpy_buff;
 	
 	o = o->next;
 
-	cpy_buff = " { ";
+	char cpy_buff[4] = " { ";
 	cpy_len = strlen(cpy_buff) + 1;
-	buff = realloc(buff,cpy_len);
+	printf(" length of cpy_buff should be 4,is, %d \n", cpy_len);
+	buff = (char *)malloc(cpy_len*sizeof(char));
 	memcpy(buff + cpy_len, cpy_buff, cpy_len);
 	
-		
+	printf("buff before while%s\n", buff);
 	while (o != NULL) {
-		if (o->v_type == 5){
-			
-			//o = obj_stringify(o->o, buff);
+		if (o->v_typ == 5){
+			printf("vtype was object \n");
+			string_key(o, buff);	
+			//o = rec_stringify(o->o, buff);
 		}
-		else{
-			cpy_buff = o->k;
-			cpy_len = strlen(cpy_buff) + 1;
-			buff = realloc(buff,cpy_len);
-			memcpy(buff + cpy_len, cpy_buff, cpy_len);
-			cpy_buff = " : ";
-			cpy_len = strlen(cpy_buff) + 1;
-			buff = realloc(buff,cpy_len);
-			memcpy(buff + cpy_len, cpy_buff, cpy_len);
-					
-			switch(o->v_typ) {
-			  case 3: cpybreak;
-			  case 4: printf("%f\n", o->f); break;
-			  case 5: printf("object key [%p]\n", &o); break;
-			  case 6: printf("%s\n", o->s); break;
-			  case 7: printf("%s", o->b ? "true\n" : "false\n"); break;
-			  default: printf("object [%p]\n", &o); break;
-  };
+		else{	
+			printf("vtype not object \n");
+			string_key(o, buff);	
+			string_val(o, buff);	
 		}
-
+		o = o->next;
+	}
+	char cpy_buffe[4] = "}";
+	cpy_len = strlen(cpy_buffe) + 1;
+	printf(" length of cpy_buff should be 4,is, %d \n", cpy_len);
+	buff = (char *)malloc(cpy_len*sizeof(char));
+	memcpy(buff + cpy_len, cpy_buffe, cpy_len);
+	return buff;
 }
 
+/* This function gets called to stringify an object */
+char *stringify_obj(obj *o){
+	char *buff = (char *)malloc(sizeof(char));
+	char *stringified = rec_stringify(o, buff);
+	printf("+++buff+++%s\n", buff);
+	free(buff);
+	printf("+++stringified+++%s\n", stringified);
+	return stringified;
+}
+ 
 /*
  * Recursively search for a key in an object
  */
@@ -251,6 +317,12 @@ int main () {
   obj_findkey(o, "key3.nestedkey4.nestedkey6");
   obj_findkey(o, "key3.nestedkey4");
   obj_findkey(o, "keyfail.nestedkey4");
+
+  char *buff;
+  buff = stringify_obj(o);
+  printf("%s", buff);
+  free(buff);
+
 
   free(o);
   free(o2);
