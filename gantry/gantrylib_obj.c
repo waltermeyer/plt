@@ -32,6 +32,55 @@ int print_k(obj *o) {
   return 0;
 }
 
+
+char *stringify(obj *o){
+	// if a value is an object, you want to call this recursively
+	// but how does this impact the order of printing
+	char *buff = (char*)malloc(sizeof(char));
+	char *stringified = rec_stringify(o, buff);
+	return stringified
+} 
+
+char *rec_stringify(obj *o, char *buff){
+
+	int cpy_len;
+	char *cpy_buff;
+	
+	o = o->next;
+
+	cpy_buff = " { ";
+	cpy_len = strlen(cpy_buff) + 1;
+	buff = realloc(buff,cpy_len);
+	memcpy(buff + cpy_len, cpy_buff, cpy_len);
+	
+		
+	while (o != NULL) {
+		if (o->v_type == 5){
+			
+			//o = obj_stringify(o->o, buff);
+		}
+		else{
+			cpy_buff = o->k;
+			cpy_len = strlen(cpy_buff) + 1;
+			buff = realloc(buff,cpy_len);
+			memcpy(buff + cpy_len, cpy_buff, cpy_len);
+			cpy_buff = " : ";
+			cpy_len = strlen(cpy_buff) + 1;
+			buff = realloc(buff,cpy_len);
+			memcpy(buff + cpy_len, cpy_buff, cpy_len);
+					
+			switch(o->v_typ) {
+			  case 3: cpybreak;
+			  case 4: printf("%f\n", o->f); break;
+			  case 5: printf("object key [%p]\n", &o); break;
+			  case 6: printf("%s\n", o->s); break;
+			  case 7: printf("%s", o->b ? "true\n" : "false\n"); break;
+			  default: printf("object [%p]\n", &o); break;
+  };
+		}
+
+}
+
 /*
  * Recursively search for a key in an object
  */
@@ -102,6 +151,7 @@ int obj_assign(obj *o, int t, void *v) {
   }
   return 0;
 }
+
 
 /*
  * Get a key value from an Object
