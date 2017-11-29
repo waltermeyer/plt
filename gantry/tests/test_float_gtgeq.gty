@@ -1,0 +1,23 @@
+// pass - check float greater-than and geq operators
+
+int main() {
+
+    float x = 4.5679;
+    float y = 4.5678;
+    
+    if (x > y) {
+        print_s("greater than");
+    }
+
+    if (y >= y) {
+        print_s("geq");
+    }
+
+    return 0;
+}
+
+/*
+****TEST****
+greater than
+geq
+*/

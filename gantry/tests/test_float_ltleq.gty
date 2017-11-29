@@ -1,0 +1,23 @@
+// pass - check float less-than and leq operators
+
+int main() {
+
+    float x = 4.5679;
+    float y = 4.5678;
+    
+    if (y < x) {
+        print_s("less than");
+    }
+
+    if (y <= y) {
+        print_s("leq");
+    }
+
+    return 0;
+}
+
+/*
+****TEST****
+less than
+leq
+*/
