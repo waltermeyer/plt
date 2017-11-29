@@ -6,14 +6,11 @@ int main() {
     float y = 2.7;
     float z = x + y;   
  
-    if (z == 4.21) {
-        print_s("true");
-    }
-
+    print_d(z);
     return 0;
 }
 
 /*
 ****TEST****
-true
+4.210000
 */

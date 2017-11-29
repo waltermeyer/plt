@@ -1,0 +1,36 @@
+// pass - check float eq and neq operators
+
+int main() {
+
+    float x = 1.5;
+    float y = 1.5;
+    float z = 2.51;
+
+    if (x == y) {
+        print_s("equal");
+    }
+
+    if (y == x) {
+        print_s("equal");
+    }
+
+    if (x != z) {
+        print_s("not equal");
+    }
+
+
+    if (z != y) {
+        print_s("not equal");
+    }
+
+    return 0;
+
+}
+
+/*
+****TEST****
+equal
+equal
+not equal
+not equal
+*/

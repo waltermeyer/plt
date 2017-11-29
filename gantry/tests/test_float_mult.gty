@@ -1,0 +1,16 @@
+// Multiplying two floats
+
+int main() {
+
+    float x = 2.5;
+    float y = 3.5;
+    float z = x * y;
+
+    print_d(z);     
+
+}
+
+/*
+****TEST****
+8.750000
+*/
