@@ -1,0 +1,19 @@
+// Adding two floats
+
+int main() {
+
+    float x = 1.51;
+    float y = 2.7;
+    float z = x + y;   
+ 
+    if (z == 4.21) {
+        print_s("true");
+    }
+
+    return 0;
+}
+
+/*
+****TEST****
+true
+*/
