@@ -37,20 +37,31 @@ int print_k(obj *o) {
 char *fill_buff(char *buff, char *cpy_buff){
 	size_t cpy_len;
 	size_t buff_sz;
-	printf("_____FILL BUFF_____\n");
+	char *old_buff;
 
-	buff_sz = sizeof(buff);
-	printf("size of buff before memcpy %zu \n", buff_sz);
-	cpy_len = sizeof(char) *(strlen(cpy_buff) + 1);
-	printf(" LENGTH OF cpy_buff : %zu \n", cpy_len);
-	buff = (char *)malloc((buff_sz + cpy_len)*sizeof(char));
-	printf("buffsz + cpy_len = %zu \n", buff_sz + cpy_len);
-	int buff_sz2 = sizeof(buff);
-	printf("size of buff after realloc %d \n" , buff_sz2); 
-	memcpy(buff + buff_sz, cpy_buff, cpy_len);
-	printf("Buff in fill_buff : %s \n", buff);
+	//printf("_____FILL BUFF_____\n");
 	
-	printf("-- END OF FILL BUFF --\n");
+
+	cpy_len = sizeof(char) *(strlen(cpy_buff) + 1);
+	//printf("Contents of cpy_buff : %s \n" , cpy_buff);
+	//printf("Length of cpy_buff : %zu \n", cpy_len);
+	
+	buff_sz = sizeof(char) *(strlen(buff)+1);
+	old_buff = (char *)malloc(buff_sz);
+	//printf("size of buff before memcpy %zu \n", buff_sz);
+	memcpy(old_buff, buff, buff_sz);
+	buff = (char *)realloc(buff, buff_sz + cpy_len);
+	//printf("buffsz + cpy_len = %zu \n", buff_sz + cpy_len);
+	
+	memcpy(buff,old_buff, buff_sz);
+	//printf("After inserting buff: %s \n", new_buff);
+	free(old_buff);
+	
+	memcpy(buff + buff_sz -1, cpy_buff, cpy_len);
+	//printf("After inserting cpy_buff : %s \n", new_buff);
+		
+
+	//printf("-- END OF FILL BUFF --\n");
 	return buff;
 }
 
@@ -60,19 +71,16 @@ char *string_key(obj *o, char *buff){
 	int len;
 
 	k = o->k;
-	printf("key %s : ", k);
-	len = sizeof(k);
+	len = strlen(k);
 	cpy_buff = malloc(sizeof(char)*(len+1));
 	memcpy(cpy_buff, k, len+1);
-	printf("  does this match cpy_buff %s ?\n", cpy_buff);
-	fill_buff(buff, cpy_buff);
-	//free(cpy_buff);
+	buff = fill_buff(buff, cpy_buff);
+	free(cpy_buff);
 	
 	len = 4;
 	cpy_buff = malloc(sizeof(char)*len);
 	cpy_buff = memcpy(cpy_buff, " : ", len);
-	fill_buff(buff, cpy_buff);
-	printf(" buff now : %s \n", buff);
+	buff = fill_buff(buff, cpy_buff);
 	free(cpy_buff);
 	
 	return buff;
@@ -80,23 +88,43 @@ char *string_key(obj *o, char *buff){
 
 // TODO : these should output to char buff not print
 char *string_val(obj *o, char *buff){
-	//switch(o->v_typ) {
-	//  case 3: cpybreak;
-	//  case 4: printf("%f\n", o->f); break;
-	//  case 5: printf("object key [%p]\n", &o); break;
-	//  case 6: printf("%s\n", o->s); break;
-	//  case 7: printf("%s", o->b ? "true\n" : "false\n"); break;
-	//  default: printf("object [%p]\n", &o); break;
-	//};
 	char *cpy_buff;
 	int len;
+	
+	char *temp;
+	switch(o->v_typ) {
+    	  case 3: 
+		len = snprintf(NULL, 0 , "%d" , o->i);  
+		cpy_buff = malloc(sizeof(char)*(len+1));
+		snprintf(cpy_buff,len+1, "%d\n", o->i); 
+		break;
+	  case 4: 
+		len = snprintf(NULL, 0 , "%f" , o->f); 
+		cpy_buff = malloc(sizeof(char)*(len+1));
+		snprintf(cpy_buff,len+1, "%f", o->f); 
+		break;
+	  //case 5: snprintf(NULL, 0 ,  , o->);  snprintf(temp, "object key [%p]\n", &o); break;
+	  case 6: 
+		len = snprintf(NULL, 0 , "%s" , o->s);  
+		cpy_buff = malloc(sizeof(char)*(len+1));
+		snprintf(cpy_buff,len+1, "%s", o->s); 
+		break;
+	  case 7:
+		len= snprintf(NULL, 0 , "%s" , o->b);  
+		cpy_buff = malloc(sizeof(char)*(len+1));
+		snprintf(cpy_buff, len+1,"%s", o->b ? "true" : "false"); 
+		break;
+	  //default:snprintf("object [%p]\n", &o); break;
+	};
+	buff = fill_buff(buff, cpy_buff);
+	free(cpy_buff);		
 
 	len = 4;
 	cpy_buff = malloc(sizeof(char)*len);
-	memcpy(cpy_buff, " ,\n", len);
-	fill_buff(buff, cpy_buff);
-	printf(" copy buff after , %s \n" , cpy_buff);
-	printf(" buff after kv , %s \n", buff);
+	memcpy(cpy_buff, " , ", len);
+	buff = fill_buff(buff, cpy_buff);
+	//printf(" copy buff after , %s \n" , cpy_buff);
+	//printf(" buff after kv , %s \n", buff);
 	free(cpy_buff);
 	
 	return buff;
@@ -104,36 +132,53 @@ char *string_val(obj *o, char *buff){
 
 char *rec_stringify(obj *o, char *buff){
 
-	int cpy_len;
+	size_t cpy_len;
 	//char *cpy_buff;
-	
-	o = o->next;
+	const char *cpy_buff;
+	size_t buff_len;
+	char *old_buff;
 
-	char cpy_buff[4] = " { ";
-	cpy_len = strlen(cpy_buff) + 1;
-	printf(" length of cpy_buff should be 4,is, %d \n", cpy_len);
-	buff = (char *)malloc(cpy_len*sizeof(char));
-	memcpy(buff + cpy_len, cpy_buff, cpy_len);
+	o = o->next;
 	
-	printf("buff before while%s\n", buff);
+	buff_len = (strlen(buff)+1)*sizeof(char);
+	old_buff = malloc(buff_len);	
+	old_buff = memcpy(old_buff, buff, buff_len);
+	
+	cpy_buff = " { ";
+	cpy_len = (strlen(cpy_buff) + 1)*sizeof(char);
+	buff = (char *)realloc(buff, (buff_len + cpy_len)*sizeof(char));
+	memcpy(buff, old_buff, buff_len);
+	memcpy(buff + buff_len -1, cpy_buff, cpy_len);
+
+	free(old_buff);		
+
 	while (o != NULL) {
 		if (o->v_typ == 5){
-			printf("vtype was object \n");
-			string_key(o, buff);	
-			//o = rec_stringify(o->o, buff);
+			buff = string_key(o, buff);
+			buff = rec_stringify(o->o, buff);
 		}
 		else{	
-			printf("vtype not object \n");
-			string_key(o, buff);	
-			string_val(o, buff);	
+			buff = string_key(o, buff);	
+			buff = string_val(o, buff);	
 		}
 		o = o->next;
 	}
-	char cpy_buffe[4] = "}";
-	cpy_len = strlen(cpy_buffe) + 1;
-	printf(" length of cpy_buff should be 4,is, %d \n", cpy_len);
-	buff = (char *)malloc(cpy_len*sizeof(char));
-	memcpy(buff + cpy_len, cpy_buffe, cpy_len);
+	
+	buff_len = (strlen(buff)+1)*sizeof(char);
+
+	old_buff = malloc(buff_len);	
+	old_buff = memcpy(old_buff, buff, buff_len);	
+
+	cpy_buff = " } ";
+	cpy_len = (strlen(cpy_buff) + 1)*sizeof(char);
+	
+	buff = (char *)realloc(buff, (buff_len + cpy_len)*sizeof(char));
+	memcpy(buff, old_buff, buff_len);
+	memcpy(buff + buff_len -1, cpy_buff, cpy_len);
+
+	free(old_buff);		
+	//printf("Printing object \n %s \n =============\n", buff);
+	
 	return buff;
 }
 
@@ -141,9 +186,6 @@ char *rec_stringify(obj *o, char *buff){
 char *stringify_obj(obj *o){
 	char *buff = (char *)malloc(sizeof(char));
 	char *stringified = rec_stringify(o, buff);
-	printf("+++buff+++%s\n", buff);
-	free(buff);
-	printf("+++stringified+++%s\n", stringified);
 	return stringified;
 }
  
@@ -320,7 +362,7 @@ int main () {
 
   char *buff;
   buff = stringify_obj(o);
-  printf("%s", buff);
+  printf("====THE OBJECT=====\n\n %s \n\n ===============\n" , buff);
   free(buff);
 
 
