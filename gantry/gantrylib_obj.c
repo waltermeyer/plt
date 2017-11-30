@@ -33,6 +33,17 @@ int print_k(obj *o) {
 }
 
 
+char *xrealloc(char *ptr, size_t sz){
+	char *temp = (char *)realloc(ptr, sz);
+	if (temp == NULL){
+		printf("Failed to realloc");
+	}
+	else {
+		ptr = temp;
+		memset(ptr, 0 , sz);
+	}
+	return ptr;
+}
 
 char *fill_buff(char *buff, char *cpy_buff){
 	size_t cpy_len;
@@ -50,7 +61,7 @@ char *fill_buff(char *buff, char *cpy_buff){
 	old_buff = (char *)malloc(buff_sz);
 	//printf("size of buff before memcpy %zu \n", buff_sz);
 	memcpy(old_buff, buff, buff_sz);
-	buff = (char *)realloc(buff, buff_sz + cpy_len);
+	buff = (char *)xrealloc(buff, buff_sz + cpy_len);
 	//printf("buffsz + cpy_len = %zu \n", buff_sz + cpy_len);
 	
 	memcpy(buff,old_buff, buff_sz);
@@ -130,9 +141,9 @@ char *string_val(obj *o, char *buff){
 	buff = fill_buff(buff, cpy_buff);
 	free(cpy_buff);		
 
-	len = 4;
+	len = 3;
 	cpy_buff = malloc(sizeof(char)*len);
-	memcpy(cpy_buff, " , ", len);
+	memcpy(cpy_buff, " ,", len);
 	buff = fill_buff(buff, cpy_buff);
 	//printf(" copy buff after , %s \n" , cpy_buff);
 	//printf(" buff after kv , %s \n", buff);
@@ -150,18 +161,19 @@ char *rec_stringify(obj *o, char *buff){
 	char *old_buff;
 
 	o = o->next;
-	
+	printf("line 164\n");	
 	buff_len = (strlen(buff)+1)*sizeof(char);
 	old_buff = malloc(buff_len);	
 	old_buff = memcpy(old_buff, buff, buff_len);
 		
 	cpy_buff = "{ ";
 	cpy_len = (strlen(cpy_buff) + 1)*sizeof(char);
-	buff = (char *)realloc(buff, (buff_len + cpy_len)*sizeof(char));
+	buff = xrealloc(buff, (buff_len + cpy_len)*sizeof(char));
 	memcpy(buff, old_buff, buff_len);
 	memcpy(buff + buff_len -1, cpy_buff, cpy_len);
 
-	free(old_buff);		
+	free(old_buff);	
+	printf("line 176\n");	
 
 	while (o != NULL) {
 		if (o->v_typ == 5){
@@ -172,35 +184,60 @@ char *rec_stringify(obj *o, char *buff){
 		}
 		else{
 			buff = string_key(o, buff);
+			printf("line 187\n");	
 			buff = string_val(o, buff);	
+			printf("line 189\n");	
 		}
+		printf("line 191\n");	
 		o = o->next;
 	}
 	
+	/* Remove comma after last value in object */
 	buff_len = (strlen(buff)+1)*sizeof(char);
 
-	old_buff = malloc(buff_len);	
-	old_buff = memcpy(old_buff, buff, buff_len);	
+	old_buff = malloc(buff_len-1);	
+	old_buff = memcpy(old_buff, buff, buff_len-2);	
+	
+	/* Add closing parenthesis of object */
+	buff_len = (strlen(old_buff)+1)*sizeof(char);
 
-	cpy_buff = " }, ";
+	cpy_buff = " },";
 	cpy_len = (strlen(cpy_buff) + 1)*sizeof(char);
 	
-	buff = (char *)realloc(buff, (buff_len + cpy_len)*sizeof(char));
+	buff = xrealloc(buff, (buff_len + cpy_len));
 	memcpy(buff, old_buff, buff_len);
-	memcpy(buff + buff_len -1, cpy_buff, cpy_len);
+	printf("Here is buff before inserting %s \n ", buff);
+	memcpy(buff + buff_len - sizeof(char), cpy_buff, cpy_len);
+	printf("Here is buff after inserting %s \n ", buff);
 
 	free(old_buff);		
-	//printf("Printing object \n %s \n =============\n", buff);
 	
 	return buff;
 }
 
-/* This function gets called to stringify an object */
+/* 
+ * Called in Gantry to stringify an object.
+ * Calls rec_stringify to obtain string, cleans up string
+ */
 char *obj_stringify(obj *o){
-	char *buff = (char *)malloc(sizeof(char));
-	memcpy(buff, "", 1);
-	char *stringified = rec_stringify(o, buff);
-	return stringified;
+	size_t buff_len;	
+	char *buff;
+	char *pre_buff;
+
+	char *temp_buff = (char *)malloc(sizeof(char));
+	memcpy(temp_buff, "", 1);
+	pre_buff = rec_stringify(o, temp_buff);
+	
+	//free(temp_buff);
+
+	/* Remove comma after Object */
+	buff_len = (strlen(pre_buff)+1)*sizeof(char);
+
+	buff = malloc(buff_len-1);
+	buff = memcpy(buff, pre_buff, buff_len-2);	
+	free(pre_buff);		
+
+	return buff;
 }
  
 /*
