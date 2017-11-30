@@ -29,7 +29,7 @@ int main () {
 
 /*
 ****TEST****
-{ "b" : { "hello" : \"World!\"  },"x" : 123 ,"test_key" : \"Hello\"  }
-{ "y" : 4 ,"z" : \"foo\"  }
-{ "f" : 4.000000 ,"t" : true  }
+{ \"b\" : { \"hello\" : \"World!\" },\"x\" : 123 , \"test_key\" : \"Hello\" }
+{ \"y\" : 4 , \"z\" : \"foo\" }
+{ \"f\" : 4.000000 , \"t\" : true }
 */

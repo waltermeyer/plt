@@ -32,11 +32,11 @@ int print_k(obj *o) {
   return 0;
 }
 
-
+/* Checks realloc and makes sure memory null */
 char *xrealloc(char *ptr, size_t sz){
 	char *temp = (char *)realloc(ptr, sz);
 	if (temp == NULL){
-		printf("Failed to realloc");
+		printf("Runtime Error: Failed to realloc");
 	}
 	else {
 		ptr = temp;
@@ -45,14 +45,13 @@ char *xrealloc(char *ptr, size_t sz){
 	return ptr;
 }
 
+/* Grows buff by appended cpy_buff */
 char *fill_buff(char *buff, char *cpy_buff){
 	size_t cpy_len;
 	size_t buff_sz;
 	char *old_buff;
 
 	//printf("_____FILL BUFF_____\n");
-	
-
 	cpy_len = sizeof(char) *(strlen(cpy_buff) + 1);
 	//printf("Contents of cpy_buff : %s \n" , cpy_buff);
 	//printf("Length of cpy_buff : %zu \n", cpy_len);
@@ -62,7 +61,6 @@ char *fill_buff(char *buff, char *cpy_buff){
 	//printf("size of buff before memcpy %zu \n", buff_sz);
 	memcpy(old_buff, buff, buff_sz);
 	buff = (char *)xrealloc(buff, buff_sz + cpy_len);
-	//printf("buffsz + cpy_len = %zu \n", buff_sz + cpy_len);
 	
 	memcpy(buff,old_buff, buff_sz);
 	//printf("After inserting buff: %s \n", new_buff);
@@ -70,20 +68,19 @@ char *fill_buff(char *buff, char *cpy_buff){
 	
 	memcpy(buff + buff_sz -1, cpy_buff, cpy_len);
 	//printf("After inserting cpy_buff : %s \n", new_buff);
-		
-
 	//printf("-- END OF FILL BUFF --\n");
 	return buff;
 }
 
+/* Populates buffer with properly formatted key from object */
 char *string_key(obj *o, char *buff){
 	char *cpy_buff;
 	char *k;
 	int len;
 	
-	len = 3;
+	len = 4;
 	cpy_buff = malloc(sizeof(char)*len);
-	cpy_buff = memcpy(cpy_buff, "\"", len);
+	cpy_buff = memcpy(cpy_buff, "\\\"", len);
 	buff = fill_buff(buff, cpy_buff);
 	free(cpy_buff);
 
@@ -94,9 +91,9 @@ char *string_key(obj *o, char *buff){
 	buff = fill_buff(buff, cpy_buff);
 	free(cpy_buff);
 	
-	len = 3;
+	len = 4;
 	cpy_buff = malloc(sizeof(char)*len);
-	cpy_buff = memcpy(cpy_buff, "\"", len);
+	cpy_buff = memcpy(cpy_buff, "\\\"", len);
 	buff = fill_buff(buff, cpy_buff);
 	free(cpy_buff);
 	
@@ -109,7 +106,7 @@ char *string_key(obj *o, char *buff){
 	return buff;
 }
 
-// TODO : these should output to char buff not print
+/* Populates buff with properly formatted value from object */
 char *string_val(obj *o, char *buff){
 	char *cpy_buff;
 	int len;
@@ -140,9 +137,9 @@ char *string_val(obj *o, char *buff){
 	};
 	buff = fill_buff(buff, cpy_buff);
 	free(cpy_buff);		
-	len = 3;
+	len = 4;
 	cpy_buff = malloc(sizeof(char)*len);
-	memcpy(cpy_buff, " ,", len);
+	memcpy(cpy_buff, " , ", len);
 	buff = fill_buff(buff, cpy_buff);
 	//printf(" copy buff after , %s \n" , cpy_buff);
 	//printf(" buff after kv , %s \n", buff);
@@ -151,6 +148,7 @@ char *string_val(obj *o, char *buff){
 	return buff;
 }
 
+/* Appends properly formatted string object to buff */
 char *rec_stringify(obj *o, char *buff){
 
 	size_t cpy_len;
@@ -190,14 +188,14 @@ char *rec_stringify(obj *o, char *buff){
 	/* Remove comma after last value in object */
 	buff_len = (strlen(buff)+1)*sizeof(char);
 
-	old_buff = malloc(buff_len-1);	
-	memset(old_buff, 0, buff_len-1);
-	old_buff = memcpy(old_buff, buff, buff_len-2);	
+	old_buff = malloc(buff_len-2);	
+	memset(old_buff, 0, buff_len-2);
+	old_buff = memcpy(old_buff, buff, buff_len-3);	
 	
 	/* Add closing parenthesis of object */
 	buff_len = (strlen(old_buff)+1)*sizeof(char);
 
-	cpy_buff = " },";
+	cpy_buff = "},";
 	cpy_len = (strlen(cpy_buff) + 1)*sizeof(char);
 	
 	buff = xrealloc(buff, (buff_len + cpy_len));
