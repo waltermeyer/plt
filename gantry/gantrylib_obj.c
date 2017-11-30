@@ -162,6 +162,7 @@ char *rec_stringify(obj *o, char *buff){
 	o = o->next;
 	buff_len = (strlen(buff)+1)*sizeof(char);
 	old_buff = malloc(buff_len);	
+	memset(old_buff, 0, buff_len);
 	old_buff = memcpy(old_buff, buff, buff_len);
 		
 	cpy_buff = "{ ";
@@ -190,6 +191,7 @@ char *rec_stringify(obj *o, char *buff){
 	buff_len = (strlen(buff)+1)*sizeof(char);
 
 	old_buff = malloc(buff_len-1);	
+	memset(old_buff, 0, buff_len-1);
 	old_buff = memcpy(old_buff, buff, buff_len-2);	
 	
 	/* Add closing parenthesis of object */
@@ -203,6 +205,7 @@ char *rec_stringify(obj *o, char *buff){
 	memcpy(buff + buff_len - sizeof(char), cpy_buff, cpy_len);
 
 	free(old_buff);		
+	//printf("==== Object before rec_stringify returns =======\n %s \n ==========", buff);
 	
 	return buff;
 }
@@ -219,14 +222,17 @@ char *obj_stringify(obj *o){
 	char *temp_buff = (char *)malloc(sizeof(char));
 	memcpy(temp_buff, "", 1);
 	pre_buff = rec_stringify(o, temp_buff);
-	
-	//free(temp_buff);
 
+	//printf("==== Object before cleaning up =======\n %s \n ==========", pre_buff);
+	
 	/* Remove comma after Object */
 	buff_len = (strlen(pre_buff)+1)*sizeof(char);
 
 	buff = malloc(buff_len-1);
+	memset(buff, 0 , buff_len-1);
+	
 	buff = memcpy(buff, pre_buff, buff_len-2);	
+	//printf("==== Object after cleaning up =======\n %s \n ==========", buff);
 	free(pre_buff);		
 
 	return buff;
@@ -408,6 +414,23 @@ int main () {
   printf("====THE OBJECT=====\n\n %s \n\n ===============\n" , buff);
   free(buff);
 
+  
+  obj *o_new = (obj *) malloc(sizeof(obj)); // head
+  obj *o2_new = (obj *) malloc(sizeof(obj));
+  o_new->k = NULL;
+  o_new->next = o2_new;
+
+  o2_new->k = "key2";
+  o2_new->i = 2;
+  o2_new->v_typ = 3;
+  o2_new->next = NULL;
+  
+  buff = obj_stringify(o_new);
+  printf("====THE OBJECT NEW=====\n\n %s \n\n ===============\n" , buff);
+  free(buff);
+
+  free(o_new);
+  free(o2_new);
 
   free(o);
   free(o2);

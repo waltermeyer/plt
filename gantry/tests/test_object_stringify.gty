@@ -10,12 +10,19 @@ int main () {
 		int y : 4
 	     |};
 
+  object c = {|
+		bool t: true,
+		float f: 4.000
+	     |};
 
   string s = obj_stringify(a);
   print_s(s);
 
-  //string objb = obj_stringify(b);
-  //print_s(objb);
+  string objb = obj_stringify(b);
+  print_s(objb);
+
+  string objc = obj_stringify(c);
+  print_s(objc);
 
   return 0;
 }
@@ -23,4 +30,6 @@ int main () {
 /*
 ****TEST****
 { "b" : { "hello" : \"World!\"  },"x" : 123 ,"test_key" : \"Hello\"  }
+{ "y" : 4 ,"z" : \"foo\"  }
+{ "f" : 4.000000 ,"t" : true  }
 */
