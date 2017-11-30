@@ -1,0 +1,20 @@
+int fun(int x, string y) {
+  print_i(x);
+  print_s(y);
+}
+
+int main () {
+  string create = "{\"Image\": \"alpine:latest\", \"Cmd\": [\"echo\", \"hello world\"]}";
+
+  object o =  {|
+		 string Image : "alpine:latest", string array Cmd : ["echo", "Hello World"], int x : 3
+	      |};
+
+  fun(o.x, o.Image);
+
+}
+/*
+****TEST****
+3
+alpine:latest
+*/

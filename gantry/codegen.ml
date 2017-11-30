@@ -24,6 +24,7 @@ let translate (globals, functions) =
     and str_t  = L.pointer_type (L.i8_type context)
     and flt_t  = L.double_type context
     and void_t = L.void_type context in
+    let arr_str_t = L.pointer_type str_t in
     (* Object Type *)
     let obj_t = let name = L.named_struct_type context "obj" in
                 let body =
@@ -37,6 +38,7 @@ let translate (globals, functions) =
                     L.pointer_type name; (* child (object) *)
                     str_t; (* string *)
                     b_t;  (* bool *)
+                    arr_str_t; (* string array *)
                   |] in
                   ignore (L.struct_set_body name body true);
                   name
@@ -247,8 +249,6 @@ let translate (globals, functions) =
 	)
       | A.Unop(op, e) ->
         let e' = expr builder e in
-	let typ = L.string_of_lltype (L.type_of e') in
-	(*print_endline typ;*)
         (match op with
              A.Neg  -> L.build_neg e' "tmp" builder
            | A.Not  -> L.build_intcast (L.build_not (L.build_intcast e' i1_t "tmp" builder) "tmp" builder) i8_t "tmp" builder
@@ -303,9 +303,8 @@ let translate (globals, functions) =
 	  | A.Object -> 5
 	  | A.String -> 6
 	  | A.Bool   -> 7
-	  | A.Null   -> 8
 	  (* Arrays *)
-	  | _	     -> 9
+	  | A.String_Array -> 8
         in
 	(* Build the data structure for a key *)
 	let e' = expr builder e in
@@ -507,15 +506,42 @@ let translate (globals, functions) =
 	    L.build_call stringcmp [| (e1') ; (e2') |]
 	    "stringcmp" builder
       | A.FunExp(f, act) ->
-        let (fdef, fdecl) = StringMap.find f func_decls in
-        let actuals = List.rev (List.map (expr builder) (List.rev act)) in
-        let result = (match fdecl.A.type_spec with A.Null -> ""
-                                            | _ -> f ^ "_result") in
-          L.build_call fdef (Array.of_list actuals) result builder
+        let (fdef, fdecl) = 
+	StringMap.find f func_decls in
+	(* If Object is actual, cast its value to formal's type *)
+	let resolve_acts form_t act =
+	if (String.contains (A.expr_to_str act) '.') then (
+	  let e' = lookup (A.expr_to_str act) in
+	  let sidx_of_typ = function
+	      "int"    -> 3
+	    | "float"  -> 4
+	    | "object" -> 5
+	    | "string" -> 6
+	    | "bool"   -> 7
+	    | _        -> raise (Failure ("Invalid object function actual parameter"))
+	  in
+	  (* Get type of formal *)
+	  let t = sidx_of_typ (A.string_of_typ form_t) in
+	  let t = L.const_int i32_t t in
+	  (* Get Value of Object on RHS (based on formal type) *)
+	  let v_e' = L.build_call obj_getkey_func [| e' ; t |] "obj_getkey_param" builder in
+	  (* Cast void* RHV to ptr of LHV type *)
+	  let v_e' = L.build_bitcast v_e' (L.pointer_type (ltype_of_typ form_t)) "cst" builder in
+	  let v_e' = L.build_load v_e' "loadcst" builder in
+	  v_e'
+	)
+	else (
+	  expr builder act
+	) in
+	let formals = List.map (fun (t, _) -> t) fdecl.A.f_params in
+        let actuals = List.rev (List.map2 (resolve_acts) (List.rev formals) (List.rev act)) in
+        let result = (match fdecl.A.type_spec with
+		        A.Null -> ""
+                      | _      -> f ^ "_result") in
+        L.build_call fdef (Array.of_list actuals) result builder
       in
-(*
-  | A.ArrAssign  (*TODO*)
-*)
+
+
     let add_terminal builder f =
       match L.block_terminator (L.insertion_block builder) with
         Some _ -> ()
