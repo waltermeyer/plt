@@ -69,11 +69,23 @@ char *string_key(obj *o, char *buff){
 	char *cpy_buff;
 	char *k;
 	int len;
+	
+	len = 3;
+	cpy_buff = malloc(sizeof(char)*len);
+	cpy_buff = memcpy(cpy_buff, "\"", len);
+	buff = fill_buff(buff, cpy_buff);
+	free(cpy_buff);
 
 	k = o->k;
 	len = strlen(k);
 	cpy_buff = malloc(sizeof(char)*(len+1));
 	memcpy(cpy_buff, k, len+1);
+	buff = fill_buff(buff, cpy_buff);
+	free(cpy_buff);
+	
+	len = 3;
+	cpy_buff = malloc(sizeof(char)*len);
+	cpy_buff = memcpy(cpy_buff, "\"", len);
 	buff = fill_buff(buff, cpy_buff);
 	free(cpy_buff);
 	
@@ -91,7 +103,6 @@ char *string_val(obj *o, char *buff){
 	char *cpy_buff;
 	int len;
 	
-	char *temp;
 	switch(o->v_typ) {
     	  case 3: 
 		len = snprintf(NULL, 0 , "%d" , o->i);  
@@ -107,7 +118,7 @@ char *string_val(obj *o, char *buff){
 	  case 6: 
 		len = snprintf(NULL, 0 , "%s" , o->s);  
 		cpy_buff = malloc(sizeof(char)*(len+1));
-		snprintf(cpy_buff,len+1, "%s", o->s); 
+		snprintf(cpy_buff,len+5, "\\\"%s\\\"", o->s); 
 		break;
 	  case 7:
 		len= snprintf(NULL, 0 , "%s" , o->b);  
@@ -143,8 +154,8 @@ char *rec_stringify(obj *o, char *buff){
 	buff_len = (strlen(buff)+1)*sizeof(char);
 	old_buff = malloc(buff_len);	
 	old_buff = memcpy(old_buff, buff, buff_len);
-	
-	cpy_buff = " { ";
+		
+	cpy_buff = "{ ";
 	cpy_len = (strlen(cpy_buff) + 1)*sizeof(char);
 	buff = (char *)realloc(buff, (buff_len + cpy_len)*sizeof(char));
 	memcpy(buff, old_buff, buff_len);
@@ -154,11 +165,13 @@ char *rec_stringify(obj *o, char *buff){
 
 	while (o != NULL) {
 		if (o->v_typ == 5){
-			buff = string_key(o, buff);
+			if(o->k){	
+				buff = string_key(o, buff);
+			}
 			buff = rec_stringify(o->o, buff);
 		}
-		else{	
-			buff = string_key(o, buff);	
+		else{
+			buff = string_key(o, buff);
 			buff = string_val(o, buff);	
 		}
 		o = o->next;
@@ -169,7 +182,7 @@ char *rec_stringify(obj *o, char *buff){
 	old_buff = malloc(buff_len);	
 	old_buff = memcpy(old_buff, buff, buff_len);	
 
-	cpy_buff = " } ";
+	cpy_buff = " }, ";
 	cpy_len = (strlen(cpy_buff) + 1)*sizeof(char);
 	
 	buff = (char *)realloc(buff, (buff_len + cpy_len)*sizeof(char));
@@ -183,8 +196,9 @@ char *rec_stringify(obj *o, char *buff){
 }
 
 /* This function gets called to stringify an object */
-char *stringify_obj(obj *o){
+char *obj_stringify(obj *o){
 	char *buff = (char *)malloc(sizeof(char));
+	memcpy(buff, "", 1);
 	char *stringified = rec_stringify(o, buff);
 	return stringified;
 }
@@ -361,7 +375,7 @@ int main () {
   obj_findkey(o, "keyfail.nestedkey4");
 
   char *buff;
-  buff = stringify_obj(o);
+  buff = obj_stringify(o);
   printf("====THE OBJECT=====\n\n %s \n\n ===============\n" , buff);
   free(buff);
 
