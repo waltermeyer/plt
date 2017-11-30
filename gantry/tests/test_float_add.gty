@@ -1,0 +1,16 @@
+// Adding two floats
+
+int main() {
+
+    float x = 1.51;
+    float y = 2.7;
+    float z = x + y;   
+ 
+    print_d(z);
+    return 0;
+}
+
+/*
+****TEST****
+4.210000
+*/

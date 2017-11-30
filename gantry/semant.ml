@@ -99,10 +99,12 @@ let check (globals, functions) =
      { type_spec = Int; f_id = "string_length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "tostring"
      { type_spec = String; f_id = "tostring"; f_params = [(String, "x")] ; f_statements = [] }
+     (StringMap.add "nap"
+     { type_spec = Int; f_id = "nap"; f_params = [(Int, "x")] ; f_statements = [] }
      (StringMap.add "httpget"
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
-     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] })))))))))))))
+     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] }))))))))))))))
   in
 
   (* Add built in functions to list of function declaration list *)
@@ -149,8 +151,10 @@ let check (globals, functions) =
 	| Binop(e1, op, e2) as e -> let t1 = expression e1 and t2 = expression e2 in
          (match op with
             Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
+          | Add | Sub | Mult | Div when t1 = Float && t2 = Float -> Float
           | Eq | Neq when t1 = t2 -> Bool
 	  | Lt | Leq | Gt | Geq when t1 = Int && t2 = Int -> Bool
+          | Lt | Leq | Gt | Geq when t2 = Float && t2 = Float -> Bool
           | And | Or when t1 = Bool && t2 = Bool -> Bool
 	  | Conc when t1 = String && t2 = String -> String 
           | _ -> raise (Failure ("illegal binary operator " ^ string_of_typ t1 ^ " " ^ string_of_op op ^ " "     ^ string_of_typ t2 ^ " in " ^ string_of_expression e))
@@ -158,6 +162,7 @@ let check (globals, functions) =
 	| Unop (op, e) as ex -> let t = expression e in
 	 (match op with
 	  Neg when t = Int -> Int
+          | Neg when t = Float -> Float
 	  | Not when t = Bool -> Bool
           | Inc when t = Int -> Int
 	  | Dec when t = Int -> Int

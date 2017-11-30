@@ -95,14 +95,18 @@ let translate (globals, functions) =
     let string_length_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
     let string_length = L.declare_function "string_length" string_length_t the_module in
 
-    (* HTTP GET built-in *)
+    (* HTTP GET library function *)
     let httpget_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
     let httpget_func = L.declare_function "httpget" httpget_t the_module in
 
-    (* HTTP POST built-in *)
+    (* HTTP POST library function *)
     let httppost_t = L.var_arg_function_type str_t
 		     [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
     let httppost_func = L.declare_function "httppost" httppost_t the_module in
+
+    (* Nap (sleep wrapper) library function *)
+    let nap_t = L.var_arg_function_type i32_t [| i32_t |] in
+    let nap_func = L.declare_function "nap" nap_t the_module in
 
     (* Object Library Runtime *)
     let obj_findkey_t = L.var_arg_function_type (L.pointer_type obj_t)
@@ -221,32 +225,47 @@ let translate (globals, functions) =
         let e1' = expr builder e1
         and e2' = expr builder e2 in
 	let typ = L.string_of_lltype (L.type_of e1') in
-	(match op with
-             A.Add  -> L.build_add e1' e2' "tmp" builder
-           | A.Sub  -> L.build_sub e1' e2' "tmp" builder
-           | A.Mult -> L.build_mul e1' e2' "tmp" builder
-           | A.Div  -> L.build_sdiv e1' e2' "tmp" builder
-           | A.And  -> L.build_and e1' e2' "tmp" builder
-           | A.Or   -> L.build_or e1' e2' "tmp" builder
-	   | A.Eq   -> if ((String.compare typ "i8*") == 0) then
-		          L.build_icmp L.Icmp.Eq
-			 (L.build_call stringeq [| (e1') ; (e2') |] "stringeq" builder)
-			 (L.const_int b_t 1) "tmp" builder
-		       else
-			 (L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder)
-	   | A.Neq   -> if ((String.compare typ "i8*") == 0) then
-		          L.build_icmp L.Icmp.Eq
-			 (L.build_call stringeq [| (e1') ; (e2') |] "stringeq" builder)
-			 (L.const_int b_t 0) "tmp" builder
-		       else
-			 (L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder)
-           | A.Conc -> L.build_call string_concat [| e1'; e2'|]
-		       "string_concat" builder 
-           | A.Lt   -> L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder
-           | A.Leq  -> L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder
-           | A.Gt   -> L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder
-           | A.Geq  -> L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder 
-	)
+	(match typ with 
+           "i32" | "i8"  -> (match op with
+             A.Add  -> L.build_add
+           | A.Sub  -> L.build_sub
+           | A.Mult -> L.build_mul
+           | A.Div  -> L.build_sdiv
+           | A.And  -> L.build_and
+           | A.Or   -> L.build_or
+	   | A.Eq   -> L.build_icmp L.Icmp.Eq
+	   | A.Neq  -> L.build_icmp L.Icmp.Ne
+           | A.Lt   -> L.build_icmp L.Icmp.Slt
+           | A.Leq  -> L.build_icmp L.Icmp.Sle
+           | A.Gt   -> L.build_icmp L.Icmp.Sgt
+           | A.Geq  -> L.build_icmp L.Icmp.Sge
+	   ) e1' e2' "tmp" builder
+
+         | "double"  -> (match op with 
+             A.Add  -> L.build_fadd
+           | A.Sub  -> L.build_fsub
+           | A.Mult -> L.build_fmul
+           | A.Div  -> L.build_fdiv
+           | A.Eq   -> L.build_fcmp L.Fcmp.Oeq
+           | A.Neq  -> L.build_fcmp L.Fcmp.One
+           | A.Lt   -> L.build_fcmp L.Fcmp.Ult
+           | A.Leq  -> L.build_fcmp L.Fcmp.Ole
+           | A.Gt   -> L.build_fcmp L.Fcmp.Ogt
+           | A.Geq  -> L.build_fcmp L.Fcmp.Oge
+           ) e1' e2' "tmp" builder
+          
+        | "i8*" -> (match op with
+            A.Eq    ->  L.build_icmp L.Icmp.Eq
+                       (L.build_call stringeq [| (e1') ; (e2') |] "stringeq" builder)
+                       (L.const_int b_t 1) "tmp" builder
+
+          | A.Neq   ->  L.build_icmp L.Icmp.Eq
+                       (L.build_call stringeq [| (e1') ; (e2') |] "stringeq" builder)
+                       (L.const_int b_t 0) "tmp" builder
+
+          | A.Conc  -> L.build_call string_concat [| e1'; e2'|] "string_concat" builder
+          ))
+
       | A.Unop(op, e) ->
         let e' = expr builder e in
         (match op with
@@ -492,6 +511,9 @@ let translate (globals, functions) =
           let e2' = expr builder e2 in
             L.build_call httppost_func [| (expr builder e) ; (e2') |]
             "httppost" builder
+      | A.FunExp("nap", [e]) ->
+            L.build_call nap_func [| (expr builder e) |]
+            "nap" builder
       | A.FunExp("string_length", [e]) ->
 	    L.build_call string_length [| (expr builder e ) |]
 	    "string_length" builder

@@ -101,7 +101,7 @@ char* httppost(char* target, char *tosend) {
 
 
 // Main for testing 
-/*
+#ifdef BUILD_TEST
 int main() {
 
 	// GET request	
@@ -115,4 +115,4 @@ int main() {
 	
 	return 0;
 }
-*/
+#endif
