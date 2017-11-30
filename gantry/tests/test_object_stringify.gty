@@ -4,12 +4,23 @@ int main () {
 		int x : 123,
 		object b : {| string hello : "World!" |}
 	     |};
+
+  object b = {|
+		string z : "foo",
+		int y : 4
+	     |};
+
+
   string s = obj_stringify(a);
   print_s(s);
+
+  //string objb = obj_stringify(b);
+  //print_s(objb);
+
   return 0;
 }
 
 /*
 ****TEST****
-{ "b" : { "hello" : \"World!\" ,  }, "x" : 123 , "test_key" : \"Hello\" ,  }, 
+{ "b" : { "hello" : \"World!\"  },"x" : 123 ,"test_key" : \"Hello\"  }
 */

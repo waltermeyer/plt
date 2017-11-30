@@ -127,12 +127,12 @@ char *string_val(obj *o, char *buff){
 		break;
 	  //case 5: snprintf(NULL, 0 ,  , o->);  snprintf(temp, "object key [%p]\n", &o); break;
 	  case 6: 
-		len = snprintf(NULL, 0 , "%s" , o->s);  
+		len = snprintf(NULL, 0 , "\\\"%s\\\"" , o->s);  
 		cpy_buff = malloc(sizeof(char)*(len+1));
-		snprintf(cpy_buff,len+5, "\\\"%s\\\"", o->s); 
+		snprintf(cpy_buff,len+1, "\\\"%s\\\"", o->s); 
 		break;
 	  case 7:
-		len= snprintf(NULL, 0 , "%s" , o->b);  
+		len= snprintf(NULL, 0 , "%s" , o->b ? "true" : "false");  
 		cpy_buff = malloc(sizeof(char)*(len+1));
 		snprintf(cpy_buff, len+1,"%s", o->b ? "true" : "false"); 
 		break;
@@ -140,7 +140,6 @@ char *string_val(obj *o, char *buff){
 	};
 	buff = fill_buff(buff, cpy_buff);
 	free(cpy_buff);		
-
 	len = 3;
 	cpy_buff = malloc(sizeof(char)*len);
 	memcpy(cpy_buff, " ,", len);
@@ -161,7 +160,6 @@ char *rec_stringify(obj *o, char *buff){
 	char *old_buff;
 
 	o = o->next;
-	printf("line 164\n");	
 	buff_len = (strlen(buff)+1)*sizeof(char);
 	old_buff = malloc(buff_len);	
 	old_buff = memcpy(old_buff, buff, buff_len);
@@ -173,7 +171,6 @@ char *rec_stringify(obj *o, char *buff){
 	memcpy(buff + buff_len -1, cpy_buff, cpy_len);
 
 	free(old_buff);	
-	printf("line 176\n");	
 
 	while (o != NULL) {
 		if (o->v_typ == 5){
@@ -184,11 +181,8 @@ char *rec_stringify(obj *o, char *buff){
 		}
 		else{
 			buff = string_key(o, buff);
-			printf("line 187\n");	
 			buff = string_val(o, buff);	
-			printf("line 189\n");	
 		}
-		printf("line 191\n");	
 		o = o->next;
 	}
 	
@@ -206,9 +200,7 @@ char *rec_stringify(obj *o, char *buff){
 	
 	buff = xrealloc(buff, (buff_len + cpy_len));
 	memcpy(buff, old_buff, buff_len);
-	printf("Here is buff before inserting %s \n ", buff);
 	memcpy(buff + buff_len - sizeof(char), cpy_buff, cpy_len);
-	printf("Here is buff after inserting %s \n ", buff);
 
 	free(old_buff);		
 	
