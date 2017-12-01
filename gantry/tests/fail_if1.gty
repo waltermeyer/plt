@@ -1,0 +1,14 @@
+int main(){
+	bool x = true;
+	if(x){
+		int y = 2;
+	}
+	if(y){
+	}
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("expected Boolean expression in y")
+*/
