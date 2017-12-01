@@ -33,7 +33,8 @@ let check (globals, functions) =
   (* Are two sides of assignment compatible? *)
   let check_assign lvaluet rvaluet err = 
      match lvaluet, rvaluet with
-       (Object, _) -> lvaluet
+       (_, Null) -> lvaluet
+     | (Object, _) -> lvaluet
      | (_, Object) -> lvaluet
      | (_, _)      -> if lvaluet == rvaluet then lvaluet else raise err
   in
@@ -147,6 +148,7 @@ let check (globals, functions) =
 	| FloatLit _ -> Float
 	| StrLit _ -> String
 	| BoolLit _ -> Bool
+        | NullLit _ -> Null
 	| Id s -> if not (String.contains s '.') then (type_of_identifier s) else (Object) (* TODO: Is this actually what we want?*)
 	| Binop(e1, op, e2) as e -> let t1 = expression e1 and t2 = expression e2 in
          (match op with

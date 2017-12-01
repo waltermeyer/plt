@@ -214,6 +214,7 @@ let translate (globals, functions) =
       | A.FloatLit f -> L.const_float flt_t f
       | A.StrLit s -> L.build_global_stringptr s "string" builder
       | A.BoolLit b -> L.const_int b_t (if b then 1 else 0)
+      | A.NullLit n -> L.const_null str_t
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> if (String.contains s '.') then
 		    (lookup s)
@@ -381,11 +382,19 @@ let translate (globals, functions) =
         ignore (add_local (t, n) builder);
 	(* Non-Object on RHS *)
 	if (not (String.contains (A.expr_to_str e) '.')) then (
-          let e' = expr builder e in
-	  let n = lookup n in
-          ignore (L.build_store e' n builder);
-          e'
-	)
+            let e' = expr builder e in
+            let n = lookup n in
+
+          if (String.compare (A.expr_to_str e) "null" == 0) then (
+            let t = ltype_of_typ t in
+            ignore (L.build_store (L.const_null t) n builder);
+            e'
+          ) else (
+            ignore (L.build_store e' n builder);
+            e'
+          )
+        )
+	
 	(* Object on RHS *)
 	else (
 	  let e1_str = n

@@ -17,7 +17,7 @@ open Ast
 %token TRUE FALSE
 %token <int> INTLIT
 %token <float> FLOATLIT
-%token <string> ID STRLIT
+%token <string> ID STRLIT NULLLIT
 %token EOF
 
 /* Precedence Rules */
@@ -191,3 +191,4 @@ literal:
     INTLIT                                  { IntLit($1) }
     | FLOATLIT                              { FloatLit($1) }
     | STRLIT                                { StrLit($1) }
+    | NULL                                  { NullLit("null") }
