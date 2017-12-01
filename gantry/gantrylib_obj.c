@@ -78,9 +78,9 @@ char *string_key(obj *o, char *buff){
 	char *k;
 	int len;
 	
-	len = 4;
+	len = 2;
 	cpy_buff = malloc(sizeof(char)*len);
-	cpy_buff = memcpy(cpy_buff, "\\\"", len);
+	cpy_buff = memcpy(cpy_buff, "\"", len);
 	buff = fill_buff(buff, cpy_buff);
 	free(cpy_buff);
 
@@ -91,9 +91,9 @@ char *string_key(obj *o, char *buff){
 	buff = fill_buff(buff, cpy_buff);
 	free(cpy_buff);
 	
-	len = 4;
+	len = 2;
 	cpy_buff = malloc(sizeof(char)*len);
-	cpy_buff = memcpy(cpy_buff, "\\\"", len);
+	cpy_buff = memcpy(cpy_buff, "\"", len);
 	buff = fill_buff(buff, cpy_buff);
 	free(cpy_buff);
 	
@@ -124,9 +124,9 @@ char *string_val(obj *o, char *buff){
 		break;
 	  //case 5: snprintf(NULL, 0 ,  , o->);  snprintf(temp, "object key [%p]\n", &o); break;
 	  case 6: 
-		len = snprintf(NULL, 0 , "\\\"%s\\\"" , o->s);  
+		len = snprintf(NULL, 0 , "\"%s\"" , o->s);  
 		cpy_buff = malloc(sizeof(char)*(len+1));
-		snprintf(cpy_buff,len+1, "\\\"%s\\\"", o->s); 
+		snprintf(cpy_buff,len+1, "\"%s\"", o->s); 
 		break;
 	  case 7:
 		len= snprintf(NULL, 0 , "%s" , o->b ? "true" : "false");  
