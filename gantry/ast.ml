@@ -38,8 +38,6 @@ type statement =
 	| If of expression * statement * statement
 	| For of expression * expression * expression * statement
 	| While of expression * statement
-	| Break
-	| Continue
 
 type function_decl = {
     type_spec : typ;
@@ -124,8 +122,6 @@ let rec string_of_statement = function
 	| For(e1, e2, e3, s) -> "for (" ^ string_of_expression e1  ^ " ; " ^ string_of_expression e2 ^ " ; "
 				        ^ string_of_expression e3  ^ ") " ^ string_of_statement s
 	| While(e, s) -> "while (" ^ string_of_expression e ^ ")\n" ^ string_of_statement s ^ "\n"
-	| Break -> "break ; "
-	| Continue -> "continue ; "
 
 let string_of_global (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 

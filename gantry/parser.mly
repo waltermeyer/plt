@@ -177,9 +177,7 @@ while_statement:
       { While($3, $5) }
 
 jump_statement:
-    BREAK SEMI                              { Break }
-    | CONTINUE SEMI                         { Continue }
-    | RETURN SEMI	                    { Return(Noexpr) }
+      RETURN SEMI	                    { Return(Noexpr) }
     | RETURN expression SEMI                { Return($2) }
 
 constant:
