@@ -1,0 +1,26 @@
+null foo(){
+}
+
+null bar(){
+	return;
+}
+
+null foobar(){
+	return 0;
+}
+
+
+int main(){
+	foo();
+	print_s("Got past null function without return");
+	bar();
+	print_s("Got past return in null function");
+	foobar();
+	print_s("Got here, oops");
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("return gives int expected null in 0")
+*/

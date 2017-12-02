@@ -1,0 +1,28 @@
+int x;
+int y;
+
+int main(){
+	x = 0;
+	y = 2;	
+	if (x==0){
+		print_s("Global x is 0");
+	}
+	if (y==2){
+		print_s("Global y is 2");
+	}
+	int y = 3;
+	if (y==3){
+		print_s("Local y is 3, no conflict on reassigning in this function.");
+	}
+	if (y==2){
+		print_s("y is still 2");
+	}
+	return 0;
+}
+
+/*
+****TEST****
+Global x is 0
+Global y is 2
+Local y is 3, no conflict on reassigning in this function.
+*/
