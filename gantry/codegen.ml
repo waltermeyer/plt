@@ -109,6 +109,11 @@ let translate (globals, functions) =
     let nap_func = L.declare_function "nap" nap_t the_module in
 
     (* Object Library Runtime *)
+    let obj_stringify_t = L.var_arg_function_type (L.pointer_type i8_t)
+			[| L.pointer_type obj_t |] in
+    let obj_stringify = L.declare_function "obj_stringify"
+			obj_stringify_t the_module in
+    
     let obj_findkey_t = L.var_arg_function_type (L.pointer_type obj_t)
 			[| L.pointer_type obj_t ; L.pointer_type i8_t |] in
     let obj_findkey_func = L.declare_function "obj_findkey"
@@ -173,7 +178,7 @@ let translate (globals, functions) =
         ignore (L.build_store p local builder);
         (* Add formal to f_var_tbl Hash Map *)
 	Hashtbl.add f_var_tbl n local in
-	(* Generate and Add Function Parameters *)
+	(* Generate and Add Function Parameters *)`
         ignore(List.iter2 add_param fdecl.A.f_params
 	      (Array.to_list (L.params the_function)));
 
@@ -527,6 +532,10 @@ let translate (globals, functions) =
           and e2' = expr builder e2 in
 	    L.build_call stringcmp [| (e1') ; (e2') |]
 	    "stringcmp" builder
+      | A.FunExp("obj_stringify", [e]) ->
+	  let e' = expr builder e in
+	    L.build_call obj_stringify [|(e')|]
+	    "obj_stringify" builder
       | A.FunExp(f, act) ->
         let (fdef, fdecl) = 
 	StringMap.find f func_decls in

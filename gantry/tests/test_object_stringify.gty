@@ -1,0 +1,35 @@
+int main () {
+  object a = {|
+		string test_key : "Hello",
+		int x : 123,
+		object b : {| string hello : "World!" |}
+	     |};
+
+  object b = {|
+		string z : "foo",
+		int y : 4
+	     |};
+
+  object c = {|
+		bool t: true,
+		float f: 4.000
+	     |};
+
+  string s = obj_stringify(a);
+  print_s(s);
+
+  string objb = obj_stringify(b);
+  print_s(objb);
+
+  string objc = obj_stringify(c);
+  print_s(objc);
+
+  return 0;
+}
+
+/*
+****TEST****
+{ "b" : { "hello" : "World!" },"x" : 123 , "test_key" : "Hello" }
+{ "y" : 4 , "z" : "foo" }
+{ "f" : 4.000000 , "t" : true }
+*/

@@ -1,5 +1,5 @@
 int main() {
-
+ 
   string docker_host = "http://localhost";
   string ver = httpget(docker_host ^ "/version");
   string image = "httpd:alpine";
@@ -10,8 +10,20 @@ int main() {
   print_s("\n *** Pulling Container Image: [" ^ image ^ "] ***\n");
   print_s(httppost(docker_host ^ "/images/create?fromImage=" ^ image, ""));
 
-  string create = "{\"Image\": \"alpine:latest\", \"Cmd\": [\"echo\", \"hello world\"]}";
+  string ex = "{ \"Image\": \"alpine:latest\", \"Cmd\": [\"echo\", \"hello world\"]}";
+
+  object create = {|
+        		string Image : "alpine:latest"			
+        	  |};
+
+  string s_create = obj_stringify(create);
+  //print_s("THE STRING");
+  //print_s(ex);
+  print_s("THE OBJECT TO STRING");
+  print_s(s_create);
+
   // Create and start container
-  print_s(httppost(docker_host ^ "/containers/create", create));
+  print_s(httppost(docker_host ^ "/containers/create", s_create));
+  //print_s(httppost(docker_host ^ "/containers/create", ex));
 
 }
