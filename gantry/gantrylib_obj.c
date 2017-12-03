@@ -261,7 +261,9 @@ obj *obj_addkey(obj *o, char *key, int typ, void *val) {
   	  case 5: o_new->o = (obj *) val;
   	  case 6: 
 		temp = (char *) val;
+		printf("%s \n", temp); 
 		l = strlen(temp);
+		printf("%d \n", l);
 		s = malloc(sizeof(char) * (l+1));
 		s = memcpy(s, temp, l+1);
 		printf("%s \n", s); 

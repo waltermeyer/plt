@@ -4,11 +4,22 @@ int main() {
 			string bar : "bar"
 		   |};
 	object b = obj_addkey(o, "biz", 3, 3);
+	string y = "baz value";
+	object c = obj_addkey(b, "baz", 6, y);
+	object d = obj_addkey(c, "blue", 7, true);
+	object e = obj_addkey(d, "yellow", 4, 3.14); 
+	
 	string s = obj_stringify(b);
-	object c = obj_addkey(b, "baz", 6, "baz value");
-	string s2 = obj_stringify(c); 
+	string sc = obj_stringify(c); 
+	string sd = obj_stringify(d);
+	string se = obj_stringify(e);
+	
+
 	print_s(s);
-	print_s(s2);
+	print_s(sc);
+	print_s(sd);
+	print_s(se);
+	
 	return 0;
 }
 
