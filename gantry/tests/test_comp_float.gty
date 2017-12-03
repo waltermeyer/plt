@@ -1,0 +1,13 @@
+int main(){
+	float a = 3.14;
+	float b = 5.00;
+	if (a<b){
+		print_s("hello");
+	}
+	return 0;
+}
+
+/*
+****TEST****
+hello
+*/

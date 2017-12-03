@@ -1,0 +1,11 @@
+int main(){
+	if(true){
+		print_i(x);
+	}
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("undeclared identifier x")
+*/

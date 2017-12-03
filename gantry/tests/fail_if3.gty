@@ -1,0 +1,11 @@
+int main(){
+	if(true){
+		foo();
+	}
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("unrecognized function foo")
+*/
