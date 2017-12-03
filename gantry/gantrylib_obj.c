@@ -252,11 +252,20 @@ obj *obj_addkey(obj *o, char *key, int typ, void *val) {
 
 	o->next = o_new;
 	
+	char *temp;
+	int l;
+	char *s;
 	switch(o_new->v_typ) {
   	  case 3: o_new->i = *((int *) val);
   	  case 4: o_new->f = *((float *) val);
   	  case 5: o_new->o = (obj *) val;
-  	  case 6: o_new->s = (char *) val;
+  	  case 6: 
+		temp = (char *) val;
+		l = strlen(temp);
+		s = malloc(sizeof(char) * (l+1));
+		s = memcpy(s, temp, l+1);
+		printf("%s \n", s); 
+		o_new->s = s;
   	  case 7: o_new->b = *((bool *) val);
   	};
 	return o;

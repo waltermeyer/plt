@@ -5,7 +5,10 @@ int main() {
 		   |};
 	object b = obj_addkey(o, "biz", 3, 3);
 	string s = obj_stringify(b);
+	object c = obj_addkey(b, "baz", 6, "baz value");
+	string s2 = obj_stringify(c); 
 	print_s(s);
+	print_s(s2);
 	return 0;
 }
 
