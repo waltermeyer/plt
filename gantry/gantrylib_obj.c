@@ -251,13 +251,13 @@ obj *obj_addkey(obj *o, char *key, int typ, void *val) {
   	o_new->next = o_next;
 
 	o->next = o_new;
-  	
-	switch(o->v_typ) {
-  	  case 3: o->i = *((int *) val);
-  	  case 4: o->f = *((float *) val);
-  	  case 5: o->o = (obj *) val;
-  	  case 6: o->s = (char *) val;
-  	  case 7: o->b = *((bool *) val);
+	
+	switch(o_new->v_typ) {
+  	  case 3: o_new->i = *((int *) val);
+  	  case 4: o_new->f = *((float *) val);
+  	  case 5: o_new->o = (obj *) val;
+  	  case 6: o_new->s = (char *) val;
+  	  case 7: o_new->b = *((bool *) val);
   	};
 	return o;
 }

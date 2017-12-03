@@ -1,0 +1,15 @@
+int main() {
+	object o = {|
+			string foo : "foo",
+			string bar : "bar"
+		   |};
+	object b = obj_addkey(o, "biz", 3, 3);
+	string s = obj_stringify(b);
+	print_s(s);
+	return 0;
+}
+
+/*
+****TEST****
+{ "biz" : 3 , "bar" : "bar" , "foo" : "foo" }
+*/

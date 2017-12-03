@@ -116,7 +116,7 @@ let translate (globals, functions) =
     
     
     let obj_addkey_t = L.var_arg_function_type (L.pointer_type obj_t)
-			[| L.pointer_type obj_t ; i32_t ; (L.pointer_type i8_t) ; (L.pointer_type i8_t)  |] in
+			[| L.pointer_type obj_t ; (L.pointer_type i8_t) ; i32_t; (L.pointer_type i8_t)  |] in
     let obj_addkey = L.declare_function "obj_addkey"
 			obj_addkey_t the_module in
     
