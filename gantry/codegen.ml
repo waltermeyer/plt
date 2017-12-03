@@ -178,7 +178,7 @@ let translate (globals, functions) =
         ignore (L.build_store p local builder);
         (* Add formal to f_var_tbl Hash Map *)
 	Hashtbl.add f_var_tbl n local in
-	(* Generate and Add Function Parameters *)`
+	(* Generate and Add Function Parameters *)
         ignore(List.iter2 add_param fdecl.A.f_params
 	      (Array.to_list (L.params the_function)));
 
