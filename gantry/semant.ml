@@ -189,7 +189,6 @@ let check (globals, functions) =
 		else
 		  List.iter2 
 		    (fun (ft, _) e -> let et = expression e in
-		      let temp = string_of_expression e in
 		      if not (String.contains (string_of_expression e) '.' )  then
 		      (
 		      ignore (check_assign ft et 
@@ -223,15 +222,16 @@ let check (globals, functions) =
 		                (expression (List.hd el)) (List.tl el)
 		       in
 		       arr_typ t
-	| ArrAcc (e1, e2) -> (match (expression e1) with
+	| ArrAcc (e1, _) -> (match (expression e1) with
 			       Int_Array    -> Int
 			     | Float_Array  -> Float
 			     | Object_Array -> Object
 			     | String_Array -> String
 			     | Bool_Array   -> Bool
+			     | Object	    -> Object
 			     | _	    -> raise (Failure("Invalid array access on " ^
 						      string_of_expression e1)))
-	| ObjExp (e) as ex -> Object
+	| ObjExp (_) -> Object
 	| Noexpr -> Null
       in
 
