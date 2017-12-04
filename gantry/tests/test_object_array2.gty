@@ -1,0 +1,7 @@
+int main () {
+  object array o = [ {| int x : 2 |}, {| int x : 3 |} ];
+  object test = o[0];
+  int x = test.x;
+  print_i(x);
+}
+
