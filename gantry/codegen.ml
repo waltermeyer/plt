@@ -24,25 +24,62 @@ let translate (globals, functions) =
     and str_t  = L.pointer_type (L.i8_type context)
     and flt_t  = L.double_type context
     and void_t = L.void_type context in
-    let arr_str_t = L.pointer_type str_t in
-    (* Object Type *)
-    let obj_t = let name = L.named_struct_type context "obj" in
+    (* Array Types *)
+    let arr_int_t = L.named_struct_type context "arr_int_t" in
                 let body =
                   [|
-                    L.pointer_type name; (* next *)
+                    i32_t; (* arr length *)
+                    L.pointer_type i32_t;
+		   |] in
+                  ignore (L.struct_set_body arr_int_t body true);
+    let arr_flt_t = L.named_struct_type context "arr_flt_t" in
+                let body =
+                  [|
+                    i32_t; (* arr length *)
+                    L.pointer_type flt_t;
+		   |] in
+                  ignore (L.struct_set_body arr_flt_t body true);
+    let arr_str_t = L.named_struct_type context "arr_str_t" in
+                let body =
+                  [|
+                    i32_t; (* arr length *)
+                    L.pointer_type str_t;
+		   |] in
+                  ignore (L.struct_set_body arr_str_t body true);
+    let arr_bool_t = L.named_struct_type context "arr_bool_t" in
+                let body =
+                  [|
+                    i32_t; (* arr length *)
+                    L.pointer_type b_t;
+		   |] in
+                  ignore (L.struct_set_body arr_bool_t body true);
+    (* Object Type *)
+    let obj_t = L.named_struct_type context "obj" in
+                let body =
+                  [|
+                    L.pointer_type obj_t; (* next *)
                     str_t; (* key *)
                     (* values *)
                     i32_t; (* value type *)
                     i32_t; (* int *)
                     flt_t; (* float *)
-                    L.pointer_type name; (* child (object) *)
+                    L.pointer_type obj_t; (* child (object) *)
                     str_t; (* string *)
                     b_t;  (* bool *)
-                    arr_str_t; (* string array *)
+		    (* Arrays *)
+		    L.pointer_type arr_int_t;
+		    L.pointer_type arr_flt_t;
+		    L.pointer_type arr_str_t;
+		    L.pointer_type arr_bool_t;
                   |] in
-                  ignore (L.struct_set_body name body true);
-                  name
-    in
+                  ignore (L.struct_set_body obj_t body true);
+    let arr_obj_t = L.named_struct_type context "arr_obj_t" in
+                let body =
+                  [|
+                    i32_t; (* arr length *)
+                    L.pointer_type (L.pointer_type obj_t);
+		   |] in
+                  ignore (L.struct_set_body arr_obj_t body true);
 
     (* AST to LLVM types *)
     let ltype_of_typ = function
@@ -53,11 +90,11 @@ let translate (globals, functions) =
       | A.Bool     -> b_t
       | A.Null     -> void_t
       (* Array Types *)
-      | A.Int_Array    -> L.pointer_type i32_t
-      | A.Float_Array  -> L.pointer_type flt_t
-      | A.Object_Array -> L.pointer_type (L.pointer_type obj_t)
-      | A.String_Array -> L.pointer_type str_t
-      | A.Bool_Array   -> L.pointer_type b_t
+      | A.Int_Array    -> L.pointer_type arr_int_t
+      | A.Float_Array  -> L.pointer_type arr_flt_t
+      | A.Object_Array -> L.pointer_type arr_obj_t
+      | A.String_Array -> L.pointer_type arr_str_t
+      | A.Bool_Array   -> L.pointer_type arr_bool_t
     in
 
     (* Global Declarations *)
@@ -294,19 +331,35 @@ let translate (globals, functions) =
 	let vl  = List.map (expr builder) el in
 	(* We infer type by first expression - semantic should handle this *)
 	let typ  = L.pointer_type (L.type_of (List.hd vl)) in
-	let size = L.const_int i32_t ((List.length vl) + 1) in
+	let size = L.const_int i32_t (List.length vl) in
+	let arr_typ = (match L.string_of_lltype typ with
+			  "i32*"    -> arr_int_t
+			| "double*" -> arr_flt_t
+			| "%obj**"  -> arr_obj_t
+			| "i8**"    -> arr_str_t
+			| "i8*"     -> arr_bool_t
+			| _         -> raise (Failure ("Invalid array type"))) in
 	(* Declare Array *)
 	let arr  = L.build_array_malloc typ size "arr" builder in
 	let arr  = L.build_pointercast arr typ "arr" builder in
+	(* Declare Struct *)
+	let arr_struct = L.build_malloc arr_typ "arr_struct" builder in
+	(* Set array size field *)
+	let arr_l = L.build_struct_gep arr_struct 0 "arr_size" builder in
+	ignore(L.build_store (L.const_int i32_t
+			     (List.length vl)) arr_l builder);
+	(* For each value, store in array *)
 	let fill i v =
 	  let vp =
 	  L.build_gep arr [| L.const_int i32_t (i + 1) |] "arr_v" builder in
 	  ignore(L.build_store v vp builder);
-	(* Populate Array with Values *)
 	in
-	(* For each value *)
+	(* Populate Array with Values *)
 	List.iteri fill vl;
-	arr
+	(* Store Array in Struct *)
+	let arr_p = L.build_struct_gep arr_struct 1 "arr_struct" builder in
+	ignore(L.build_store arr arr_p builder);
+	arr_struct
       | A.ArrAcc(e1, e2) ->
         let e1_str = A.expr_to_str e1
         and idx = expr builder e2 in
@@ -317,6 +370,9 @@ let translate (globals, functions) =
 	  else
 	    (L.build_load (lookup e1_str) "arracc" builder)
 	in
+	(* Get actual array from struct *)
+	let arr = L.build_struct_gep arr 1 "arr_v" builder in
+	let arr = L.build_load arr "arr_v" builder in
 	let e1' = L.build_gep arr [| idx |] "arracc_e" builder in
 	let e1' = L.build_load e1' "arracc" builder in
 	e1'
@@ -329,7 +385,10 @@ let translate (globals, functions) =
 	  | A.String -> 6
 	  | A.Bool   -> 7
 	  (* Arrays *)
-	  | A.String_Array -> 8
+	  | A.Int_Array    -> 8
+	  | A.Float_Array  -> 9
+	  | A.String_Array -> 10
+	  | A.Bool_Array   -> 11
 	  | _ -> raise (Failure ("Invalid or unsupported object key type"))
         in
 	(* Build the data structure for a key *)
