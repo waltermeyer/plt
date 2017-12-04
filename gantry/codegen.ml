@@ -114,6 +114,12 @@ let translate (globals, functions) =
     let obj_stringify = L.declare_function "obj_stringify"
 			obj_stringify_t the_module in
     
+    
+    let obj_addkey_t = L.var_arg_function_type (L.pointer_type obj_t)
+			[| L.pointer_type obj_t ; (L.pointer_type i8_t) ; i32_t; (L.pointer_type i8_t)  |] in
+    let obj_addkey = L.declare_function "obj_addkey"
+			obj_addkey_t the_module in
+    
     let obj_findkey_t = L.var_arg_function_type (L.pointer_type obj_t)
 			[| L.pointer_type obj_t ; L.pointer_type i8_t |] in
     let obj_findkey_func = L.declare_function "obj_findkey"
@@ -538,6 +544,29 @@ let translate (globals, functions) =
 	  let e' = expr builder e in
 	    L.build_call obj_stringify [|(e')|]
 	    "obj_stringify" builder
+      | A.FunExp("obj_addkey", [e; e1; e2; e3]) ->
+	  let e' = expr builder e
+	  and e1' = expr builder e1
+	  and e2' = expr builder e2
+	  and e3' = expr builder e3 in 
+	  let sidx_of_typ = function
+	      "i32"    -> 3
+	    | "double" -> 4
+	    | "%obj*"  -> 5
+	    | "i8*"    -> 6
+	    | "i8"     -> 7
+	    | _        -> raise (Failure ("Invalid object assignment"))
+	  in
+	  let t = sidx_of_typ (L.string_of_lltype (L.type_of e3')) in
+	  let t_e3' = L.const_int i32_t t in
+	  (* Cast ptr to RHV to void ptr to store in Object *)
+	  let p_e3' = L.build_alloca (L.type_of e3') "pcst" builder in
+	  ignore(L.build_store e3' p_e3' builder);
+	  let v_e3' = L.build_bitcast p_e3' (L.pointer_type i8_t)
+		      "cst" builder in
+	  (* Build call to obj_addkey *)
+	  L.build_call obj_addkey [| (e'); (e1'); (e2'); (v_e3') |]
+	    "obj_addkey" builder
       | A.FunExp(f, act) ->
         let (fdef, fdecl) = 
 	StringMap.find f func_decls in

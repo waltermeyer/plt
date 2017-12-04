@@ -105,8 +105,10 @@ let check (globals, functions) =
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "obj_stringify"
      { type_spec = String; f_id = "obj_stringify"; f_params = [(Object, "x")] ; f_statements = [] } 
+     (StringMap.add "obj_addkey"
+     { type_spec = Object; f_id = "obj_addkey"; f_params = [(Object, "x"); (String, "y"); (Int, "z"); (String, "a")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
-     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] })))))))))))))))
+     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] }))))))))))))))))
   in
 
   (* Add built in functions to list of function declaration list *)
@@ -191,7 +193,9 @@ let check (globals, functions) =
 		else
 		  List.iter2 
 		    (fun (ft, _) e -> let et = expression e in
-		      if not (String.contains (string_of_expression e) '.' )  then
+		      let temp = string_of_expression e in
+		      let r = Str.regexp "obj_addkey" in
+		      if not (String.contains (string_of_expression e) '.' ) && not (Str.string_match r f_id 0) then
 		      (
 		      ignore (check_assign ft et 
 		        (Failure ("illegal actual argument found " ^ string_of_typ et ^

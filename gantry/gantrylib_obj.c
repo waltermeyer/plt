@@ -235,6 +235,40 @@ char *obj_stringify(obj *o){
 
 	return buff;
 }
+
+
+/* Add key and value to the beginning of an object
+ * Accepts: key, typ, value
+ * Returns : Object with added key
+ */
+obj *obj_addkey(obj *o, char *key, int typ, void *val) {
+	/* Save what o currently sexts as next */
+	obj *o_next = o->next;
+	/* Malloc object */
+  	obj *o_new = (obj *) malloc(sizeof(obj));
+	o_new->k = key;
+  	o_new->v_typ = typ;
+  	o_new->next = o_next;
+
+	o->next = o_new;
+	
+	int l;
+	char *s;
+	switch(o_new->v_typ) {
+  	  case 3: o_new->i = *((int *) val); break;
+  	  case 4: o_new->f = *((double *) val); break;
+  	  case 5: o_new->o = (obj *) val; break;
+  	  case 6: 
+		  l = strlen((const char *)(*(void **)val)) + 1;
+		  s = (char *)malloc(sizeof(l));
+		  memcpy(s, (const char *)(*(void **)val), l);
+		  o_new->s = s;
+		  break;
+  	  case 7: o_new->b = *((bool *) val); break;
+  	};
+	return o;
+}
+
  
 /*
  * Recursively search for a key in an object
