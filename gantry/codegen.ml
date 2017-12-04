@@ -184,7 +184,7 @@ let translate (globals, functions) =
         ignore (L.build_store p local builder);
         (* Add formal to f_var_tbl Hash Map *)
 	Hashtbl.add f_var_tbl n local in
-	(* Generate and Add Function Parameters *)`
+	(* Generate and Add Function Parameters *)
         ignore(List.iter2 add_param fdecl.A.f_params
 	      (Array.to_list (L.params the_function)));
 
@@ -250,9 +250,9 @@ let translate (globals, functions) =
            | A.Leq  -> L.build_icmp L.Icmp.Sle
            | A.Gt   -> L.build_icmp L.Icmp.Sgt
            | A.Geq  -> L.build_icmp L.Icmp.Sge
+	   | _      -> raise (Failure ("Invalid integer binary operation"))
 	   ) e1' e2' "tmp" builder
-
-         | "double"  -> (match op with 
+         | "double" -> (match op with
              A.Add  -> L.build_fadd
            | A.Sub  -> L.build_fsub
            | A.Mult -> L.build_fmul
@@ -263,8 +263,8 @@ let translate (globals, functions) =
            | A.Leq  -> L.build_fcmp L.Fcmp.Ole
            | A.Gt   -> L.build_fcmp L.Fcmp.Ogt
            | A.Geq  -> L.build_fcmp L.Fcmp.Oge
+	   | _      -> raise (Failure ("Invalid float binary operation"))
            ) e1' e2' "tmp" builder
-          
         | "i8*" -> (match op with
             A.Eq    ->  L.build_icmp L.Icmp.Eq
                        (L.build_call stringeq [| (e1') ; (e2') |] "stringeq" builder)
@@ -275,8 +275,9 @@ let translate (globals, functions) =
                        (L.const_int b_t 0) "tmp" builder
 
           | A.Conc  -> L.build_call string_concat [| e1'; e2'|] "string_concat" builder
-          ))
-
+	  | _       -> raise (Failure ("Invalid string binary operation")))
+	| _         -> raise (Failure ("Invalid binary operation"))
+       )
       | A.Unop(op, e) ->
         let e' = expr builder e in
         (match op with
@@ -335,6 +336,7 @@ let translate (globals, functions) =
 	  | A.Bool   -> 7
 	  (* Arrays *)
 	  | A.String_Array -> 8
+	  | _ -> raise (Failure ("Invalid or unsupported object key type"))
         in
 	(* Build the data structure for a key *)
 	let e' = expr builder e in
