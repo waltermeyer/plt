@@ -3,22 +3,35 @@ int main() {
 			string foo : "foo",
 			string bar : "bar"
 		   |};
+	
 	object b = obj_addkey(o, "biz", 3, 3);
+	string s = obj_stringify(b);
+	print_s(s);
+	
 	string y = "baz value";
 	object c = obj_addkey(b, "baz", 6, y);
-	object d = obj_addkey(c, "blue", 7, true);
-	object e = obj_addkey(d, "yellow", 4, 3.14); 
-	
-	string s = obj_stringify(b);
 	string sc = obj_stringify(c); 
-	string sd = obj_stringify(d);
-	string se = obj_stringify(e);
+	print_s(sc);
 	
 
-	print_s(s);
-	print_s(sc);
+	object d = obj_addkey(c, "blue", 7, true);
+	string sd = obj_stringify(d);
 	print_s(sd);
+	
+
+	object e = obj_addkey(d, "yellow", 4, 3.14); 	
+	string se = obj_stringify(e);
 	print_s(se);
+
+	float test_float = e.yellow;
+	int test_int = e.biz;
+	string test_string = e.baz;
+	bool test_bool = e.blue;
+
+	print_d(test_float);
+	print_i(test_int);
+	print_s(test_string);
+	print_b(test_bool);
 	
 	return 0;
 }
@@ -26,4 +39,11 @@ int main() {
 /*
 ****TEST****
 { "biz" : 3 , "bar" : "bar" , "foo" : "foo" }
+{ "baz" : "baz value" , "biz" : 3 , "bar" : "bar" , "foo" : "foo" }
+{ "blue" : true , "baz" : "baz value" , "biz" : 3 , "bar" : "bar" , "foo" : "foo" }
+{ "yellow" : 3.140000 , "blue" : true , "baz" : "baz value" , "biz" : 3 , "bar" : "bar" , "foo" : "foo" }
+3.140000
+3
+baz value
+true
 */
