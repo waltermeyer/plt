@@ -30,6 +30,7 @@ let translate (globals, functions) =
                   [|
                     i32_t; (* arr length *)
                     L.pointer_type i32_t;
+                    i32_t; (* arr type *)
 		   |] in
                   ignore (L.struct_set_body arr_int_t body true);
     let arr_flt_t = L.named_struct_type context "arr_flt_t" in
@@ -37,6 +38,7 @@ let translate (globals, functions) =
                   [|
                     i32_t; (* arr length *)
                     L.pointer_type flt_t;
+                    i32_t; (* arr type *)
 		   |] in
                   ignore (L.struct_set_body arr_flt_t body true);
     let arr_str_t = L.named_struct_type context "arr_str_t" in
@@ -44,6 +46,7 @@ let translate (globals, functions) =
                   [|
                     i32_t; (* arr length *)
                     L.pointer_type str_t;
+                    i32_t; (* arr type *)
 		   |] in
                   ignore (L.struct_set_body arr_str_t body true);
     let arr_bool_t = L.named_struct_type context "arr_bool_t" in
@@ -51,6 +54,7 @@ let translate (globals, functions) =
                   [|
                     i32_t; (* arr length *)
                     L.pointer_type b_t;
+                    i32_t; (* arr type *)
 		   |] in
                   ignore (L.struct_set_body arr_bool_t body true);
     (* Object Type *)
@@ -78,6 +82,7 @@ let translate (globals, functions) =
                   [|
                     i32_t; (* arr length *)
                     L.pointer_type (L.pointer_type obj_t);
+                    i32_t; (* arr type *)
 		   |] in
                   ignore (L.struct_set_body arr_obj_t body true);
 
@@ -348,6 +353,18 @@ let translate (globals, functions) =
 	let arr_l = L.build_struct_gep arr_struct 0 "arr_size" builder in
 	ignore(L.build_store (L.const_int i32_t
 			     (List.length vl)) arr_l builder);
+	(* Set Array Type in Struct *)
+	let arr_t = L.build_struct_gep arr_struct 2 "arr_type" builder in
+	let sidx_of_typ = function
+	    "i32*"    -> 3
+	  | "double*" -> 4
+	  | "%obj**"  -> 5
+	  | "i8**"    -> 6
+	  | "i8*"     -> 7
+	  | _         -> raise (Failure ("Invalid array type"))
+	in
+	let t = sidx_of_typ (L.string_of_lltype typ) in
+	ignore(L.build_store (L.const_int i32_t t) arr_t builder);
 	(* For each value, store in array *)
 	let fill i v =
 	  let vp =
