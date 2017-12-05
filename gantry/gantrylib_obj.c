@@ -3,6 +3,36 @@
 #include <stdlib.h>
 #include <string.h>
 
+// The arr int
+typedef struct arr_int {
+  int len;
+  struct arr_int *i_a;
+  int typ;
+} arr_int;
+
+// The arr float
+typedef struct arr_flt {
+  int len;
+  struct arr_flt *i_f;
+  int typ;
+} arr_flt;
+
+// The arr string
+typedef struct arr_str {
+  int len;
+  struct arr_str *i_s;
+  int typ;
+} arr_str;
+
+
+// The arr bool
+typedef struct arr_bool {
+  int len;
+  struct arr_bool *i_b;
+  int typ;
+} arr_bool;
+
+
 // The Object Struct
 typedef struct obj {
   // metadata
@@ -16,6 +46,10 @@ typedef struct obj {
   struct obj *o;   // object
   char *s;   // string
   bool b; // bool
+  struct arr_int *i_a;
+  struct arr_flt *f_a;
+  struct arr_str *s_a;
+  struct arr_bool *b_a; 
 } obj;
 
 int print_k(obj *o) {
@@ -336,6 +370,10 @@ int obj_assign(obj *o, int t, void *v) {
 	o->s = s;
 	break;
       case 7: o->b = *(bool *)v; break;
+      case 8: o->i_a = (arr_int *)v; break;
+      case 9: o->f_a = (arr_flt *)v; break;
+      case 10: o->s_a = (arr_str *)v; break;
+      case 11: o->b_a = (arr_bool *)v; break;
     };
   }
   return 0;
@@ -361,6 +399,10 @@ void *obj_getkey(obj *o, int t) {
     case 5: return (void *)o->o;
     case 6: return (void *)&o->s;
     case 7: return (void *)&o->b;
+    case 8: return (void *)o->i_a;
+    case 9: return (void *)o->f_a;
+    case 10: return (void *)o->s_a;
+    case 11: return (void *)o->b_a;
   };
   return NULL;
 }
