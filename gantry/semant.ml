@@ -151,7 +151,7 @@ let check (globals, functions) =
 	| FloatLit _ -> Float
 	| StrLit _ -> String
 	| BoolLit _ -> Bool
-	| Id s -> if not (String.contains s '.') then (type_of_identifier s) else (Object) (* TODO: Is this actually what we want?*)
+	| Id s -> if not (String.contains s '.') then (type_of_identifier s) else (Object)
 	| Binop(e1, op, e2) as e -> let t1 = expression e1 and t2 = expression e2 in
          (match op with
             Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
@@ -176,7 +176,6 @@ let check (globals, functions) =
 		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
 		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
       	| AssignDecl (t, n, e) as ex ->
-		(* TODO : add scope, check not duplicate within function *)
 		add_local (t, n);
 		let lt = type_of_identifier n
 		and rt = expression e in 
