@@ -3,8 +3,31 @@ int main () {
   object test = o[0];
   int x = test.x;
   print_i(x);
+
+  object o2 = {| string array Cmd : ["echo", "Hello World!"] |};
+  string array a = ["echo", "Hello Mars!", "why", "oh", "why"];
+  int array c = [42, 420];
+  o2.Cmd = a;
+  string array b = o2.Cmd;
+  print_s(b[0] ^ " " ^  b[1]);
+
+  print_i(arr_length(b));
+  print_i(arr_length(c));
+
+  for(int i = 0; i < arr_length(b); i++) {
+    print_s(b[i]);
+  }
+
 }
 /*
 ****TEST****
 2
+echo Hello Mars!
+5
+2
+echo
+Hello Mars!
+why
+oh
+why
 */

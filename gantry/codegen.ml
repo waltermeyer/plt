@@ -137,6 +137,10 @@ let translate (globals, functions) =
     let string_length_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
     let string_length = L.declare_function "string_length" string_length_t the_module in
 
+    (* Array Length *)
+    let arr_length_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+    let arr_length = L.declare_function "arr_length" arr_length_t the_module in
+
     (* HTTP GET library function *)
     let httpget_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
     let httpget_func = L.declare_function "httpget" httpget_t the_module in
@@ -155,7 +159,6 @@ let translate (globals, functions) =
 			[| L.pointer_type obj_t |] in
     let obj_stringify = L.declare_function "obj_stringify"
 			obj_stringify_t the_module in
-    
     
     let obj_addkey_t = L.var_arg_function_type (L.pointer_type obj_t)
 			[| L.pointer_type obj_t ; (L.pointer_type i8_t) ; i32_t; (L.pointer_type i8_t)  |] in
@@ -324,9 +327,9 @@ let translate (globals, functions) =
         let e' = expr builder e in
         (match op with
              A.Neg  -> L.build_neg e' "tmp" builder
-           | A.Not  -> L.build_intcast (L.build_not (L.build_intcast e' i1_t "tmp" builder) "tmp" builder) i8_t "tmp" builder
-			(*L.const_select e'*) 
-			(*( L.build_icmp L.Icmp.Eq e' (L.const_int i1_t 0) "tmp" builder )*)
+           | A.Not  -> L.build_intcast (L.build_not
+				       (L.build_intcast e' i1_t "tmp" builder)
+				       "tmp" builder) i8_t "tmp" builder
 	   | A.Inc  ->
 	       let n   = lookup (A.expr_to_str e) in
 	       let tmp = L.build_load n "tmp" builder in
@@ -486,6 +489,11 @@ let translate (globals, functions) =
 	    | "%obj**"  -> 5
 	    | "i8**"    -> 6
 	    | "i8*"     -> 7
+	    (* Arrays *)
+	    | "%arr_int_t**"  -> 8
+	    | "%arr_flt_t**"  -> 9
+	    | "%arr_str_t**"  -> 10
+	    | "%arr_bool_t**" -> 11
 	    | _         -> raise (Failure ("Invalid object assignment"))
 	  in
 	  (* Get type of primitive on LHS *)
@@ -531,6 +539,11 @@ let translate (globals, functions) =
 	    | "%obj*"  -> 5
 	    | "i8*"    -> 6
 	    | "i8"     -> 7
+	    (* Arrays *)
+	    | "%arr_int_t*"  -> 8
+	    | "%arr_flt_t*"  -> 9
+	    | "%arr_str_t*"  -> 10
+	    | "%arr_bool_t*" -> 11
 	    | _        -> raise (Failure ("Invalid object assignment"))
 	  in
 	  (* Get type of primitive on RHS *)
@@ -556,6 +569,11 @@ let translate (globals, functions) =
 	    | "%obj**"  -> 5
 	    | "i8**"    -> 6
 	    | "i8*"     -> 7
+	    (* Arrays *)
+	    | "%arr_int_t**"  -> 8
+	    | "%arr_flt_t**"  -> 9
+	    | "%arr_str_t**"  -> 10
+	    | "%arr_bool_t**" -> 11
 	    | _         -> raise (Failure ("Invalid object assignment"))
 	  in
 	  (* Get type of primitive on LHS *)
@@ -606,6 +624,13 @@ let translate (globals, functions) =
       | A.FunExp("string_length", [e]) ->
 	    L.build_call string_length [| (expr builder e ) |]
 	    "string_length" builder
+      | A.FunExp("arr_length", [e]) ->
+	    let e' = expr builder e in
+	    (* Cast array to void * to send to length function *)
+	    let p_e' = L.build_alloca (L.type_of e') "pcst" builder in
+	    ignore(L.build_store e' p_e' builder);
+	    let e' = L.build_bitcast p_e' (L.pointer_type i8_t) "cs" builder in
+	    L.build_call arr_length [| (e') |] "arr_length" builder
       | A.FunExp("slice", [e; e1; e2]) ->
           let e1' = expr builder e1
           and e2' = expr builder e2 in
@@ -625,17 +650,7 @@ let translate (globals, functions) =
 	  and e1' = expr builder e1
 	  and e2' = expr builder e2
 	  and e3' = expr builder e3 in 
-	  let sidx_of_typ = function
-	      "i32"    -> 3
-	    | "double" -> 4
-	    | "%obj*"  -> 5
-	    | "i8*"    -> 6
-	    | "i8"     -> 7
-	    | _        -> raise (Failure ("Invalid object assignment"))
-	  in
-	  let t = sidx_of_typ (L.string_of_lltype (L.type_of e3')) in
-	  let t_e3' = L.const_int i32_t t in
-	  (* Cast ptr to RHV to void ptr to store in Object *)
+	  (* Cast e3 to void ptr to store in Object *)
 	  let p_e3' = L.build_alloca (L.type_of e3') "pcst" builder in
 	  ignore(L.build_store e3' p_e3' builder);
 	  let v_e3' = L.build_bitcast p_e3' (L.pointer_type i8_t)
@@ -656,6 +671,11 @@ let translate (globals, functions) =
 	    | "object" -> 5
 	    | "string" -> 6
 	    | "bool"   -> 7
+	    (* Arrays *)
+	    | "%arr_int_t"  -> 8
+	    | "%arr_flt_t"  -> 9
+	    | "%arr_str_t"  -> 10
+	    | "%arr_bool_t" -> 11
 	    | _        -> raise (Failure ("Invalid object function actual parameter"))
 	  in
 	  (* Get type of formal *)

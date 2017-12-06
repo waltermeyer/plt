@@ -3,6 +3,36 @@
 #include <stdlib.h>
 #include <string.h>
 
+// The arr int
+typedef struct arr_int {
+  int len;
+  int **i_a;
+  int typ;
+} arr_int;
+
+// The arr float
+typedef struct arr_flt {
+  int len;
+  double **i_f;
+  int typ;
+} arr_flt;
+
+// The arr string
+typedef struct arr_str {
+  int len;
+  char **i_s;
+  int typ;
+} arr_str;
+
+
+// The arr bool
+typedef struct arr_bool {
+  int len;
+  bool **i_b;
+  int typ;
+} arr_bool;
+
+
 // The Object Struct
 typedef struct obj {
   // metadata
@@ -16,8 +46,14 @@ typedef struct obj {
   struct obj *o;   // object
   char *s;   // string
   bool b; // bool
+  struct arr_int *i_a;
+  struct arr_flt *f_a;
+  struct arr_str *s_a;
+  struct arr_bool *b_a; 
 } obj;
 
+
+// Object Key Printing
 int print_k(obj *o) {
   if (o == NULL)
     return 1;
@@ -280,24 +316,17 @@ obj *obj_findkey(obj *o, char *keys) {
   // parse a key to search for
   k = strsep(&keys_dup, ".");
 
-//  printf("Searching: %s\n", keys);
-//  printf("Current Key: %s\n", k);
-
   // search for keys within an object
   o = o->next; // get first key from head struct
   while (o != NULL) {
-//    printf("on: %s\n", o->k);
     if (strcmp(o->k, k) == 0) {
       // found our key
       if (strlen(k) == strlen(keys)) {
-//      printf("Found the key!\n");
 	free(k);
 	return o;
       }
       // continue nested key search
       else if (o->v_typ == 5) {
-//      printf("Found object that nests the key\n");
-//	printf("Now searching for: %s\n", keys_dup);
         o = obj_findkey(o->o, keys_dup);
         free(k);
 	return o;
@@ -318,9 +347,6 @@ int obj_assign(obj *o, int t, void *v) {
   int l;
   char *s;
   if (o != NULL) {
-    // If this key was a string, garbage collect it
-//    if (o->v_typ == 6)
-//      free(o->s);
     // Set new key type
     o->v_typ = t;
     // Set key value
@@ -336,6 +362,10 @@ int obj_assign(obj *o, int t, void *v) {
 	o->s = s;
 	break;
       case 7: o->b = *(bool *)v; break;
+      case 8: o->i_a = (arr_int *)v; break;
+      case 9: o->f_a = (arr_flt *)v; break;
+      case 10: o->s_a = (arr_str *)v; break;
+      case 11: o->b_a = (arr_bool *)v; break;
     };
   }
   return 0;
@@ -361,6 +391,10 @@ void *obj_getkey(obj *o, int t) {
     case 5: return (void *)o->o;
     case 6: return (void *)&o->s;
     case 7: return (void *)&o->b;
+    case 8: return (void *)o->i_a;
+    case 9: return (void *)o->f_a;
+    case 10: return (void *)o->s_a;
+    case 11: return (void *)o->b_a;
   };
   return NULL;
 }
@@ -371,6 +405,15 @@ void *obj_getkey(obj *o, int t) {
 int obj_gettyp(obj *o) {
   return o->v_typ;
 }
+
+/*
+ * Get the length of an array
+ */
+int arr_length(void *arr) {
+  struct arr_int *arr_i = *(arr_int **)(arr);
+  return arr_i->len;
+}
+
 
 #ifdef BUILD_TEST
 int main () {
@@ -446,7 +489,6 @@ int main () {
   printf("====THE OBJECT=====\n\n %s \n\n ===============\n" , buff);
   free(buff);
 
-  
   obj *o_new = (obj *) malloc(sizeof(obj)); // head
   obj *o2_new = (obj *) malloc(sizeof(obj));
   o_new->k = NULL;
