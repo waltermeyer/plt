@@ -97,6 +97,8 @@ let check (globals, functions) =
      { type_spec = Bool; f_id = "stringcmp"; f_params = [(String, "x"); (String, "y")] ; f_statements = [] }
      (StringMap.add "string_length"
      { type_spec = Int; f_id = "string_length"; f_params = [(String, "x")] ; f_statements = [] }
+     (StringMap.add "arr_length"
+     { type_spec = Int; f_id = "arr_length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "tostring"
      { type_spec = String; f_id = "tostring"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "nap"
@@ -108,7 +110,7 @@ let check (globals, functions) =
      (StringMap.add "obj_addkey"
      { type_spec = Object; f_id = "obj_addkey"; f_params = [(Object, "x"); (String, "y"); (Int, "z"); (String, "a")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
-     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] }))))))))))))))))
+     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] })))))))))))))))))
   in
 
   (* Add built in functions to list of function declaration list *)
@@ -192,10 +194,11 @@ let check (globals, functions) =
 		else
 		  List.iter2 
 		    (fun (ft, _) e -> let et = expression e in
-		      let temp = string_of_expression e in
-		      let r = Str.regexp "obj_addkey" in
-		      if not (String.contains (string_of_expression e) '.' ) && not (Str.string_match r f_id 0) then
-		      (
+		      let obj_addkey = Str.regexp "obj_addkey" in
+		      let arr_length = Str.regexp "arr_length" in
+		      if not (String.contains (string_of_expression e) '.' )
+		      && not (Str.string_match obj_addkey f_id 0)
+		      && not (Str.string_match arr_length f_id 0) then (
 		      ignore (check_assign ft et 
 		        (Failure ("illegal actual argument found " ^ string_of_typ et ^
 		        " expected " ^ string_of_typ ft ^ " in " ^ string_of_expression e)))

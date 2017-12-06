@@ -6,21 +6,21 @@
 // The arr int
 typedef struct arr_int {
   int len;
-  struct arr_int *i_a;
+  int **i_a;
   int typ;
 } arr_int;
 
 // The arr float
 typedef struct arr_flt {
   int len;
-  struct arr_flt *i_f;
+  double **i_f;
   int typ;
 } arr_flt;
 
 // The arr string
 typedef struct arr_str {
   int len;
-  struct arr_str *i_s;
+  char **i_s;
   int typ;
 } arr_str;
 
@@ -28,7 +28,7 @@ typedef struct arr_str {
 // The arr bool
 typedef struct arr_bool {
   int len;
-  struct arr_bool *i_b;
+  bool **i_b;
   int typ;
 } arr_bool;
 
@@ -52,6 +52,8 @@ typedef struct obj {
   struct arr_bool *b_a; 
 } obj;
 
+
+// Object Key Printing
 int print_k(obj *o) {
   if (o == NULL)
     return 1;
@@ -314,24 +316,17 @@ obj *obj_findkey(obj *o, char *keys) {
   // parse a key to search for
   k = strsep(&keys_dup, ".");
 
-//  printf("Searching: %s\n", keys);
-//  printf("Current Key: %s\n", k);
-
   // search for keys within an object
   o = o->next; // get first key from head struct
   while (o != NULL) {
-//    printf("on: %s\n", o->k);
     if (strcmp(o->k, k) == 0) {
       // found our key
       if (strlen(k) == strlen(keys)) {
-//      printf("Found the key!\n");
 	free(k);
 	return o;
       }
       // continue nested key search
       else if (o->v_typ == 5) {
-//      printf("Found object that nests the key\n");
-//	printf("Now searching for: %s\n", keys_dup);
         o = obj_findkey(o->o, keys_dup);
         free(k);
 	return o;
@@ -352,9 +347,6 @@ int obj_assign(obj *o, int t, void *v) {
   int l;
   char *s;
   if (o != NULL) {
-    // If this key was a string, garbage collect it
-//    if (o->v_typ == 6)
-//      free(o->s);
     // Set new key type
     o->v_typ = t;
     // Set key value
@@ -413,6 +405,15 @@ void *obj_getkey(obj *o, int t) {
 int obj_gettyp(obj *o) {
   return o->v_typ;
 }
+
+/*
+ * Get the length of an array
+ */
+int arr_length(void *arr) {
+  struct arr_int *arr_i = *(arr_int **)(arr);
+  return arr_i->len;
+}
+
 
 #ifdef BUILD_TEST
 int main () {
@@ -488,7 +489,6 @@ int main () {
   printf("====THE OBJECT=====\n\n %s \n\n ===============\n" , buff);
   free(buff);
 
-  
   obj *o_new = (obj *) malloc(sizeof(obj)); // head
   obj *o2_new = (obj *) malloc(sizeof(obj));
   o_new->k = NULL;
