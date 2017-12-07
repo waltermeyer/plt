@@ -11,9 +11,14 @@ int main() {
 	string s = arr_stringify(b);
 	print_s(s);
 
-	//string array c = ["this", "is", "a", "string", "array", "yay"];
-	//string s = arr_stringify(c);
-	//print_s(s);
+	string array c = ["this", "is", "a", "string", "array", "yay"];
+	string s = arr_stringify(c);
+	print_s(s);
+  	object o =  {|
+		 string Image : "alpine:latest", int array Cmd : [1, 2], int x : 3
+	      |};
 
+	string s = obj_stringify(o);
+	print_s(s);
 	return 0;
 }

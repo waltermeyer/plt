@@ -21,7 +21,7 @@ typedef struct arr_flt {
 typedef struct arr_str {
   int len;
   int typ;
-  char *s_a;
+  char **s_a;
 } arr_str;
 
 
@@ -125,7 +125,7 @@ char *arr_stringify(void *arr){
 	printf("Length :  %d \n ", len);
 	
 	char *buff;
-	size_t buff_len;
+	//size_t buff_len;
 
 	char *cpy_buff;
 	size_t cpy_len;
@@ -134,16 +134,21 @@ char *arr_stringify(void *arr){
 	
 	buff = (char *)malloc(sizeof(char));
 	memcpy(buff, "", 1);
-	buff = fill_buff(buff, "[ ");
+	
+	cpy_len = 2;
+	cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
+ 	memcpy(cpy_buff, " [", cpy_len+1);	
+	buff = fill_buff(buff, cpy_buff);
 	
 
 	switch(typ){
 		case 3:
+			printf("GOT HERE \n");
 			for (int i=1; i< len+1; i++){
 				printf("Value %d is %d \n", i, (arr_i->i_a[i]));
 				cpy_len = snprintf(NULL, 0 , "%d" , (arr_i->i_a[i]));  
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
-				snprintf(cpy_buff,cpy_len+1, "%d\n",  (arr_i->i_a[i]));
+				snprintf(cpy_buff,cpy_len+1, "%d",  (arr_i->i_a[i]));
 				buff = fill_buff(buff, cpy_buff);
 				if (i!=len){
 					buff = fill_buff(buff, " , ");
@@ -156,7 +161,7 @@ char *arr_stringify(void *arr){
 				printf("Value %d is %lf \n", i, (arr_f->f_a[i]));
 				cpy_len = snprintf(NULL, 0 , "%lf" , (arr_f->f_a[i]));  
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
-				snprintf(cpy_buff,cpy_len+1, "%lf\n",  (arr_f->f_a[i]));
+				snprintf(cpy_buff,cpy_len+1, "%lf",  (arr_f->f_a[i]));
 				buff = fill_buff(buff, cpy_buff);
 				if (i!=len){
 					buff = fill_buff(buff, " , ");
@@ -165,17 +170,17 @@ char *arr_stringify(void *arr){
 			}
 			break;
       		case 6: 
-			//for (int i=1; i< len+1; i++){
-			//	printf("Value %d is %d \n", i, (arr_s->s_a[i]));
-			//	cpy_len = snprintf(NULL, 0 , "\"%s\"" , &(arr_s->s_a[i]));  
-			//	cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
-			//	snprintf(cpy_buff,cpy_len+1, "\"%s\"", &(arr_s->s_a[i])); 
-			//	buff = fill_buff(buff,cpy_buff);
-			//	if (i!=len){
-			//		buff = fill_buff(buff, " , ");
-			//	}
-			//	printf("%s \n", buff);
-			//}
+			for (int i=1; i< len+1; i++){
+				printf("Value %d is %d \n", i, (arr_s->s_a[i]));
+				cpy_len = snprintf(NULL, 0 , "\"%s\"" , (arr_s->s_a[i]));  
+				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
+				snprintf(cpy_buff,cpy_len+1, "\"%s\"", (arr_s->s_a[i])); 
+				buff = fill_buff(buff,cpy_buff);
+				if (i!=len){
+					buff = fill_buff(buff, " , ");
+				}
+				printf("%s \n", buff);
+			}
 			break;
       		case 7:
 			for (int i=1; i< len+1; i++){
@@ -192,7 +197,11 @@ char *arr_stringify(void *arr){
 			break;
 	}
 	
-	buff = fill_buff(buff, " ]");
+	cpy_len = 2;
+	cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
+ 	memcpy(cpy_buff, " ]", cpy_len+1);
+	buff = fill_buff(buff, cpy_buff);
+	
 	free(cpy_buff);
 	//char *buff = "foo";
 	return buff;
@@ -237,6 +246,9 @@ char *string_key(obj *o, char *buff){
 char *string_val(obj *o, char *buff){
 	char *cpy_buff;
 	int len;
+
+	struct arr_int *i_a;
+	void *arr;
 	
 	switch(o->v_typ) {
     	  case 3: 
@@ -260,9 +272,17 @@ char *string_val(obj *o, char *buff){
 		cpy_buff = malloc(sizeof(char)*(len+1));
 		snprintf(cpy_buff, len+1,"%s", o->b ? "true" : "false"); 
 		break;
-	  //default:snprintf("object [%p]\n", &o); break;
+	  case 8:
+  		i_a = o->i_a;
+		arr = *(void **) i_a;
+		printf("%d \n" , i_a->len);
+		cpy_buff = arr_stringify(arr);
+		break;
+	  default:
+		cpy_buff = malloc(sizeof(char));
 	};
 	buff = fill_buff(buff, cpy_buff);
+	//printf(" Print buff : %s \n" , cpy_buff);
 	free(cpy_buff);		
 	len = 4;
 	cpy_buff = malloc(sizeof(char)*len);
@@ -593,14 +613,41 @@ int main () {
   
   buff = obj_stringify(o_new);
   printf("====THE OBJECT NEW=====\n\n %s \n\n ===============\n" , buff);
- 
-  //arr_int *ia = *(arr_int **) malloc(sizeof(arr_int));
+  
+  /* Array Stringify */
+  printf("Before arr_int \n"); 
+  struct arr_int *ia = (arr_int *) malloc(sizeof(arr_int));
+  printf("After arr_int \n");
   //ia->len = 4;
-  //ia->typ = 8;
-  //ia->i_a = {1,2,3,4};
+
+  //ia->typ = 3;
+  printf("After setting typ and len \n");
+  //
+  int *arr = (int *) malloc(4*sizeof(int));
+  
+  arr[0] = 1;
+  arr[1] = 2;
+  arr[2] = 3;
+  arr[3] = 4;
+ 
+  ia->len = 4;
+  ia->typ = 3;
+  ia->i_a = arr;
+
+  printf("%d \n " , arr[1]);
 
   //printf("%d\n" , ia->len); 
+  //printf("Strinfied array %s \n", s);
+  //free(s);
+  //free(ia->i_a);
+  void *int_array = *(void **)(ia);
+  char *s = arr_stringify(int_array);
+  printf("%s\n", s);
 
+  free(int_array);
+  free(s);
+  free(ia->i_a);
+  free(ia);
   free(buff);
 
   free(o_new);
