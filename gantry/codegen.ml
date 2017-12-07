@@ -29,32 +29,32 @@ let translate (globals, functions) =
                 let body =
                   [|
                     i32_t; (* arr length *)
-                    L.pointer_type i32_t;
                     i32_t; (* arr type *)
+                    L.pointer_type i32_t;
 		   |] in
                   ignore (L.struct_set_body arr_int_t body true);
     let arr_flt_t = L.named_struct_type context "arr_flt_t" in
                 let body =
                   [|
                     i32_t; (* arr length *)
-                    L.pointer_type flt_t;
                     i32_t; (* arr type *)
+                    L.pointer_type flt_t;
 		   |] in
                   ignore (L.struct_set_body arr_flt_t body true);
     let arr_str_t = L.named_struct_type context "arr_str_t" in
                 let body =
                   [|
                     i32_t; (* arr length *)
-                    L.pointer_type str_t;
                     i32_t; (* arr type *)
+                    L.pointer_type str_t;
 		   |] in
                   ignore (L.struct_set_body arr_str_t body true);
     let arr_bool_t = L.named_struct_type context "arr_bool_t" in
                 let body =
                   [|
                     i32_t; (* arr length *)
-                    L.pointer_type b_t;
                     i32_t; (* arr type *)
+                    L.pointer_type b_t;
 		   |] in
                   ignore (L.struct_set_body arr_bool_t body true);
     (* Object Type *)
@@ -153,6 +153,12 @@ let translate (globals, functions) =
     (* Nap (sleep wrapper) library function *)
     let nap_t = L.var_arg_function_type i32_t [| i32_t |] in
     let nap_func = L.declare_function "nap" nap_t the_module in
+    
+    (* Array Stringify *)
+    let arr_stringify_t = L.var_arg_function_type (L.pointer_type i8_t)
+			[| L.pointer_type i8_t ; i32_t |] in
+    let arr_stringify = L.declare_function "arr_stringify"
+			arr_stringify_t the_module in
 
     (* Object Library Runtime *)
     let obj_stringify_t = L.var_arg_function_type (L.pointer_type i8_t)
@@ -363,7 +369,7 @@ let translate (globals, functions) =
 	ignore(L.build_store (L.const_int i32_t
 			     (List.length vl)) arr_l builder);
 	(* Set Array Type in Struct *)
-	let arr_t = L.build_struct_gep arr_struct 2 "arr_type" builder in
+	let arr_t = L.build_struct_gep arr_struct 1 "arr_type" builder in
 	let sidx_of_typ = function
 	    "i32*"    -> 3
 	  | "double*" -> 4
@@ -383,13 +389,13 @@ let translate (globals, functions) =
 	(* Populate Array with Values *)
 	List.iteri fill vl;
 	(* Store Array in Struct *)
-	let arr_p = L.build_struct_gep arr_struct 1 "arr_struct" builder in
+	let arr_p = L.build_struct_gep arr_struct 2 "arr_struct" builder in
 	ignore(L.build_store arr arr_p builder);
 	arr_struct
       | A.ArrAcc(e1, e2) ->
         let e1_str = A.expr_to_str e1
         and idx = expr builder e2 in
-	let idx = L.build_add idx (L.const_int i32_t 1) "arridx" builder in
+	let idx = L.build_add idx (L.const_int i32_t 2) "arridx" builder in
 	let arr =
           if (String.contains e1_str '.') then
 	    (lookup e1_str)
@@ -397,7 +403,7 @@ let translate (globals, functions) =
 	    (L.build_load (lookup e1_str) "arracc" builder)
 	in
 	(* Get actual array from struct *)
-	let arr = L.build_struct_gep arr 1 "arr_v" builder in
+	let arr = L.build_struct_gep arr 2 "arr_v" builder in
 	let arr = L.build_load arr "arr_v" builder in
 	let e1' = L.build_gep arr [| idx |] "arracc_e" builder in
 	let e1' = L.build_load e1' "arracc" builder in
@@ -641,6 +647,17 @@ let translate (globals, functions) =
           and e2' = expr builder e2 in
 	    L.build_call stringcmp [| (e1') ; (e2') |]
 	    "stringcmp" builder
+      | A.FunExp("arr_stringify", [e; e1]) ->
+	  let e' = expr builder e
+	  and e1' = expr builder e1 in
+	  (* Cast e to void ptr  *)
+	  let p_e' = L.build_alloca (L.type_of e') "pcst" builder in
+	  ignore(L.build_store e' p_e' builder);
+	  let v_e' = L.build_bitcast p_e' (L.pointer_type i8_t)
+		      "cst" builder in
+	  (* Build call to obj_addkey *)
+	  L.build_call arr_stringify [| (v_e') ; (e1') |]
+	    "arr_stringify" builder
       | A.FunExp("obj_stringify", [e]) ->
 	  let e' = expr builder e in
 	    L.build_call obj_stringify [|(e')|]

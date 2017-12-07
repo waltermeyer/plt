@@ -1,0 +1,11 @@
+int main() {
+	int array x = [1,2,3];
+	string s = arr_stringify(x, 3);	
+	print_s(s);
+
+	float array y = [1.00, 3.14, 4.00, 9.88];
+	string s = arr_stringify(y, 4);
+	print_s(s);
+
+	return 0;
+}
