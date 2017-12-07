@@ -156,7 +156,7 @@ let translate (globals, functions) =
     
     (* Array Stringify *)
     let arr_stringify_t = L.var_arg_function_type (L.pointer_type i8_t)
-			[| L.pointer_type i8_t ; i32_t |] in
+			[| L.pointer_type i8_t |] in
     let arr_stringify = L.declare_function "arr_stringify"
 			arr_stringify_t the_module in
 
@@ -647,16 +647,15 @@ let translate (globals, functions) =
           and e2' = expr builder e2 in
 	    L.build_call stringcmp [| (e1') ; (e2') |]
 	    "stringcmp" builder
-      | A.FunExp("arr_stringify", [e; e1]) ->
-	  let e' = expr builder e
-	  and e1' = expr builder e1 in
+      | A.FunExp("arr_stringify", [e]) ->
+	  let e' = expr builder e in
 	  (* Cast e to void ptr  *)
 	  let p_e' = L.build_alloca (L.type_of e') "pcst" builder in
 	  ignore(L.build_store e' p_e' builder);
 	  let v_e' = L.build_bitcast p_e' (L.pointer_type i8_t)
 		      "cst" builder in
 	  (* Build call to obj_addkey *)
-	  L.build_call arr_stringify [| (v_e') ; (e1') |]
+	  L.build_call arr_stringify [| (v_e') |]
 	    "arr_stringify" builder
       | A.FunExp("obj_stringify", [e]) ->
 	  let e' = expr builder e in

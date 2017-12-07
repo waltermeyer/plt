@@ -106,7 +106,7 @@ let check (globals, functions) =
      (StringMap.add "httpget"
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "arr_stringify"
-     { type_spec = String; f_id = "arr_stringify"; f_params = [(String , "x") ; (Int, "y")] ; f_statements = [] }
+     { type_spec = String; f_id = "arr_stringify"; f_params = [(String , "x")] ; f_statements = [] }
      (StringMap.add "obj_stringify"
      { type_spec = String; f_id = "obj_stringify"; f_params = [(Object, "x")] ; f_statements = [] } 
      (StringMap.add "obj_addkey"

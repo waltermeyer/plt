@@ -110,7 +110,7 @@ char *fill_buff(char *buff, char *cpy_buff){
 }
 
 
-char *arr_stringify(void *arr, int l){
+char *arr_stringify(void *arr){
 	/* Cast to each arr type */  	
 	struct arr_int *arr_i = *(arr_int **)(arr);
 	struct arr_flt *arr_f = *(arr_flt **)(arr);
@@ -164,8 +164,32 @@ char *arr_stringify(void *arr, int l){
 				printf("%s \n " , buff);
 			}
 			break;
-      		case 6: break;// String
-      		case 7: break;// Bool
+      		case 6: 
+			//for (int i=1; i< len+1; i++){
+			//	printf("Value %d is %d \n", i, (arr_s->s_a[i]));
+			//	cpy_len = snprintf(NULL, 0 , "\"%s\"" , &(arr_s->s_a[i]));  
+			//	cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
+			//	snprintf(cpy_buff,cpy_len+1, "\"%s\"", &(arr_s->s_a[i])); 
+			//	buff = fill_buff(buff,cpy_buff);
+			//	if (i!=len){
+			//		buff = fill_buff(buff, " , ");
+			//	}
+			//	printf("%s \n", buff);
+			//}
+			break;
+      		case 7:
+			for (int i=1; i< len+1; i++){
+				printf("Value %d is %s \n", i, ((arr_b->b_a[i]) ? "true" : "false"));
+				cpy_len= snprintf(NULL, 0 , "%s" , (arr_b->b_a[i]) ? "true" : "false");  
+				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
+				snprintf(cpy_buff, cpy_len+1,"%s", (arr_b->b_a[i]) ? "true" : "false"); 
+				buff = fill_buff(buff, cpy_buff);
+				if (i!=len){
+					buff = fill_buff(buff, " , ");
+				}
+				printf("%s \n " , buff);
+			}
+			break;
 	}
 	
 	buff = fill_buff(buff, " ]");
