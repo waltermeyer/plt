@@ -1,0 +1,67 @@
+The Gantry Compiler README
+
+----
+
+Requirements:
+
+OCaml 4.02.3 (or higher)
+LLVM 3.8
+m4 1.4.17 (or higher)
+gcc 5.4 (or higher)
+make 4.1 (or higher)
+libcurl4
+pkg-config
+
+Other versions other than the aforementioned may work but have not been tested.
+Additionally, you should be able to get Gantry compiled on the Operating System
+of choice provided you have the prerequisites installed.
+
+-----
+
+Installation on Ubuntu 16.04 LTS:
+
+sudo apt-get update -y
+sudo apt-get install -y ocaml opam m4 pkg-config llvm-3.8 libcurl4-gnutls-dev
+opam init --auto-setup
+opam install -y ocamlfind llvm.3.8
+
+----
+
+Compiling the Compiler:
+
+From the gantry working directory (likely where this README is) run:
+
+make
+
+This will produce the compiler binary 'gantry.native'.
+
+----
+
+Running Compiler Tests:
+
+make clean && make
+./test_all.sh
+
+This will compile and execute all tests inside of the tests/ directory.
+If these work, you can assume the compiler is working on your system
+and you can begin compiling your own Gantry (.gty) programs.
+
+----
+
+Compiling a Gantry Program to a native binary:
+
+Gantry provides a convenient wrapper script that will compile your source (.gty)
+program and perform the appropriate linking with libraries that Gantry uses.
+
+./gantry_comp.sh your_program.gty
+
+----
+
+Compiling a Gantry program to LLVM IR:
+
+If you'd like to see the LLVM IR output from
+the compiler you can run the following to send
+it to stdout:
+
+./gantry.native < program.gty
+
