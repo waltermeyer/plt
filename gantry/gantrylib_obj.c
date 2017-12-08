@@ -140,10 +140,11 @@ char *arr_stringify(void *arr){
  	memcpy(cpy_buff, " [", cpy_len+1);	
 	buff = fill_buff(buff, cpy_buff);
 
+	int i;
 	switch(typ){
 		case 3:
 			printf("GOT HERE \n");
-			for (int i=0; i< len; i++){
+			for (i=0; i< len; i++){
 				printf("Value %d is %d \n", i, (arr_i->i_a[i]));
 				cpy_len = snprintf(NULL, 0 , "%d" , (arr_i->i_a[i]));  
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
@@ -157,7 +158,7 @@ char *arr_stringify(void *arr){
 			printf("Done int\n");
 			break;
 		case 4: 
-			for (int i=0; i< len; i++){
+			for (i=0; i< len; i++){
 				printf("Value %d is %lf \n", i, (arr_f->f_a[i]));
 				cpy_len = snprintf(NULL, 0 , "%lf" , (arr_f->f_a[i])); 
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
@@ -170,7 +171,7 @@ char *arr_stringify(void *arr){
 			}
 			break;
       		case 6: 
-			for (int i=0; i< len; i++){
+			for (i=0; i< len; i++){
 				printf("Value %d is %d \n", i, (arr_s->s_a[i]));
 				cpy_len = snprintf(NULL, 0 , "\"%s\"" , (arr_s->s_a[i]));  
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
@@ -185,7 +186,7 @@ char *arr_stringify(void *arr){
 			}
 			break;
       		case 7:
-			for (int i=0; i< len; i++){
+			for (i=0; i< len; i++){
 				printf("Value %d is %s \n", i, ((arr_b->b_a[i]) ? "true" : "false"));
 				cpy_len= snprintf(NULL, 0 , "%s" , (arr_b->b_a[i]) ? "true" : "false");  
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
