@@ -223,6 +223,17 @@ let translate (globals, functions) =
       | A.Binop (e1, op, e2) ->
         let e1' = expr builder e1
         and e2' = expr builder e2 in
+        let search_assign_null e f = 
+            let r = Str.regexp "null" in
+            ignore(Str.search_forward r (L.string_of_llvalue e) 0);
+            L.const_null (L.type_of f)
+
+        in
+        let e2' = 
+            try search_assign_null e2' e1'
+            with Not_found ->
+            e2' in
+
 	let typ = L.string_of_lltype (L.type_of e1') in
 	(match typ with 
            "i32" | "i8"  -> (match op with
@@ -385,14 +396,25 @@ let translate (globals, functions) =
             let e' = expr builder e in
             let n = lookup n in
 
-          if (String.compare (A.expr_to_str e) "null" == 0) then (
+         (* if (String.compare (A.expr_to_str e) "null" == 0) then (
             let t = ltype_of_typ t in
             ignore (L.build_store (L.const_null t) n builder);
             e'
           ) else (
             ignore (L.build_store e' n builder);
             e'
-          )
+          )*)
+
+            let r = Str.regexp("null") in
+                try Str.search_forward r (L.string_of_llvalue e') 0;
+                let t = ltype_of_typ t in
+                ignore (L.build_store (L.const_null t) n builder);
+                e'
+
+                with Not_found ->
+                let t = ltype_of_typ t in
+                ignore (L.build_store e' n builder);
+                e'
         )
 	
 	(* Object on RHS *)

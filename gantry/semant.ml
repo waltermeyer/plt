@@ -154,7 +154,13 @@ let check (globals, functions) =
          (match op with
             Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
           | Add | Sub | Mult | Div when t1 = Float && t2 = Float -> Float
+          | Add | Sub | Mult | Div when t1 = Int && t2 = Null -> Int
+          | Add | Sub | Mult | Div when t1 = Float && t2 = Null -> Float
           | Eq | Neq when t1 = t2 -> Bool
+          | Eq | Neq when t1 = Float && t2 = Null -> Bool
+          | Eq | Neq when t1 = Int && t2 = Null -> Bool
+          | Eq | Neq when t1 = Bool && t2 = Null -> Bool
+          | Eq | Neq when t1 = String && t2 = Null -> Bool
 	  | Lt | Leq | Gt | Geq when t1 = Int && t2 = Int -> Bool
           | Lt | Leq | Gt | Geq when t2 = Float && t2 = Float -> Bool
           | And | Or when t1 = Bool && t2 = Bool -> Bool

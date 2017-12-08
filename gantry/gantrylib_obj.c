@@ -86,6 +86,7 @@ int obj_assign(obj *o, int t, void *v) {
     // Set new key type
     o->v_typ = t;
     // Set key value
+ 
     switch(o->v_typ) {
       case 3: o->i = *(int *)v; break;
       case 4: o->f = *(double *)v; break;
