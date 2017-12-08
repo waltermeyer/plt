@@ -81,8 +81,8 @@ let translate (globals, functions) =
                 let body =
                   [|
                     i32_t; (* arr length *)
-                    L.pointer_type (L.pointer_type obj_t);
                     i32_t; (* arr type *)
+                    L.pointer_type (L.pointer_type obj_t);
 		   |] in
                   ignore (L.struct_set_body arr_obj_t body true);
 
@@ -395,7 +395,7 @@ let translate (globals, functions) =
       | A.ArrAcc(e1, e2) ->
         let e1_str = A.expr_to_str e1
         and idx = expr builder e2 in
-	let idx = L.build_add idx (L.const_int i32_t 2) "arridx" builder in
+	let idx = L.build_add idx (L.const_int i32_t 1) "arridx" builder in
 	let arr =
           if (String.contains e1_str '.') then
 	    (lookup e1_str)
