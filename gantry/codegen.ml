@@ -383,7 +383,7 @@ let translate (globals, functions) =
 	(* For each value, store in array *)
 	let fill i v =
 	  let vp =
-	  L.build_gep arr [| L.const_int i32_t (i + 1) |] "arr_v" builder in
+	  L.build_gep arr [| L.const_int i32_t i |] "arr_v" builder in
 	  ignore(L.build_store v vp builder);
 	in
 	(* Populate Array with Values *)
@@ -395,7 +395,7 @@ let translate (globals, functions) =
       | A.ArrAcc(e1, e2) ->
         let e1_str = A.expr_to_str e1
         and idx = expr builder e2 in
-	let idx = L.build_add idx (L.const_int i32_t 1) "arridx" builder in
+	(*let idx = L.build_add idx (L.const_int i32_t 1) "arridx" builder in*)
 	let arr =
           if (String.contains e1_str '.') then
 	    (lookup e1_str)
