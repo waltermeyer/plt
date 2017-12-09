@@ -117,15 +117,13 @@ char *arr_stringify(void *arr){
 	struct arr_str *arr_s = *(arr_str **)(arr);
 	struct arr_bool *arr_b = *(arr_bool **)(arr);
 
-	//int typ = arr_i->typ;
 	int len = arr_i->len;
 	int typ = arr_i->typ;
   	
-	printf("Type :  %d \n " , typ);
-	printf("Length :  %d \n ", len);
+	//printf("Type :  %d \n " , typ);
+	//printf("Length :  %d \n ", len);
 	
 	char *buff;
-	//size_t buff_len;
 
 	char *cpy_buff;
 	size_t cpy_len;
@@ -137,15 +135,14 @@ char *arr_stringify(void *arr){
 	
 	cpy_len = 2;
 	cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
- 	memcpy(cpy_buff, " [", cpy_len+1);	
+ 	memcpy(cpy_buff, "[ ", cpy_len+1);	
 	buff = fill_buff(buff, cpy_buff);
 
 	int i;
 	switch(typ){
 		case 3:
-			printf("GOT HERE \n");
 			for (i=0; i< len; i++){
-				printf("Value %d is %d \n", i, (arr_i->i_a[i]));
+				//printf("Value %d is %d \n", i, (arr_i->i_a[i]));
 				cpy_len = snprintf(NULL, 0 , "%d" , (arr_i->i_a[i]));  
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
 				snprintf(cpy_buff,cpy_len+1, "%d",  (arr_i->i_a[i]));
@@ -153,13 +150,11 @@ char *arr_stringify(void *arr){
 				if (i!=len-1){
 					buff = fill_buff(buff, " , ");
 				}
-				printf("%s \n " , buff);
 			}
-			printf("Done int\n");
 			break;
 		case 4: 
 			for (i=0; i< len; i++){
-				printf("Value %d is %lf \n", i, (arr_f->f_a[i]));
+				//printf("Value %d is %lf \n", i, (arr_f->f_a[i]));
 				cpy_len = snprintf(NULL, 0 , "%lf" , (arr_f->f_a[i])); 
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
 				snprintf(cpy_buff,cpy_len+1, "%lf",  (arr_f->f_a[i]));
@@ -167,27 +162,24 @@ char *arr_stringify(void *arr){
 				if (i!=len-1){
 					buff = fill_buff(buff, " , ");
 				}
-				printf("%s \n " , buff);
+				//printf("%s \n " , buff);
 			}
 			break;
       		case 6: 
 			for (i=0; i< len; i++){
-				printf("Value %d is %d \n", i, (arr_s->s_a[i]));
+				//printf("Value %d is %d \n", i, (arr_s->s_a[i]));
 				cpy_len = snprintf(NULL, 0 , "\"%s\"" , (arr_s->s_a[i]));  
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
-				printf("test1\n");
 				snprintf(cpy_buff,cpy_len+1, "\"%s\"", (arr_s->s_a[i])); 
-				printf("test2\n");
 				buff = fill_buff(buff,cpy_buff);
 				if (i!=len-1){
 					buff = fill_buff(buff, " , ");
 				}
-				printf("%s \n", buff);
 			}
 			break;
       		case 7:
 			for (i=0; i< len; i++){
-				printf("Value %d is %s \n", i, ((arr_b->b_a[i]) ? "true" : "false"));
+				//printf("Value %d is %s \n", i, ((arr_b->b_a[i]) ? "true" : "false"));
 				cpy_len= snprintf(NULL, 0 , "%s" , (arr_b->b_a[i]) ? "true" : "false");  
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
 				snprintf(cpy_buff, cpy_len+1,"%s", (arr_b->b_a[i]) ? "true" : "false"); 
@@ -195,14 +187,13 @@ char *arr_stringify(void *arr){
 				if (i!=len-1){
 					buff = fill_buff(buff, " , ");
 				}
-				printf("%s \n " , buff);
 			}
 			break;
 	}
 	
 	cpy_len = 2;
 	cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
- 	memcpy(cpy_buff, "]", cpy_len+1);
+ 	memcpy(cpy_buff, " ]", cpy_len+1);
 	buff = fill_buff(buff, cpy_buff);
 	free(cpy_buff);
 	//char *buff = "foo";
@@ -249,7 +240,10 @@ char *string_val(obj *o, char *buff){
 	char *cpy_buff;
 	int len;
 
-	struct arr_int *i_a;
+	//struct arr_int *i_a;
+	//struct arr_flt *f_a;
+	//struct arr_str *s_a;
+	//struct arr_bool *b_a;
 	void *arr;
 	
 	switch(o->v_typ) {
@@ -275,9 +269,19 @@ char *string_val(obj *o, char *buff){
 		snprintf(cpy_buff, len+1,"%s", o->b ? "true" : "false"); 
 		break;
 	  case 8:
-  		i_a = o->i_a;
-		arr = *(void **) i_a;
-		printf("%d \n" , i_a->len);
+		arr = (void **) o->i_a;
+		cpy_buff = arr_stringify(arr);
+		break;
+	  case 9:
+		arr = (void **) o->f_a;
+		cpy_buff = arr_stringify(arr);
+		break;
+	  case 10:
+		arr = (void **) o->s_a;
+		cpy_buff = arr_stringify(arr);
+		break;
+	  case 11:
+		arr = (void **) o->b_a;
 		cpy_buff = arr_stringify(arr);
 		break;
 	  default:
@@ -415,6 +419,10 @@ obj *obj_addkey(obj *o, char *key, int typ, void *val) {
 		  o_new->s = s;
 		  break;
   	  case 7: o_new->b = *((bool *) val); break;
+      	  case 8: o_new->i_a = (arr_int *) val; break; 
+      	  case 9: o_new->f_a = (arr_flt *) val; break;
+      	  case 10: o_new->s_a = (arr_str *)val; break;
+      	  case 11: o_new->b_a = (arr_bool *)val; break;
   	};
 	return o;
 }
@@ -638,13 +646,15 @@ int main () {
 
   printf("%d \n " , arr[1]);
 
+  //int array
+
   //printf("%d\n" , ia->len); 
   //printf("Strinfied array %s \n", s);
   //free(s);
   //free(ia->i_a);
-  void *int_array = *(void **)(ia);
-  char *s = arr_stringify(int_array);
-  printf("%s\n", s);
+  //void *int_array = *(void **)(ia);
+  //char *s = arr_stringify(int_array);
+  //printf("%s\n", s);
 
   free(int_array);
   free(s);
