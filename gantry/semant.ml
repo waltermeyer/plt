@@ -105,12 +105,14 @@ let check (globals, functions) =
      { type_spec = Int; f_id = "nap"; f_params = [(Int, "x")] ; f_statements = [] }
      (StringMap.add "httpget"
      { type_spec = String; f_id = "httpget"; f_params = [(String, "x")] ; f_statements = [] }
+     (StringMap.add "arr_stringify"
+     { type_spec = String; f_id = "arr_stringify"; f_params = [(String , "x")] ; f_statements = [] }
      (StringMap.add "obj_stringify"
      { type_spec = String; f_id = "obj_stringify"; f_params = [(Object, "x")] ; f_statements = [] } 
      (StringMap.add "obj_addkey"
      { type_spec = Object; f_id = "obj_addkey"; f_params = [(Object, "x"); (String, "y"); (Int, "z"); (String, "a")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
-     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] })))))))))))))))))
+     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] }))))))))))))))))))
   in
 
   (* Add built in functions to list of function declaration list *)
@@ -196,8 +198,10 @@ let check (globals, functions) =
 		    (fun (ft, _) e -> let et = expression e in
 		      let obj_addkey = Str.regexp "obj_addkey" in
 		      let arr_length = Str.regexp "arr_length" in
+		      let arr_stringify = Str.regexp "arr_stringify" in
 		      if not (String.contains (string_of_expression e) '.' )
 		      && not (Str.string_match obj_addkey f_id 0)
+		      && not (Str.string_match arr_stringify f_id 0)
 		      && not (Str.string_match arr_length f_id 0) then (
 		      ignore (check_assign ft et 
 		        (Failure ("illegal actual argument found " ^ string_of_typ et ^

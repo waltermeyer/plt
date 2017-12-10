@@ -1,0 +1,47 @@
+int main() {
+	int array x = [1,2,3];
+	string s = arr_stringify(x);	
+	print_s(s);
+
+	float array y = [1.00, 3.14, 4.00, 9.88];
+	string s = arr_stringify(y);
+	print_s(s);
+	
+	bool array b = [true, false];
+	string s = arr_stringify(b);
+	print_s(s);
+
+	string array c = ["this", "is", "a", "string", "array", "yay"];
+	string s = arr_stringify(c);
+	print_s(s);
+  	object o1 =  {|
+		 string Image : "alpine:latest", int x : 3
+	      |};
+
+	int array Cmd = [1,2];
+	string array arr2 = ["foo", "barr", "zoo"];
+	float array arr3 = [1.22, 3.000, 4.2, 5.3];
+	bool array arr4 = [true];
+	object o2 = obj_addkey(o1, "foo", 8, Cmd);
+	object o3 = obj_addkey(o2, "key1", 10, arr2);
+	object o4 = obj_addkey(o3, "key3", 9, arr3);
+	object o5 = obj_addkey(o4, "key4", 11, arr4);
+	string s = obj_stringify(o2);
+	print_s(s);
+  	//object o =  {|
+	//	 string Image : "alpine:latest", int array Cmd : [1, 2], int x : 3
+	//      |};
+
+	//string s = obj_stringify(o);
+	//print_s(s);
+	return 0;
+}
+
+/*
+****TEST****
+[ 1 , 2 , 3 ]
+[ 1.000000 , 3.140000 , 4.000000 , 9.880000 ]
+[ true , false ]
+[ "this" , "is" , "a" , "string" , "array" , "yay" ]
+{ "key4" : [ true ] , "key3" : [ 1.220000 , 3.000000 , 4.200000 , 5.300000 ] , "key1" : [ "foo" , "barr" , "zoo" ] , "foo" : [ 1 , 2 ] , "x" : 3 , "Image" : "alpine:latest" }
+*/
