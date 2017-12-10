@@ -332,24 +332,22 @@ let translate (globals, functions) =
            ) i8_t "tmp" builder
 
          | "i8" -> (match op with
-             A.And  -> L.build_intcast (L.build_and e1' (L.build_intcast e2' 
-                                                          i8_t "tmp" builder)
+             A.And  -> (L.build_and e1' (L.build_intcast e2' i8_t "tmp" builder)
+                                                         "tmp" builder)
+
+           | A.Or   -> (L.build_or e1' (L.build_intcast e2' i8_t "tmp" builder)
                                                         "tmp" builder)
 
-           | A.Or   ->  L.build_intcast (L.build_or e1' (L.build_intcast e2' 
-                                                          i8_t "tmp" builder)
-                                                        "tmp" builder)
-
-           | A.Eq   -> L.build_intcast (L.build_icmp L.Icmp.Eq e1' 
+           | A.Eq   -> (L.build_icmp L.Icmp.Eq e1' 
                                          (L.build_intcast e2' i8_t "tmp" builder)
                                                         "tmp" builder)
 
-           | A.Neq  -> L.build_intcast (L.build_icmp L.Icmp.Ne e1' 
+           | A.Neq  -> (L.build_icmp L.Icmp.Ne e1' 
                                          (L.build_intcast e2' i8_t "tmp" builder)
                                                         "tmp" builder)
 
            | _      -> raise (Failure ("Invalid Boolean binary operation"))
-           ) i8_t "tmp" builder
+           )
 
         | "i8*" -> (match op with
             A.Eq    ->  L.build_icmp L.Icmp.Eq
