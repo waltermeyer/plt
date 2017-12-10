@@ -311,7 +311,7 @@ let translate (globals, functions) =
            | A.Geq  -> L.build_fcmp L.Fcmp.Oge
 	   | _      -> raise (Failure ("Invalid float binary operation"))
            ) e1' e2' "tmp" builder
-        |  "i8" | "i1"  -> (match op with
+         | "i8"  -> (match op with
              A.And  -> L.build_intcast (L.build_and e1' e2' "tmp" builder)
            | A.Or   -> L.build_intcast (L.build_or e1' e2' "tmp" builder)
            | A.Eq   -> L.build_intcast (L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder)
