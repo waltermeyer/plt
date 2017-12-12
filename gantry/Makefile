@@ -6,7 +6,7 @@
 
 
 all : gantry.native gantrylib_string.o gantrylib_http.o gantrylib_nap.o   \
-	gantrylib_obj.o printb.o
+	gantrylib_obj.o gantrylib_printb.o
 
 gantry.native :
 	ocamlbuild -use-ocamlfind -pkgs str,llvm,llvm.analysis -cflags -w,+a-4 \
