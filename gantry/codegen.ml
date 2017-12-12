@@ -64,7 +64,7 @@ let translate (globals, functions) =
                     L.pointer_type obj_t; (* next *)
                     str_t; (* key *)
                     (* values *)
-                    i32_t; (* value type *)
+		    i32_t; (* value type *)
                     i32_t; (* int *)
                     flt_t; (* float *)
                     L.pointer_type obj_t; (* child (object) *)
@@ -395,7 +395,6 @@ let translate (globals, functions) =
       | A.ArrAcc(e1, e2) ->
         let e1_str = A.expr_to_str e1
         and idx = expr builder e2 in
-	(*let idx = L.build_add idx (L.const_int i32_t 1) "arridx" builder in*)
 	let arr =
           if (String.contains e1_str '.') then
 	    (lookup e1_str)
@@ -465,8 +464,7 @@ let translate (globals, functions) =
 	ignore(set_next parent);
 	(* Connect each key in this object *)
 	let build_obj _ =
-	  let (t, _, k) = Stack.pop kv_stack in
-	  ignore(L.build_struct_gep k t "value" builder);
+	  let (_, _, k) = Stack.pop kv_stack in
 	  ignore(set_next k);
 	in
 	(* Build out all of the key values within this object *)
@@ -509,7 +507,6 @@ let translate (globals, functions) =
 	  let v_e2' = L.build_call obj_getkey_func
 		      [| e2' ; t_e1' |] "obj_getkey" builder in
 	  (* Cast void* RHV to ptr of LHV type *)
-	  ignore(L.build_alloca (L.type_of e1') "pcst" builder);
 	  let v_e2' = L.build_bitcast v_e2' (L.type_of e1') "cst" builder in
 	  let v_e2' = L.build_load v_e2' "loadcst" builder in
 	  ignore(L.build_store v_e2' e1' builder);
@@ -589,7 +586,6 @@ let translate (globals, functions) =
 	  let v_e2' = L.build_call obj_getkey_func
 		      [| e2' ; t_e1' |] "obj_getkey" builder in
 	  (* Cast void* RHV to ptr of LHV type *)
-	  ignore(L.build_alloca (L.type_of e1') "pcst" builder);
 	  let v_e2' = L.build_bitcast v_e2' (L.type_of e1') "cst" builder in
 	  let v_e2' = L.build_load v_e2' "loadcst" builder in
 	  ignore(L.build_store v_e2' e1' builder);
@@ -688,10 +684,10 @@ let translate (globals, functions) =
 	    | "string" -> 6
 	    | "bool"   -> 7
 	    (* Arrays *)
-	    | "%arr_int_t"  -> 8
-	    | "%arr_flt_t"  -> 9
-	    | "%arr_str_t"  -> 10
-	    | "%arr_bool_t" -> 11
+	    | "int array"    -> 8
+	    | "float array"  -> 9
+	    | "string array" -> 10
+	    | "bool array"   -> 11
 	    | _        -> raise (Failure ("Invalid object function actual parameter"))
 	  in
 	  (* Get type of formal *)
