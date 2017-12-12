@@ -31,12 +31,6 @@ int main() {
 	object o5 = obj_addkey(o4, "key4", 11, arr4);
 	string s = obj_stringify(o1);
 	print_s(s);
-  	//object o =  {|
-	//	 string Image : "alpine:latest", int array Cmd : [1, 2], int x : 3
-	//      |};
-
-	//string s = obj_stringify(o);
-	//print_s(s);
 	return 0;
 }
 
