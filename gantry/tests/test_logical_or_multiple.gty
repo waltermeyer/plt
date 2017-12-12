@@ -1,0 +1,18 @@
+// pass - test if multiple logical ORs work in a condition
+
+int main () {
+
+  int x = 0;
+  float y = 1.0;
+  bool z = true;
+
+  if (x == 1 || y == 0.0 || z) {
+    print_s("x = 1 or y = 0.0 or z = true");
+  }
+
+}
+
+/*
+****TEST****
+x = 1 or y = 0.0 or z = true
+*/

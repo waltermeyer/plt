@@ -164,6 +164,7 @@ let check (globals, functions) =
 	  | Lt | Leq | Gt | Geq when t1 = Int && t2 = Int -> Bool
           | Lt | Leq | Gt | Geq when t2 = Float && t2 = Float -> Bool
           | And | Or when t1 = Bool && t2 = Bool -> Bool
+          (*| And | Or when (t1 = Bool || t1 = Int || t1 = Float) && t2 = Bool -> Bool*)
 	  | Conc when t1 = String && t2 = String -> String 
           | _ -> raise (Failure ("illegal binary operator " ^ string_of_typ t1 ^ " " ^ string_of_op op ^ " "     ^ string_of_typ t2 ^ " in " ^ string_of_expression e))
  	)
