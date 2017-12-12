@@ -32,7 +32,7 @@ let translate (globals, functions) =
                     i32_t; (* arr type *)
                     L.pointer_type i32_t;
 		   |] in
-                  ignore (L.struct_set_body arr_int_t body true);
+                  ignore (L.struct_set_body arr_int_t body false);
     let arr_flt_t = L.named_struct_type context "arr_flt_t" in
                 let body =
                   [|
@@ -40,7 +40,7 @@ let translate (globals, functions) =
                     i32_t; (* arr type *)
                     L.pointer_type flt_t;
 		   |] in
-                  ignore (L.struct_set_body arr_flt_t body true);
+                  ignore (L.struct_set_body arr_flt_t body false);
     let arr_str_t = L.named_struct_type context "arr_str_t" in
                 let body =
                   [|
@@ -48,7 +48,7 @@ let translate (globals, functions) =
                     i32_t; (* arr type *)
                     L.pointer_type str_t;
 		   |] in
-                  ignore (L.struct_set_body arr_str_t body true);
+                  ignore (L.struct_set_body arr_str_t body false);
     let arr_bool_t = L.named_struct_type context "arr_bool_t" in
                 let body =
                   [|
@@ -56,7 +56,7 @@ let translate (globals, functions) =
                     i32_t; (* arr type *)
                     L.pointer_type b_t;
 		   |] in
-                  ignore (L.struct_set_body arr_bool_t body true);
+                  ignore (L.struct_set_body arr_bool_t body false);
     (* Object Type *)
     let obj_t = L.named_struct_type context "obj" in
                 let body =
@@ -64,19 +64,19 @@ let translate (globals, functions) =
                     L.pointer_type obj_t; (* next *)
                     str_t; (* key *)
                     (* values *)
-                    i32_t; (* value type *)
+		    i32_t; (* value type *)
                     i32_t; (* int *)
                     flt_t; (* float *)
                     L.pointer_type obj_t; (* child (object) *)
                     str_t; (* string *)
                     b_t;  (* bool *)
 		    (* Arrays *)
-		    L.pointer_type arr_int_t;
-		    L.pointer_type arr_flt_t;
-		    L.pointer_type arr_str_t;
-		    L.pointer_type arr_bool_t;
+		    L.pointer_type (L.pointer_type arr_int_t);
+		    L.pointer_type (L.pointer_type arr_flt_t);
+		    L.pointer_type (L.pointer_type arr_str_t);
+		    L.pointer_type (L.pointer_type arr_bool_t);
                   |] in
-                  ignore (L.struct_set_body obj_t body true);
+                  ignore (L.struct_set_body obj_t body false);
     let arr_obj_t = L.named_struct_type context "arr_obj_t" in
                 let body =
                   [|
@@ -84,7 +84,7 @@ let translate (globals, functions) =
                     i32_t; (* arr type *)
                     L.pointer_type (L.pointer_type obj_t);
 		   |] in
-                  ignore (L.struct_set_body arr_obj_t body true);
+                  ignore (L.struct_set_body arr_obj_t body false);
 
     (* AST to LLVM types *)
     let ltype_of_typ = function
@@ -434,7 +434,6 @@ let translate (globals, functions) =
       | A.ArrAcc(e1, e2) ->
         let e1_str = A.expr_to_str e1
         and idx = expr builder e2 in
-	(*let idx = L.build_add idx (L.const_int i32_t 1) "arridx" builder in*)
 	let arr =
           if (String.contains e1_str '.') then
 	    (lookup e1_str)
@@ -474,6 +473,17 @@ let translate (globals, functions) =
 	(L.build_struct_gep k 2 "value_typ" builder) builder);
 	(* Set value *)
 	let value = L.build_struct_gep k (sidx_of_typ t) "value" builder in
+	let e' =
+	  if ((sidx_of_typ t) > 7) then (
+	  (* Cast ptr to RHV to void ptr to store in Object *)
+	  let e'' = L.build_alloca (L.type_of e') "arrinobj" builder in
+	  ignore(L.build_store e' e'' builder);
+	    e''
+	  )
+	  else (
+	    e'
+	  )
+	in
 	ignore(L.build_store e' value builder);
 	(* Add the key value pair to a stack *)
 	ignore(Stack.push (sidx_of_typ t, n, k) kv_stack);
@@ -504,8 +514,7 @@ let translate (globals, functions) =
 	ignore(set_next parent);
 	(* Connect each key in this object *)
 	let build_obj _ =
-	  let (t, _, k) = Stack.pop kv_stack in
-	  ignore(L.build_struct_gep k t "value" builder);
+	  let (_, _, k) = Stack.pop kv_stack in
 	  ignore(set_next k);
 	in
 	(* Build out all of the key values within this object *)
@@ -548,7 +557,6 @@ let translate (globals, functions) =
 	  let v_e2' = L.build_call obj_getkey_func
 		      [| e2' ; t_e1' |] "obj_getkey" builder in
 	  (* Cast void* RHV to ptr of LHV type *)
-	  ignore(L.build_alloca (L.type_of e1') "pcst" builder);
 	  let v_e2' = L.build_bitcast v_e2' (L.type_of e1') "cst" builder in
 	  let v_e2' = L.build_load v_e2' "loadcst" builder in
 	  ignore(L.build_store v_e2' e1' builder);
@@ -628,7 +636,6 @@ let translate (globals, functions) =
 	  let v_e2' = L.build_call obj_getkey_func
 		      [| e2' ; t_e1' |] "obj_getkey" builder in
 	  (* Cast void* RHV to ptr of LHV type *)
-	  ignore(L.build_alloca (L.type_of e1') "pcst" builder);
 	  let v_e2' = L.build_bitcast v_e2' (L.type_of e1') "cst" builder in
 	  let v_e2' = L.build_load v_e2' "loadcst" builder in
 	  ignore(L.build_store v_e2' e1' builder);
@@ -727,10 +734,10 @@ let translate (globals, functions) =
 	    | "string" -> 6
 	    | "bool"   -> 7
 	    (* Arrays *)
-	    | "%arr_int_t"  -> 8
-	    | "%arr_flt_t"  -> 9
-	    | "%arr_str_t"  -> 10
-	    | "%arr_bool_t" -> 11
+	    | "int array"    -> 8
+	    | "float array"  -> 9
+	    | "string array" -> 10
+	    | "bool array"   -> 11
 	    | _        -> raise (Failure ("Invalid object function actual parameter"))
 	  in
 	  (* Get type of formal *)
