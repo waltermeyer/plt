@@ -1,0 +1,29 @@
+int gcd(int x, int y){
+	while (x != y) {
+		if ( x> y){
+			x = x-y;
+		}
+		else{
+			y = y-x;
+		}
+	}
+	return x;
+}
+	
+
+
+int main(){
+	int a = gcd(21, 77);
+	int b = gcd(22, 110);
+	int c = gcd(72, 880);
+	print_i(a);
+	print_i(b);
+	print_i(c);
+}	
+
+/*
+****TEST****
+7
+22
+8
+*/
