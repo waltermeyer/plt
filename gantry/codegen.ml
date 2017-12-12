@@ -71,10 +71,10 @@ let translate (globals, functions) =
                     str_t; (* string *)
                     b_t;  (* bool *)
 		    (* Arrays *)
-		    L.pointer_type arr_int_t;
-		    L.pointer_type arr_flt_t;
-		    L.pointer_type arr_str_t;
-		    L.pointer_type arr_bool_t;
+		    L.pointer_type (L.pointer_type arr_int_t);
+		    L.pointer_type (L.pointer_type arr_flt_t);
+		    L.pointer_type (L.pointer_type arr_str_t);
+		    L.pointer_type (L.pointer_type arr_bool_t);
                   |] in
                   ignore (L.struct_set_body obj_t body false);
     let arr_obj_t = L.named_struct_type context "arr_obj_t" in
@@ -434,6 +434,17 @@ let translate (globals, functions) =
 	(L.build_struct_gep k 2 "value_typ" builder) builder);
 	(* Set value *)
 	let value = L.build_struct_gep k (sidx_of_typ t) "value" builder in
+	let e' =
+	  if ((sidx_of_typ t) > 7) then (
+	  (* Cast ptr to RHV to void ptr to store in Object *)
+	  let e'' = L.build_alloca (L.type_of e') "arrinobj" builder in
+	  ignore(L.build_store e' e'' builder);
+	    e''
+	  )
+	  else (
+	    e'
+	  )
+	in
 	ignore(L.build_store e' value builder);
 	(* Add the key value pair to a stack *)
 	ignore(Stack.push (sidx_of_typ t, n, k) kv_stack);
