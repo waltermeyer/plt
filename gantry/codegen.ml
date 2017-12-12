@@ -32,7 +32,7 @@ let translate (globals, functions) =
                     i32_t; (* arr type *)
                     L.pointer_type i32_t;
 		   |] in
-                  ignore (L.struct_set_body arr_int_t body true);
+                  ignore (L.struct_set_body arr_int_t body false);
     let arr_flt_t = L.named_struct_type context "arr_flt_t" in
                 let body =
                   [|
@@ -40,7 +40,7 @@ let translate (globals, functions) =
                     i32_t; (* arr type *)
                     L.pointer_type flt_t;
 		   |] in
-                  ignore (L.struct_set_body arr_flt_t body true);
+                  ignore (L.struct_set_body arr_flt_t body false);
     let arr_str_t = L.named_struct_type context "arr_str_t" in
                 let body =
                   [|
@@ -48,7 +48,7 @@ let translate (globals, functions) =
                     i32_t; (* arr type *)
                     L.pointer_type str_t;
 		   |] in
-                  ignore (L.struct_set_body arr_str_t body true);
+                  ignore (L.struct_set_body arr_str_t body false);
     let arr_bool_t = L.named_struct_type context "arr_bool_t" in
                 let body =
                   [|
@@ -56,7 +56,7 @@ let translate (globals, functions) =
                     i32_t; (* arr type *)
                     L.pointer_type b_t;
 		   |] in
-                  ignore (L.struct_set_body arr_bool_t body true);
+                  ignore (L.struct_set_body arr_bool_t body false);
     (* Object Type *)
     let obj_t = L.named_struct_type context "obj" in
                 let body =
@@ -76,7 +76,7 @@ let translate (globals, functions) =
 		    L.pointer_type arr_str_t;
 		    L.pointer_type arr_bool_t;
                   |] in
-                  ignore (L.struct_set_body obj_t body true);
+                  ignore (L.struct_set_body obj_t body false);
     let arr_obj_t = L.named_struct_type context "arr_obj_t" in
                 let body =
                   [|
@@ -84,7 +84,7 @@ let translate (globals, functions) =
                     i32_t; (* arr type *)
                     L.pointer_type (L.pointer_type obj_t);
 		   |] in
-                  ignore (L.struct_set_body arr_obj_t body true);
+                  ignore (L.struct_set_body arr_obj_t body false);
 
     (* AST to LLVM types *)
     let ltype_of_typ = function

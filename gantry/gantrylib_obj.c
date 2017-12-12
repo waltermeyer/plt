@@ -513,10 +513,10 @@ void *obj_getkey(obj *o, int t) {
     case 5: return (void *)o->o;
     case 6: return (void *)&o->s;
     case 7: return (void *)&o->b;
-    case 8: return (void **)&o->i_a;
-    case 9: return (void **)&o->f_a;
-    case 10: return (void **)&o->s_a;
-    case 11: return (void **)&o->b_a;
+    case 8: return (void *)&o->i_a;
+    case 9: return (void *)&o->f_a;
+    case 10: return (void *)&o->s_a;
+    case 11: return (void *)&o->b_a;
   };
   return NULL;
 }
