@@ -15,8 +15,11 @@ int main() {
 	string s = arr_stringify(c);
 	print_s(s);
   	object o1 =  {|
-		 string Image : "alpine:latest", int x : 3
+		 string Image : "alpine:latest", int x : 3, int array z : [1,2,3]
 	      |};
+
+	int array test = o1.z;
+	print_i(test[1]);
 
 	int array Cmd = [1,2];
 	string array arr2 = ["foo", "barr", "zoo"];
@@ -26,7 +29,7 @@ int main() {
 	object o3 = obj_addkey(o2, "key1", 10, arr2);
 	object o4 = obj_addkey(o3, "key3", 9, arr3);
 	object o5 = obj_addkey(o4, "key4", 11, arr4);
-	string s = obj_stringify(o2);
+	string s = obj_stringify(o1);
 	print_s(s);
   	//object o =  {|
 	//	 string Image : "alpine:latest", int array Cmd : [1, 2], int x : 3
@@ -43,5 +46,6 @@ int main() {
 [ 1.000000 , 3.140000 , 4.000000 , 9.880000 ]
 [ true , false ]
 [ "this" , "is" , "a" , "string" , "array" , "yay" ]
-{ "key4" : [ true ] , "key3" : [ 1.220000 , 3.000000 , 4.200000 , 5.300000 ] , "key1" : [ "foo" , "barr" , "zoo" ] , "foo" : [ 1 , 2 ] , "x" : 3 , "Image" : "alpine:latest" }
+2
+{ "key4" : [ true ] , "key3" : [ 1.220000 , 3.000000 , 4.200000 , 5.300000 ] , "key1" : [ "foo" , "barr" , "zoo" ] , "foo" : [ 1 , 2 ] , "z" : [ 1 , 2 , 3 ] , "x" : 3 , "Image" : "alpine:latest" }
 */
