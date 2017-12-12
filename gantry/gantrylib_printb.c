@@ -1,3 +1,8 @@
+/*
+ * Gantry: Print Boolean Function
+ * Author: Taimur Samee
+ */
+
 #include <stdio.h>
 #include <stdbool.h>
 

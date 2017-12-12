@@ -1,4 +1,8 @@
-(* Semantic checking for the Gantry compiler *)
+(*
+ * Gantry: Semantic AST
+ * Author: Audrey Copeland
+ * Contributors: Walter Meyer, Taimur Samee
+ *)
 
 open Ast
 

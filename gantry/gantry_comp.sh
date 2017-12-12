@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Author: Walter Meyer
 # A wrapper script for compiling Gantry programs
 
 if [ $# -ne 1 ] 

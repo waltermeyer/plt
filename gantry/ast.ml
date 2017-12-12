@@ -1,4 +1,7 @@
-(* Abstract Syntax Tree *)
+(*
+ * Gantry: Abstract Syntax Tree
+ * Author: Walter Meyer
+ *)
 
 type op =
   | Add | Sub | Mult | Div

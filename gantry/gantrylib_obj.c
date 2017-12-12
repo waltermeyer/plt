@@ -1,3 +1,9 @@
+/*
+ * Gantry: Object and Array Library Module
+ * Author (Object Runtime Functions): Walter Meyer 
+ * Author (Stringify Functions): Audrey Copeland
+ */
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>

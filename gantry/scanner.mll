@@ -1,4 +1,7 @@
-(* Ocamllex scanner for Gantry *)
+(*
+ * Gantry: Scanner
+ * Author: Walter Meyer
+ *)
 
 { open Parser }
 

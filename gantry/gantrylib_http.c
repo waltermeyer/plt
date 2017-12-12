@@ -1,3 +1,8 @@
+/*
+ * Gantry: HTTP Library Module
+ * Author: Taimur Samee
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

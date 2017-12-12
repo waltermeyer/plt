@@ -1,3 +1,8 @@
+/*
+ * Gantry: nap Library Module
+ * Author: Taimur Samee
+ */
+
 // Wrapper function for sleep() in C
 #include<unistd.h>
 

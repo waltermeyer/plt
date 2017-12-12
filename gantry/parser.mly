@@ -1,4 +1,7 @@
-/* Ocamlyacc parser for Gantry */
+/*
+ * Ocamlyacc parser for Gantry 
+ * Author: Walter Meyer
+ */
 
 %{
 open Ast

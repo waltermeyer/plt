@@ -1,3 +1,9 @@
+(*
+ * Gantry: Code Generation
+ * Author: Walter Meyer
+ * Contributors: Audrey Copeland, Taimur Samee
+ *)
+
 module L = Llvm
 module A = Ast
 

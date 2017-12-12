@@ -1,3 +1,8 @@
+/*
+ * Author: Audrey Copeland
+ * Contributor: Taimur Samee
+ */
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

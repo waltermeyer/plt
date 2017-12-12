@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Testing script taken from MicroC 
+# with minor changes for automation by
+# Audrey Copeland and Walter Meyer
+
 # Regression testing script for Gantry
 # Step through a list of files
 #  Compile, run, and check the output of each expected-to-work test
