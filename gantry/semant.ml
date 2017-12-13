@@ -93,8 +93,6 @@ let check (globals, functions) =
      { type_spec = Int; f_id = "length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "slice"
      { type_spec = String; f_id = "slice"; f_params = [(String, "x"); (Int, "y"); (Int, "z")] ; f_statements = [] }
-     (StringMap.add "string_concat"
-     { type_spec = String; f_id = "string_concat"; f_params = [(String, "x"); (String, "y")] ; f_statements = [] }
      (StringMap.add "stringcmp"
      { type_spec = Int; f_id = "stringcmp"; f_params = [(String, "x"); (String, "y")] ; f_statements = [] }
      (StringMap.add "stringeq"
@@ -116,7 +114,7 @@ let check (globals, functions) =
      (StringMap.add "obj_addkey"
      { type_spec = Object; f_id = "obj_addkey"; f_params = [(Object, "x"); (String, "y"); (Int, "z"); (String, "a")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
-     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] }))))))))))))))))))
+     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] })))))))))))))))))
   in
 
   (* Add built in functions to list of function declaration list *)
