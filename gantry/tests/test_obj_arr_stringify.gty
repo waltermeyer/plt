@@ -1,0 +1,12 @@
+int main(){
+	object array x = [ {| int x: 4, int y: 10, int z: 15 |}, {|string s: "foo", string foo:"bar"|} , {| float z:2.00 |}, {|bool a: true |}];
+	string s = arr_stringify(x);
+	print_s(s);
+	return 0;
+}
+
+
+/*
+****TEST****
+[ { "z" : 15 , "y" : 10 , "x" : 4 },{ "foo" : "bar" , "s" : "foo" },{ "z" : 2.000000 },{ "a" : true } ]
+*/

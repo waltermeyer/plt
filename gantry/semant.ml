@@ -82,13 +82,6 @@ let check (globals, functions) =
      { type_spec = Null; f_id = "print_b"; f_params = [(Bool, "x")] ; f_statements = [] }
      (StringMap.add "print_k"
      { type_spec = Null; f_id = "print_k"; f_params = [(Object, "x")] ; f_statements = [] }
-     (* TODO : Decide whether we are implementing in our language or in codegen *)
-     (*(StringMap.add "arrify"
-     { type_spec = Array; f_id = "arrify"; f_params = [(String, "x")] ; f_statements = [] }
-     (StringMap.add "objectify"
-     { type_spec = Object; f_id = "objectify"; f_params = [(String, "x")] ; f_statements = [] } 
-     (StringMap.add "jsonify"
-     { type_spec = String; f_id = "jsonify"; f_params = [(Object, "x")] ; f_statements = [] }*) 
      (StringMap.add "length"
      { type_spec = Int; f_id = "length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "slice"
@@ -143,8 +136,6 @@ let check (globals, functions) =
  
      (* Add globals and function parameters to symbol table *)
      List.iter (fun (a, b) -> Hashtbl.add symbols b a) (globals @ func.f_params);
-
-     (* TODO: if function parameter is an object, the keys of said object need to be added to symbol table *)
 
      let type_of_identifier s = 
 	 try Hashtbl.find symbols s
@@ -269,7 +260,6 @@ let check (globals, functions) =
       | If(p, s1, s2) -> check_bool_expression p; statement s1; statement s2;
       | For(e1, e2, e3, st) -> ignore (expression e1); check_bool_expression e2; ignore(expression e3); statement st
       | While(p, s) -> check_bool_expression p; statement s
-      (* Do Break and Continue need to be semantically checked? *)
      in 
 
      statement (Block func.f_statements)

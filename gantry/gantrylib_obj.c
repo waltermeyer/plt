@@ -9,6 +9,26 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+// The Object Struct
+typedef struct obj {
+  // metadata
+  struct obj *next; // next
+  char *k;    // key name
+  int  v_typ; // value type
+
+  // values
+  int i;     // int
+  double f;   // float
+  struct obj *o;   // object
+  char *s;   // string
+  bool b; // bool
+  struct arr_int *i_a;
+  struct arr_flt *f_a;
+  struct arr_str *s_a;
+  struct arr_bool *b_a; 
+} obj;
+
 // The arr int
 typedef struct arr_int {
   int len;
@@ -31,6 +51,13 @@ typedef struct arr_str {
 } arr_str;
 
 
+typedef struct arr_obj {
+  int len;
+  int typ;
+  obj **o_a;
+} arr_obj;
+
+
 // The arr bool
 typedef struct arr_bool {
   int len;
@@ -38,26 +65,7 @@ typedef struct arr_bool {
   bool *b_a;
 } arr_bool;
 
-
-// The Object Struct
-typedef struct obj {
-  // metadata
-  struct obj *next; // next
-  char *k;    // key name
-  int  v_typ; // value type
-
-  // values
-  int i;     // int
-  double f;   // float
-  struct obj *o;   // object
-  char *s;   // string
-  bool b; // bool
-  struct arr_int *i_a;
-  struct arr_flt *f_a;
-  struct arr_str *s_a;
-  struct arr_bool *b_a; 
-} obj;
-
+char *obj_stringify(obj *);
 
 // Object Key Printing
 int print_k(obj *o) {
@@ -122,6 +130,7 @@ char *arr_stringify(void *arr){
 	struct arr_flt *arr_f = *(arr_flt **)(arr);
 	struct arr_str *arr_s = *(arr_str **)(arr);
 	struct arr_bool *arr_b = *(arr_bool **)(arr);
+	struct arr_obj *arr_o = *(arr_obj **)(arr);
 
 	int len = arr_i->len;
 	int typ = arr_i->typ;
@@ -143,7 +152,8 @@ char *arr_stringify(void *arr){
 	cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
  	memcpy(cpy_buff, "[ ", cpy_len+1);	
 	buff = fill_buff(buff, cpy_buff);
-
+	
+	obj *o;
 	int i;
 	switch(typ){
 		case 3:
@@ -169,6 +179,17 @@ char *arr_stringify(void *arr){
 					buff = fill_buff(buff, " , ");
 				}
 				//printf("%s \n " , buff);
+			}
+			break;
+    		case 5: 
+			for (i=0; i<len; i++){
+				//cpy_buff = xrealloc(cpy_buff, sizeof(char));
+				o = arr_o->o_a[i];
+				cpy_buff = obj_stringify(o);
+				buff=fill_buff(buff,cpy_buff);
+				if (i!=len-1){
+					buff = fill_buff(buff, ",");
+				}
 			}
 			break;
       		case 6: 
