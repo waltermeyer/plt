@@ -15,5 +15,5 @@ program=${1::-4}
                 > $program.ll && llc $program.ll \
 		> $program.s && gcc -o $program $program.s \
 		  gantrylib_string.o gantrylib_http.o gantrylib_obj.o \
-		  -L/usr/lib/x86_64-linux-gnu -lcurl
+		  gantrylib_nap.o -L/usr/lib/x86_64-linux-gnu -lcurl
 
