@@ -95,11 +95,9 @@ Check() {
     echo "###### Testing $basename" 1>&2
 
     generatedfiles=""
-    # TODO : Replace printbig.o with our string print
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.s ${basename}.exe ${basename}.out" &&
     
     Run "$GANTRY" "<" "$1" ">" "${basename}.ll" &&
-    #RUN "$LLI" "${basename}.ll" " " > "{basename}.out" &&
     Run "$LLC" "${basename}.ll" ">" "${basename}.s" &&
     Run "$CC" "-o" "${basename}.exe" "${basename}.s" \
 	  "gantrylib_http.o" "gantrylib_string.o" \
@@ -140,16 +138,6 @@ CheckFail() {
     RunFail "$GANTRY" "<" $1 "2>" "${basename}.err" ">>" $globallog &&
     Compare ${basename}.err ${reffile}.err ${basename}.diff
 
-    #RunFail "$GANTRY" "<" "$1" "2>" "${basename}.ll" &&
-    ##RUN "$LLI" "${basename}.ll" " " > "{basename}.out" &&
-    #RunFail "$LLC" "${basename}.ll" ">" "${basename}.s" &&
-    #RunFail "$CC" "-o" "${basename}.exe" "${basename}.s" \
-    #      "gantrylib_http.o" "gantrylib_string.o" \
-    #      "gantrylib_obj.o" "$LDFLAGS" &&
-    #RunFail "./${basename}.exe" "2>" "${basename}.err" &&
-    #Compare ${basename}.err ${reffile}.err ${basename}.diff
-    # Report the status and clean up the generated files
-
     if [ $error -eq 0 ] ; then
 	if [ $keep -eq 0 ] ; then
 	    rm -f $generatedfiles
@@ -183,14 +171,6 @@ LLIFail() {
 
 which "$LLI" >> $globallog || LLIFail
 
-# TODO: Replace printbig with our string print
-#if [ ! -f printbig.o ]
-#then
-#    echo "Could not find printbig.o"
-#    echo "Try \"make printbig.o\""
-#    exit 1
-#fi
-
 if [ $# -ge 1 ]
 then
     files=$@
@@ -220,7 +200,6 @@ do
 	    Check $file 2>> $globallog
 	    ;;
 	*fail_*)
-	    #echo "Fail tests disabled"
 	    CheckFail $file 2>> $globallog
 	    ;;
 	*)
