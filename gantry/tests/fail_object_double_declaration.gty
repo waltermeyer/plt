@@ -1,0 +1,13 @@
+int main(){
+	/* This should be fine */
+	int y = 2;
+	int y = 4;
+	/* This should not work */
+	object x = {| int y : 2 |};
+	object x = {| int z : 3 |};
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("Object x declared twice")
+*/
