@@ -122,6 +122,10 @@ let translate (globals, functions) =
     let printb_t = L.var_arg_function_type i32_t [| b_t |] in
     let printb_func = L.declare_function "print_b" printb_t the_module in
 
+    (* Get user input *)
+    let get_string_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
+    let get_string = L.declare_function "get_string" get_string_t the_module in
+
     (* String Concatenation *)
     let string_concat_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
     let string_concat = L.declare_function "string_concat" string_concat_t the_module in
@@ -669,6 +673,9 @@ let translate (globals, functions) =
       | A.FunExp("print_k", [e]) ->
 	L.build_call printk_func [| (expr builder e) |]
 	  "print_k" builder
+      | A.FunExp("get_string", [e]) ->
+	  L.build_call get_string [|(expr builder e)|]
+	  "get_string" builder
       | A.FunExp("httpget", [e]) ->
         L.build_call httpget_func [| (expr builder e) |]
           "httpget" builder

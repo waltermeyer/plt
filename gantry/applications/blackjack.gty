@@ -1,0 +1,56 @@
+//
+//int double(){
+//}
+//
+//int stand(){
+//}	
+//
+//int split(){
+//}
+//
+//int surrender(){
+//}
+//
+
+
+int match_card(string value){
+	if (value == "1"){
+		val = 1;
+	}
+	if (value == "2"){
+		val = 2;
+	}
+	if (value == "3"){
+		val = 3;
+	}
+	return val;
+
+
+int main(){
+	string url = "https://deckofcardsapi.com/api/deck/";
+	string new_deck = httpget(url ^ "new/");
+	print_s(new_deck);
+	int len = string_length(new_deck);	
+	print_i(len);
+	string deck_id = slice(new_deck, 66, len-2);
+	print_s(deck_id);
+	string draw_url = url ^ deck_id;
+	string new_card_url = draw_url ^ "/draw/?count=1";
+	string new_card = httpget(new_card_url);
+	print_s(new_card);
+	int len = string_length(new_card);
+	for (int i = 0; i<len; i++){
+		int x = i+4;
+		string temp = slice(new_card, i, x);
+		if (temp == "code"){
+			print_s("Found a match");
+			print_s(temp);
+			print_i(x);
+			int index = x + 4;
+			string value = slice(new_card, index, index + 1);
+			string suite = slice(new_card, index + 1, index + 2);
+			print_s(value);
+			print_s(suite);
+		}
+	}
+}	
