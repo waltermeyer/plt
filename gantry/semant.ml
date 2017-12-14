@@ -91,6 +91,10 @@ let check (globals, functions) =
      { type_spec = Null; f_id = "print_b"; f_params = [(Bool, "x")] ; f_statements = [] }
      (StringMap.add "print_k"
      { type_spec = Null; f_id = "print_k"; f_params = [(Object, "x")] ; f_statements = [] }
+     (StringMap.add "get_string"
+     { type_spec = String; f_id = "get_string"; f_params = [(String, "x")] ; f_statements = [] }
+     (StringMap.add "stoint"
+     { type_spec = Int; f_id = "length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "length"
      { type_spec = Int; f_id = "length"; f_params = [(String, "x")] ; f_statements = [] }
      (StringMap.add "slice"
@@ -114,7 +118,7 @@ let check (globals, functions) =
      (StringMap.add "obj_addkey"
      { type_spec = Object; f_id = "obj_addkey"; f_params = [(Object, "x"); (String, "y"); (Int, "z"); (String, "a")] ; f_statements = [] } 
      (StringMap.singleton "httppost" 
-     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] }))))))))))))))))
+     { type_spec = String; f_id = "httppost"; f_params = [(String, "x");(String, "x")] ; f_statements = [] }))))))))))))))))))
   in
 
   (* Add built in functions to list of function declaration list *)

@@ -1,6 +1,7 @@
 (*
  * Gantry: Abstract Syntax Tree
  * Author: Walter Meyer
+ * Contributor: Audrey Copeland
  *)
 
 type op =

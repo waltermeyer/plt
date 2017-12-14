@@ -122,6 +122,13 @@ let translate (globals, functions) =
     let printb_t = L.var_arg_function_type i32_t [| b_t |] in
     let printb_func = L.declare_function "print_b" printb_t the_module in
 
+    (* Get user input *)
+    let get_string_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
+    let get_string = L.declare_function "get_string" get_string_t the_module in
+
+    let stoint_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+    let stoint = L.declare_function "stoint" stoint_t the_module in 
+
     (* String Concatenation *)
     let string_concat_t = L.var_arg_function_type str_t [| L.pointer_type i8_t |] in
     let string_concat = L.declare_function "string_concat" string_concat_t the_module in
@@ -669,6 +676,12 @@ let translate (globals, functions) =
       | A.FunExp("print_k", [e]) ->
 	L.build_call printk_func [| (expr builder e) |]
 	  "print_k" builder
+      | A.FunExp("get_string", [e]) ->
+	  L.build_call get_string [|(expr builder e)|]
+	  "get_string" builder
+      | A.FunExp("stoint", [e]) ->
+	  L.build_call stoint [|(expr builder e)|]
+	  "stoint" builder
       | A.FunExp("httpget", [e]) ->
         L.build_call httpget_func [| (expr builder e) |]
           "httpget" builder
@@ -813,12 +826,12 @@ let translate (globals, functions) =
         let pred_builder = L.builder_at_end context pred_bb in
         let bool_val = expr pred_builder predicate in
 	let typ = L.string_of_lltype (L.type_of bool_val) in
+
 	let bv = 
 	if  ((String.compare typ "i8") == 0) then
 		(L.build_intcast bool_val i1_t "tmp" builder)
 	else
 		bool_val in
-
 
         let merge_bb = L.append_block context "merge" the_function in
         ignore (L.build_cond_br bv body_bb merge_bb pred_builder);

@@ -1,0 +1,5 @@
+int main(){
+	string y = "Please enter a string : ";
+	string s = get_string(y);
+	return 0;
+}
