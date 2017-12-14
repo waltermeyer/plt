@@ -1,0 +1,16 @@
+int main(){
+	string x = "3";
+	int y = stoint(x);
+	print_i(y);
+
+	x = "412";
+	y = stoint(x);
+	print_i(y);
+}
+
+
+/*
+****TEST****
+3
+412
+*/

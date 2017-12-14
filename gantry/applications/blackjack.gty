@@ -1,56 +1,102 @@
-//
-//int double(){
-//}
-//
-//int stand(){
-//}	
-//
-//int split(){
-//}
-//
-//int surrender(){
-//}
-//
-
+/* Author : Audrey
+ * A game of Black Jack (with some rule modifications):
+ * Aces are 1 point (not 1 or 11).
+ * There is no special blackjack hand (comb. of face card and 11).
+ * No betting.
+ * Requires two players, or you can play against yourself.
+ * Some extra magic! If the api call fails, player will draw a 0.
+ */
 
 int match_card(string value){
-	if (value == "1"){
+	int val = 0;
+	if (value == "A"){
 		val = 1;
 	}
-	if (value == "2"){
-		val = 2;
+	if (value == "J" || value == "Q" || value == "K") {
+		val = 10;
 	}
-	if (value == "3"){
-		val = 3;
+	else {
+		val = stoint(value);
 	}
 	return val;
+}
 
-
-int main(){
-	string url = "https://deckofcardsapi.com/api/deck/";
-	string new_deck = httpget(url ^ "new/");
-	print_s(new_deck);
-	int len = string_length(new_deck);	
-	print_i(len);
-	string deck_id = slice(new_deck, 66, len-2);
-	print_s(deck_id);
-	string draw_url = url ^ deck_id;
-	string new_card_url = draw_url ^ "/draw/?count=1";
-	string new_card = httpget(new_card_url);
-	print_s(new_card);
+int hit(string draw_url){
+	string new_card = httpget(draw_url);
 	int len = string_length(new_card);
+	int val = 0;
 	for (int i = 0; i<len; i++){
 		int x = i+4;
 		string temp = slice(new_card, i, x);
 		if (temp == "code"){
-			print_s("Found a match");
-			print_s(temp);
-			print_i(x);
 			int index = x + 4;
 			string value = slice(new_card, index, index + 1);
 			string suite = slice(new_card, index + 1, index + 2);
+			val = match_card(value);
+			print_s("The card drawn was a : ");
 			print_s(value);
-			print_s(suite);
+			print_s("With a value of : ");
+			print_i(val);
 		}
 	}
-}	
+	return val;
+}
+
+int turn(string draw_url, int total){
+	int new = 0;
+	int t = total;
+	print_s("Current score is");
+	print_i(t);
+	string req = "Enter 1 to draw, anything else to stay ";
+	string res = get_string(req);
+	if (res == "1"){	
+		new = hit(draw_url);
+	}
+	t = t + new;
+	return t;
+}
+	
+
+int main(){
+	string url = "https://deckofcardsapi.com/api/deck/";
+	string new_deck = httpget(url ^ "new/shuffle/");
+	int len = string_length(new_deck);	
+	string deck_id = slice(new_deck, len-14, len-2);
+	print_s(deck_id);
+	string draw_url = url ^ deck_id ^ "/draw/?count=1";
+	int p1_total = 0;
+	int p2_total = 0;
+	int new = 0;
+	int done = 0;
+	while (done  != 1){
+		print_s("===Player 1===");
+		p1_total = turn(draw_url, p1_total);
+		print_s("===Player 2===");	
+		p2_total = turn(draw_url, p2_total);
+		if (p1_total > 22 || p2_total > 22){
+			done = 1;
+		}
+	}
+	print_s("+++++ GAME OVER +++++");
+	if (p1_total > 21){
+		print_s("PLAYER 1 LOST (went over 21)");
+		print_s("PLAYER 2 WON");
+	}
+	if (p1_total == 21) {
+		print_s("PLAYER 1 WON (hit 21)");
+		print_s("PLAYER 2 LOST");
+	}
+	if (p2_total > 21){
+		print_s("PLAYER 2 LOST (went over 21)");
+		print_s("PLAYER 1 WON");
+	}
+	if (p2_total == 21) {
+		print_s("PLAYER 2 WON (hit 21)");
+		print_s("PLAYER 1 LOST");
+	}
+	print_s("Player 1 total");
+	print_i(p1_total);
+	print_s("Player 2 total");
+	print_i(p2_total);
+	return 0;
+}

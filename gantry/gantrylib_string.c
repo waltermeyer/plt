@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <iostream>
-#include <sstream>
 
 char *get_string(char* req) {
 	char s[100];
@@ -21,7 +19,7 @@ char *get_string(char* req) {
 }
 
 int stoint(char *s){
-	int ret = stoi(s);
+	int ret = atoi(s);
 	return ret;
 }
 
@@ -140,8 +138,8 @@ int main(){
 	test_slice();
 	char *s = get_string("Please enter input : ");
 	printf("%s\n", s);
-	char *s = "4";
-	int i = stoint(s);
+	char *si = "4";
+	int i = stoint(si);
 	printf("%d\n", i);
 	return 0;
 }
