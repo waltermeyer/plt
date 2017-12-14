@@ -42,20 +42,11 @@ let check (globals, functions) =
      | (_, _)      -> if lvaluet == rvaluet then lvaluet else raise err
   in
 
-			
+
   let add_local (t, n) =
     ignore(Hashtbl.add symbols n t);
   in
 
-  let check_decl lt lv err = 
-     if lt == Object then 
-	(if (Hashtbl.mem symbols lv) then (raise err)
-	else 
-	  add_local(lt, lv))
-     else 
-	add_local(lt, lv);
-  in
-  
   (**** Checking Global Variables ****)
   List.iter (check_not_null (fun n -> "illegal null global " ^ n)) globals;
 
@@ -164,6 +155,7 @@ let check (globals, functions) =
 	  | Lt | Leq | Gt | Geq when t1 = Int && t2 = Int -> Bool
           | Lt | Leq | Gt | Geq when t2 = Float && t2 = Float -> Bool
           | And | Or when t1 = Bool && t2 = Bool -> Bool
+          (*| And | Or when (t1 = Bool || t1 = Int || t1 = Float) && t2 = Bool -> Bool*)
 	  | Conc when t1 = String && t2 = String -> String 
           | _ -> raise (Failure ("illegal binary operator " ^ string_of_typ t1 ^ " " ^ string_of_op op ^ " "     ^ string_of_typ t2 ^ " in " ^ string_of_expression e))
  	)
@@ -180,7 +172,7 @@ let check (globals, functions) =
 		check_assign lt rt (Failure("illegal assignment " ^ string_of_typ lt ^ 
 		" = " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
       	| AssignDecl (t, n, e) as ex ->
-		check_decl t n (Failure("Object " ^ n ^ " declared twice"));
+		add_local (t, n);
 		let lt = type_of_identifier n
 		and rt = expression e in 
 		if (String.contains n '.') then
