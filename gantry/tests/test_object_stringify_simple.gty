@@ -1,0 +1,14 @@
+int main(){
+  	object o =  {|
+		 string name: "Joe", 
+		 int age: 3,
+		 string array pets : ["Cat", "Dog", "Pig"]
+	      |};
+	string to_string = obj_stringify(o);
+	print_s(to_string);
+}
+
+/*
+****TEST****
+{ "pets" : [ "Cat" , "Dog" , "Pig" ] , "age" : 3 , "name" : "Joe" }
+*/

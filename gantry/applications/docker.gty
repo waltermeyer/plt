@@ -14,14 +14,14 @@
 
 string docker_host;
 
-int watch_logs(int polls, string cid) {
+// Get one line from logs
+int watch_logs(int polls, int wait, string cid, string tail) {
   // Poll stdout of running container
   int i = 0;
   while (i < polls) {
-    print_s(docker_host ^ "/containers/" ^ cid ^ "/logs?stdout=true&timestamps=true");
-    string out = httpget(docker_host ^ "/containers/" ^ cid ^ "/logs?stdout=1");
+    string out = httpget(docker_host ^ "/containers/" ^ cid ^ "/logs?stdout=1&tail=" ^ tail);
     print_s(out);
-    nap(3);
+    nap(wait);
     i++;
   }
 }
@@ -36,7 +36,7 @@ int main() {
 	string Image : "ubuntu:14.04",
 	bool Tty : true,
 	string array Cmd :
-	[ "bash", "-c", "bash -c \\\"while true; do echo Hello World && uname -a; sleep 3; done\\\"" ]
+	[ "bash", "-c", "bash -c \\\"while true; do echo Hello World && uname -a && date; sleep 3; done\\\"" ]
     |};
 
   // Download Image
@@ -47,8 +47,8 @@ int main() {
 
   // Create and Start Container from Image
   string exec_json = obj_stringify(exec);
-  print_s("JSON Response:");
   string container_id = httppost(docker_host ^ "/containers/create", exec_json);
+  print_s("JSON Response:");
   print_s(container_id);
 
   // Grab sliced CID
@@ -57,7 +57,7 @@ int main() {
   // Start the container
   print_s("\n *** Starting Container: [" ^ cid ^ "] ***\n");
   httppost(docker_host ^ "/containers/" ^ cid ^ "/start", "");
-  watch_logs(5, cid);
-
+  print_s("\n *** Container Logs: [" ^ cid ^ "] ***\n");
+  watch_logs(5, 3, cid, "3");
 }
 
