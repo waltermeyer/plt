@@ -293,74 +293,64 @@ let translate (globals, functions) =
         let e1' = expr builder e1
         and e2' = expr builder e2 in
 	let typ = L.string_of_lltype (L.type_of e1') in
-	(match typ with 
+	(match typ with
            "i32" -> (match op with
-             A.Add  -> L.build_add
-           | A.Sub  -> L.build_sub
-           | A.Mult -> L.build_mul
-           | A.Div  -> L.build_sdiv
-           | A.And  -> L.build_and
-           | A.Or   -> L.build_or
-	   | A.Eq   -> L.build_icmp L.Icmp.Eq
-	   | A.Neq  -> L.build_icmp L.Icmp.Ne
-           | A.Lt   -> L.build_icmp L.Icmp.Slt
-           | A.Leq  -> L.build_icmp L.Icmp.Sle
-           | A.Gt   -> L.build_icmp L.Icmp.Sgt
-           | A.Geq  -> L.build_icmp L.Icmp.Sge
+             A.Add  -> L.build_add e1' e2' "tmp" builder
+           | A.Sub  -> L.build_sub e1' e2' "tmp" builder
+           | A.Mult -> L.build_mul e1' e2' "tmp" builder
+           | A.Div  -> L.build_sdiv e1' e2' "tmp" builder
+	   | A.Eq   -> L.build_intcast (L.build_icmp L.Icmp.Eq e1' e2' "tmp" builder)
+		       i8_t "tmp" builder
+	   | A.Neq   -> L.build_intcast (L.build_icmp L.Icmp.Ne e1' e2' "tmp" builder)
+		       i8_t "tmp" builder
+	   | A.Lt   -> L.build_intcast (L.build_icmp L.Icmp.Slt e1' e2' "tmp" builder)
+		       i8_t "tmp" builder
+	   | A.Leq   -> L.build_intcast (L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder)
+		       i8_t "tmp" builder
+	   | A.Gt   -> L.build_intcast (L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder)
+		       i8_t "tmp" builder
+	   | A.Geq   -> L.build_intcast (L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder)
+		       i8_t "tmp" builder
 	   | _      -> raise (Failure ("Invalid integer binary operation"))
-	   ) e1' e2' "tmp" builder
+	   )
          | "double" -> (match op with
-             A.Add  -> L.build_fadd
-           | A.Sub  -> L.build_fsub
-           | A.Mult -> L.build_fmul
-           | A.Div  -> L.build_fdiv
-           | A.Eq   -> L.build_fcmp L.Fcmp.Oeq
-           | A.Neq  -> L.build_fcmp L.Fcmp.One
-           | A.Lt   -> L.build_fcmp L.Fcmp.Ult
-           | A.Leq  -> L.build_fcmp L.Fcmp.Ole
-           | A.Gt   -> L.build_fcmp L.Fcmp.Ogt
-           | A.Geq  -> L.build_fcmp L.Fcmp.Oge
+             A.Add  -> L.build_fadd e1' e2' "tmp" builder
+           | A.Sub  -> L.build_fsub e1' e2' "tmp" builder
+           | A.Mult -> L.build_fmul e1' e2' "tmp" builder
+           | A.Div  -> L.build_fdiv e1' e2' "tmp" builder
+	   | A.Eq   -> L.build_intcast (L.build_fcmp L.Fcmp.Oeq e1' e2' "tmp" builder)
+		       i8_t "tmp" builder
+	   | A.Neq   -> L.build_intcast (L.build_fcmp L.Fcmp.One e1' e2' "tmp" builder)
+		       i8_t "tmp" builder
+	   | A.Lt   -> L.build_intcast (L.build_fcmp L.Fcmp.Ult e1' e2' "tmp" builder)
+		       i8_t "tmp" builder
+	   | A.Leq   -> L.build_intcast (L.build_fcmp L.Fcmp.Ole e1' e2' "tmp" builder)
+		       i8_t "tmp" builder
+	   | A.Gt   -> L.build_intcast (L.build_fcmp L.Fcmp.Ogt e1' e2' "tmp" builder)
+		       i8_t "tmp" builder
+	   | A.Geq   -> L.build_intcast (L.build_fcmp L.Fcmp.Oge e1' e2' "tmp" builder)
+		       i8_t "tmp" builder
 	   | _      -> raise (Failure ("Invalid float binary operation"))
-           ) e1' e2' "tmp" builder
-
-         | "i1" -> (match op with
-             A.And  -> L.build_intcast (L.build_and e1' (L.build_intcast e2' 
-                                                          i1_t "tmp" builder) 
-                                                        "tmp" builder)
-          
-           | A.Or   ->  L.build_intcast (L.build_or e1' (L.build_intcast e2' 
-                                                          i1_t "tmp" builder)
-                                                        "tmp" builder)
-
-           | A.Eq   -> L.build_intcast (L.build_icmp L.Icmp.Eq e1' 
-                                         (L.build_intcast e2' i1_t "tmp" builder)
-                                                        "tmp" builder)
-
-           | A.Neq  -> L.build_intcast (L.build_icmp L.Icmp.Ne e1' 
-                                         (L.build_intcast e2' i1_t "tmp" builder)
-                                                        "tmp" builder)
-
-           | _      -> raise (Failure ("Invalid Boolean binary operation"))
-           ) i8_t "tmp" builder
-
+	   )
          | "i8" -> (match op with
-             A.And  -> (L.build_and e1' (L.build_intcast e2' i8_t "tmp" builder)
-                                                         "tmp" builder)
-
-           | A.Or   -> (L.build_or e1' (L.build_intcast e2' i8_t "tmp" builder)
-                                                        "tmp" builder)
-
-           | A.Eq   -> (L.build_icmp L.Icmp.Eq e1' 
-                                         (L.build_intcast e2' i8_t "tmp" builder)
-                                                        "tmp" builder)
-
-           | A.Neq  -> (L.build_icmp L.Icmp.Ne e1' 
-                                         (L.build_intcast e2' i8_t "tmp" builder)
-                                                        "tmp" builder)
-
-           | _      -> raise (Failure ("Invalid Boolean binary operation"))
-           )
-
+               A.And -> L.build_intcast (L.build_and
+				        (L.build_intcast e1' i1_t "tmp" builder)
+				        (L.build_intcast e2' i1_t "tmp" builder)
+				        "tmp" builder)
+             | A.Or  -> L.build_intcast (L.build_or
+				        (L.build_intcast e1' i1_t "tmp" builder)
+				        (L.build_intcast e2' i1_t "tmp" builder)
+				        "tmp" builder)
+             | A.Eq  -> L.build_intcast (L.build_icmp L.Icmp.Eq
+				        (L.build_intcast e1' i1_t "tmp" builder)
+				        (L.build_intcast e2' i1_t "tmp" builder)
+				        "tmp" builder)
+             | A.Neq -> L.build_intcast (L.build_icmp L.Icmp.Ne
+				        (L.build_intcast e1' i1_t "tmp" builder)
+				        (L.build_intcast e2' i1_t "tmp" builder)
+				        "tmp" builder)
+             | _     -> raise (Failure ("Invalid Boolean binary operation"))
+           ) i8_t "tmp" builder
         | "i8*" -> (match op with
             A.Eq    ->  L.build_icmp L.Icmp.Eq
                        (L.build_call stringeq [| (e1') ; (e2') |] "stringeq" builder)
@@ -369,7 +359,6 @@ let translate (globals, functions) =
           | A.Neq   ->  L.build_icmp L.Icmp.Eq
                        (L.build_call stringeq [| (e1') ; (e2') |] "stringeq" builder)
                        (L.const_int b_t 0) "tmp" builder
-
           | A.Conc  -> L.build_call string_concat [| e1'; e2'|] "string_concat" builder
 	  | _       -> raise (Failure ("Invalid string binary operation")))
 	| _         -> raise (Failure ("Invalid binary operation"))
@@ -813,12 +802,13 @@ let translate (globals, functions) =
         let pred_builder = L.builder_at_end context pred_bb in
         let bool_val = expr pred_builder predicate in
 	let typ = L.string_of_lltype (L.type_of bool_val) in
-	let bv = 
+	let bv =
 	if  ((String.compare typ "i8") == 0) then
-		(L.build_intcast bool_val i1_t "tmp" builder)
+		(L.build_intcast bool_val i1_t "tmp" pred_builder)
 	else
-		bool_val in
-
+		bool_val
+	in
+	(*print_endline (L.string_of_llvalue bool_val);*)
 
         let merge_bb = L.append_block context "merge" the_function in
         ignore (L.build_cond_br bv body_bb merge_bb pred_builder);
