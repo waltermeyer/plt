@@ -8,6 +8,21 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+char *get_string(char* req) {
+	char s[100];
+	char *ret;
+	printf("%s", req);
+	scanf("%s", s);
+	ret = malloc(strlen(s))+1;
+	memcpy(ret, s, strlen(s)+1);
+	return ret;
+}
+
+int stoint(char *s){
+	int ret = atoi(s);
+	return ret;
+}
+
 char *slice(char *src, int begin, int end){
 	int len = end - begin;
 	char *dest = malloc(len + 1);
@@ -121,6 +136,11 @@ int main(){
 	test_string_length();
 	printf("=== Testing String Slice ===\n");
 	test_slice();
+	char *s = get_string("Please enter input : ");
+	printf("%s\n", s);
+	char *si = "4";
+	int i = stoint(si);
+	printf("%d\n", i);
 	return 0;
 }
 #endif

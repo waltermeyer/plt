@@ -8,6 +8,6 @@
 
 void print_b (bool b) {
 
-    printf("%s", b ? "true" : "false");	
+    printf("%s\n", b ? "true" : "false");	
 
 }
