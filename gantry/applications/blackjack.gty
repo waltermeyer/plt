@@ -12,7 +12,7 @@ int match_card(string value){
 	if (value == "A"){
 		val = 1;
 	}
-	if (value == "J" || value == "Q" || value == "K") {
+	if (value == "J" || value == "Q" || value == "K" ) {
 		val = 10;
 	}
 	else {
@@ -46,21 +46,17 @@ int turn(string draw_url){
 	int new = 0;
 	string req = "Enter 1 to draw, anything else to stay ";
 	string res = get_string(req);
-	if (res == "1"){	
-		new = hit(draw_url);
-	}
+	//if (res == "1"){	
+	//	new = hit(draw_url);
+	//}
 	return new;
 }
 
-int score(int new, object p){
+object score(object p, int new){
 	bool aces = p.aces;
 	bool hasten = p.hasten;
 	bool twentyone = p.twentyone;
 	int total = p.total_na; 
-	int total_temp1 = p.total_na;
-	int total_temp2 = p.total_na;
-	int total_temp3 = p.total_na;
-	int total_temp4 = p.total_na;
 	int aces = p.aces;
 	/* If current card is an ace */
 	if (new == 1){
@@ -68,31 +64,37 @@ int score(int new, object p){
 		aces = p.aces;
 	}
 	/* If current card is a 10 */
-	if (new == 10){
-		p.hasten = true;
-		hasten = p.hasten;
-	}
+	//if (new == 10){
+	//	p.hasten = true;
+	//	hasten = p.hasten;
+	//}
+	return p;
+}
+/*	
 	if (aces > 0 && hasten == true){
 		p.blackjack = true;
 	}
-	/* Scoring with no aces */
 	if (aces == 0){
 		p.total_na = total + new;
 		total = p.total_na;
-		int total_temp1 = p.total_na;
-		int total_temp2 = p.total_na;
-		int total_temp3 = p.total_na;
-		int total_temp4 = p.total_na;
 	}
-	//else {
-	//	if (new == 10){
-	//		p.hasten = true;
-	//	}
-	//	p.total_na = total + new;
-	//	total = p.total_na;
-	//	total_temp = p.total_na;
-	//}
+	else {
+		if (new == 10){
+			p.hasten = true;
+		}
+		p.total_na = total + new;
+		total = p.total_na;
+		total_temp = p.total_na;
+	}
+	return p;
 }
+*/
+
+bool check_done(object p ){
+	bool done = p.done;
+	return done;
+}
+
 
 int main(){
 	object p1 = {|
@@ -121,22 +123,24 @@ int main(){
 	string new_deck = httpget(url ^ "new/shuffle/");
 	int len = string_length(new_deck);	
 	string deck_id = slice(new_deck, len-14, len-2);
-	print_s(deck_id);
 	string draw_url = url ^ deck_id ^ "/draw/?count=1";
 	int p1_total = 0;
 	int p2_total = 0;
-	int new = 0;
+	//int new = 0;
 	bool done = false;
 	bool p1_done = p1.done;
 	bool p2_done = p2.done;
 	bool t = true;
-	while (done == false){
+	int new = 0;
+	while (p1_done == false && p2_done == false){
 		print_s("===Player 1===");
-		p1.new = turn(draw_url);
+		new = turn(draw_url);
+	 	p1 = score(p1, new);
 		print_s("===Player 2===");	
-		p2.new = turn(draw_url);
-		p1_done = p1.done;
-		p2_done = p2.done;
+		new = turn(draw_url);
+		p2 = score(p2, new);
+		p1_done = check_done(p1);
+		p2_done = check_done(p2);
 		if (p1_done || p2_done){
 			done = true;
 		}

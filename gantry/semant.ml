@@ -264,8 +264,11 @@ let check (globals, functions) =
 	 | [] -> ()
         in check_block sl
       | Expr e -> ignore (expression e)
-      | Return e -> let t = expression e in if t = func.type_spec then () else
-	 raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ 
+      | Return e -> 
+	 let t = expression e in 
+	 if t = func.type_spec then () 
+	 else if  (String.contains (string_of_expression e) '.') then raise(Failure ("trying to access object key " ^ string_of_expression e ^ " in return of function expecting " ^ string_of_typ func.type_spec ^ " please assign to variable and then return"))
+	 else raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^ 
 			  string_of_typ func.type_spec ^ " in " ^ string_of_expression e))
       | If(p, s1, s2) -> check_bool_expression p; statement s1; statement s2;
       | For(e1, e2, e3, st) -> ignore (expression e1); check_bool_expression e2; ignore(expression e3); statement st
