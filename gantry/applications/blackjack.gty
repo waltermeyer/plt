@@ -42,22 +42,81 @@ int hit(string draw_url){
 	return val;
 }
 
-int turn(string draw_url, int total){
+int turn(string draw_url){
 	int new = 0;
-	int t = total;
-	print_s("Current score is");
-	print_i(t);
 	string req = "Enter 1 to draw, anything else to stay ";
 	string res = get_string(req);
 	if (res == "1"){	
 		new = hit(draw_url);
 	}
-	t = t + new;
-	return t;
+	return new;
 }
-	
+
+int score(int new, object p){
+	bool aces = p.aces;
+	bool hasten = p.hasten;
+	bool twentyone = p.twentyone;
+	int total = p.total_na; 
+	int total_temp1 = p.total_na;
+	int total_temp2 = p.total_na;
+	int total_temp3 = p.total_na;
+	int total_temp4 = p.total_na;
+	int aces = p.aces;
+	/* If current card is an ace */
+	if (new == 1){
+		p.aces = aces + 1;
+		aces = p.aces;
+	}
+	/* If current card is a 10 */
+	if (new == 10){
+		p.hasten = true;
+		hasten = p.hasten;
+	}
+	if (aces > 0 && hasten == true){
+		p.blackjack = true;
+	}
+	/* Scoring with no aces */
+	if (aces == 0){
+		p.total_na = total + new;
+		total = p.total_na;
+		int total_temp1 = p.total_na;
+		int total_temp2 = p.total_na;
+		int total_temp3 = p.total_na;
+		int total_temp4 = p.total_na;
+	}
+	//else {
+	//	if (new == 10){
+	//		p.hasten = true;
+	//	}
+	//	p.total_na = total + new;
+	//	total = p.total_na;
+	//	total_temp = p.total_na;
+	//}
+}
 
 int main(){
+	object p1 = {|
+			string name : "Player 1",
+			bool blackjack : false,
+			bool twentyone : false,
+			bool bust : false,
+			bool done : false,
+			bool hasten : false,
+			int new : 0,
+			int total_na : 0,
+			int aces : 0
+		    |};
+	object p2 = {|
+			string name : "Player 1",
+			bool blackjack : false,
+			bool twentyone : false,
+			bool bust : false,
+			bool done : false,
+			bool hasten : false,
+			int new : 0,
+			int total_na : 0,
+			int aces : 0
+		    |};
 	string url = "https://deckofcardsapi.com/api/deck/";
 	string new_deck = httpget(url ^ "new/shuffle/");
 	int len = string_length(new_deck);	
@@ -67,14 +126,19 @@ int main(){
 	int p1_total = 0;
 	int p2_total = 0;
 	int new = 0;
-	int done = 0;
-	while (done  != 1){
+	bool done = false;
+	bool p1_done = p1.done;
+	bool p2_done = p2.done;
+	bool t = true;
+	while (done == false){
 		print_s("===Player 1===");
-		p1_total = turn(draw_url, p1_total);
+		p1.new = turn(draw_url);
 		print_s("===Player 2===");	
-		p2_total = turn(draw_url, p2_total);
-		if (p1_total > 22 || p2_total > 22){
-			done = 1;
+		p2.new = turn(draw_url);
+		p1_done = p1.done;
+		p2_done = p2.done;
+		if (p1_done || p2_done){
+			done = true;
 		}
 	}
 	print_s("+++++ GAME OVER +++++");
