@@ -1,0 +1,90 @@
+/*
+ *
+ * Docker Orchestration Application 2
+ * 
+ * Contains a function to run a container and
+ * handle port binding/exposure. 
+ *
+ * The following demostrates some typical use cases
+ * for the Gantry language with respect to interacting
+ * with a JSON API using Gantry data structures and
+ * built-in functions.
+ *
+ * Utilized Docker API Reference:
+ * https://docs.docker.com/engine/api/v1.32/
+ *
+ * Author: Walter Meyer
+ */
+
+string docker_host;
+
+// Get one line from logs
+int watch_logs(int polls, int wait, string cid, string tail) {
+  // Poll stdout of running container
+  int i = 0;
+  while (i < polls) {
+    string out = httpget(docker_host ^ "/containers/" ^ cid ^ "/logs?stdout=1&tail=" ^ tail);
+    print_s(out);
+    nap(wait);
+    i++;
+  }
+}
+
+string format_str(string exec_json) {
+  exec_json = slice(exec_json, 0, 41) ^ "/" ^ slice(exec_json, 42, string_length(exec_json));
+  exec_json = slice(exec_json, 0, 51) ^ slice(exec_json, 52, string_length(exec_json));
+  exec_json = slice(exec_json, 0, 74) ^ slice(exec_json, 76, string_length(exec_json));
+  return exec_json;
+}
+
+// Create and start an arbitrary container with port bindings
+int start(string image, string port) {
+  // Pull image
+  print_s("\n *** Pulling Container Image: [" ^ image ^ "] ***\n");
+  httppost(docker_host ^ "/images/create?fromImage=" ^ image, "");
+
+  // Array of Port Bindings
+  object port_bind = {| string HostPort : port |};
+  string port = obj_stringify(port_bind);
+  print_s(port);
+
+  // Start Container
+  object exec =
+    {|
+	string Image : image,
+	bool Tty : true,
+	object HostConfig :
+	  {| 
+	     object PortBindings : {| string array 80_tcp : [ port ] |}
+	  |}
+    |};
+
+  string exec_json = obj_stringify(exec);
+  exec_json = format_str(exec_json);
+  print_s(exec_json);
+  print_s("\n *** Creating Container: [" ^ image ^ "] ***\n");
+  string container_id = httppost(docker_host ^ "/containers/create", exec_json);
+  print_s(container_id);
+  string cid = slice(container_id, 7, 17);
+
+  // Create and Start Apache Container
+  print_s("\n *** Starting Container: [" ^ cid ^ "] ***");
+  container_id = httppost(docker_host ^ "/containers/" ^ cid ^ "/start", "");
+  print_s(container_id);
+
+  // Watch container logs
+  print_s("\n *** Tailing Last Line of Container Logs: [" ^ cid ^ "] ***");
+  watch_logs(100, 3, cid, "1");    
+
+}
+
+int main() {
+  // The Docker API Host
+  docker_host = "http://localhost";
+
+  // Spawn Apache Container
+  start("httpd:alpine", "8080");
+
+  return 0;
+}
+

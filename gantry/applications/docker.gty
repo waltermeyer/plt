@@ -10,6 +10,7 @@
  * Utilized Docker API Reference:
  * https://docs.docker.com/engine/api/v1.32/
  *
+ * Author: Walter Meyer
  */
 
 string docker_host;
@@ -59,5 +60,6 @@ int main() {
   httppost(docker_host ^ "/containers/" ^ cid ^ "/start", "");
   print_s("\n *** Container Logs: [" ^ cid ^ "] ***\n");
   watch_logs(5, 3, cid, "3");
+
 }
 
