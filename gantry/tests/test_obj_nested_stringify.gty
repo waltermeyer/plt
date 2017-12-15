@@ -1,0 +1,20 @@
+int main(){
+	string image = "foo";
+	object exec =
+   		 {|
+   		     string Image : image,
+   		     bool Tty : true,
+   		     object HostConfig :
+   		       {|
+   		          object PortBindings : {| int x : 2 |}
+   		       |}
+   		 |};
+	string o = obj_stringify(exec);
+	print_s(o);
+	return 0;
+}
+
+/*
+****TEST****
+{ "HostConfig" : { "PortBindings" : { "x" : 2 } } , "Tty" : true , "Image" : "foo" } 
+*/
