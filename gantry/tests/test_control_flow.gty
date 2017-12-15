@@ -1,0 +1,26 @@
+int main(){
+	int i = 10;
+	bool v = true;
+	for (i = 0; i < 4; i++){
+		if (i==2){
+			print_i(i);
+		}
+	}
+	bool x = false;
+	while(x == false){
+		i++;
+		if (i>5 && v == true){
+			x = true;
+		}
+		else{
+			print_b(x);
+		}
+	}	
+	return 0;
+}
+
+/*
+****TEST****
+2
+false
+*/

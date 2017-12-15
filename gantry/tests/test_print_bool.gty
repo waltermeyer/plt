@@ -3,7 +3,6 @@
 int main() {
 
     print_b(true);
-    print_s("");
     print_b(false);
     return 0;
 
