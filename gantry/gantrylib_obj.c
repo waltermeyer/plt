@@ -102,24 +102,17 @@ char *fill_buff(char *buff, char *cpy_buff){
 	size_t buff_sz;
 	char *old_buff;
 
-	//printf("_____FILL BUFF_____\n");
 	cpy_len = sizeof(char) *(strlen(cpy_buff) + 1);
-	//printf("Contents of cpy_buff : %s \n" , cpy_buff);
-	//printf("Length of cpy_buff : %zu \n", cpy_len);
 	
 	buff_sz = sizeof(char) *(strlen(buff)+1);
 	old_buff = (char *)malloc(buff_sz);
-	//printf("size of buff before memcpy %zu \n", buff_sz);
 	memcpy(old_buff, buff, buff_sz);
 	buff = (char *)xrealloc(buff, buff_sz + cpy_len);
 	
 	memcpy(buff,old_buff, buff_sz);
-	//printf("After inserting buff: %s \n", new_buff);
 	free(old_buff);
 	
 	memcpy(buff + buff_sz -1, cpy_buff, cpy_len);
-	//printf("After inserting cpy_buff : %s \n", new_buff);
-	//printf("-- END OF FILL BUFF --\n");
 	return buff;
 }
 
@@ -134,10 +127,7 @@ char *arr_stringify(void *arr){
 
 	int len = arr_i->len;
 	int typ = arr_i->typ;
-  	
-	//printf("Type :  %d \n " , typ);
-	//printf("Length :  %d \n ", len);
-	
+  		
 	char *buff;
 
 	char *cpy_buff;
@@ -158,7 +148,6 @@ char *arr_stringify(void *arr){
 	switch(typ){
 		case 3:
 			for (i=0; i< len; i++){
-				//printf("Value %d is %d \n", i, (arr_i->i_a[i]));
 				cpy_len = snprintf(NULL, 0 , "%d" , (arr_i->i_a[i]));  
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
 				snprintf(cpy_buff,cpy_len+1, "%d",  (arr_i->i_a[i]));
@@ -170,7 +159,6 @@ char *arr_stringify(void *arr){
 			break;
 		case 4: 
 			for (i=0; i< len; i++){
-				//printf("Value %d is %lf \n", i, (arr_f->f_a[i]));
 				cpy_len = snprintf(NULL, 0 , "%lf" , (arr_f->f_a[i])); 
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
 				snprintf(cpy_buff,cpy_len+1, "%lf",  (arr_f->f_a[i]));
@@ -178,23 +166,20 @@ char *arr_stringify(void *arr){
 				if (i!=len-1){
 					buff = fill_buff(buff, " , ");
 				}
-				//printf("%s \n " , buff);
 			}
 			break;
     		case 5: 
 			for (i=0; i<len; i++){
-				//cpy_buff = xrealloc(cpy_buff, sizeof(char));
 				o = arr_o->o_a[i];
 				cpy_buff = obj_stringify(o);
 				buff=fill_buff(buff,cpy_buff);
 				if (i!=len-1){
-					buff = fill_buff(buff, ",");
+					buff = fill_buff(buff, ", ");
 				}
 			}
 			break;
       		case 6: 
 			for (i=0; i< len; i++){
-				//printf("Value %d is %d \n", i, (arr_s->s_a[i]));
 				cpy_len = snprintf(NULL, 0 , "\"%s\"" , (arr_s->s_a[i]));  
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
 				snprintf(cpy_buff,cpy_len+1, "\"%s\"", (arr_s->s_a[i])); 
@@ -206,7 +191,6 @@ char *arr_stringify(void *arr){
 			break;
       		case 7:
 			for (i=0; i< len; i++){
-				//printf("Value %d is %s \n", i, ((arr_b->b_a[i]) ? "true" : "false"));
 				cpy_len= snprintf(NULL, 0 , "%s" , (arr_b->b_a[i]) ? "true" : "false");  
 				cpy_buff = xrealloc(cpy_buff, sizeof(char)*(cpy_len+1));
 				snprintf(cpy_buff, cpy_len+1,"%s", (arr_b->b_a[i]) ? "true" : "false"); 
@@ -223,7 +207,6 @@ char *arr_stringify(void *arr){
  	memcpy(cpy_buff, " ]", cpy_len+1);
 	buff = fill_buff(buff, cpy_buff);
 	free(cpy_buff);
-	//char *buff = "foo";
 	return buff;
 }
 
@@ -267,10 +250,6 @@ char *string_val(obj *o, char *buff){
 	char *cpy_buff;
 	int len;
 
-	//struct arr_int *i_a;
-	//struct arr_flt *f_a;
-	//struct arr_str *s_a;
-	//struct arr_bool *b_a;
 	void *arr;
 	
 	switch(o->v_typ) {
@@ -284,7 +263,6 @@ char *string_val(obj *o, char *buff){
 		cpy_buff = malloc(sizeof(char)*(len+1));
 		snprintf(cpy_buff,len+1, "%f", o->f); 
 		break;
-	  //case 5: snprintf(NULL, 0 ,  , o->);  snprintf(temp, "object key [%p]\n", &o); break;
 	  case 6: 
 		len = snprintf(NULL, 0 , "\"%s\"" , o->s);  
 		cpy_buff = malloc(sizeof(char)*(len+1));
@@ -315,14 +293,11 @@ char *string_val(obj *o, char *buff){
 		cpy_buff = malloc(sizeof(char));
 	};
 	buff = fill_buff(buff, cpy_buff);
-	//printf(" Print buff : %s \n" , cpy_buff);
 	free(cpy_buff);		
 	len = 4;
 	cpy_buff = malloc(sizeof(char)*len);
 	memcpy(cpy_buff, " , ", len);
 	buff = fill_buff(buff, cpy_buff);
-	//printf(" copy buff after , %s \n" , cpy_buff);
-	//printf(" buff after kv , %s \n", buff);
 	free(cpy_buff);
 	
 	return buff;
@@ -333,7 +308,6 @@ char *string_val(obj *o, char *buff){
 char *rec_stringify(obj *o, char *buff){
 
 	size_t cpy_len;
-	//char *cpy_buff;
 	const char *cpy_buff;
 	size_t buff_len;
 	char *old_buff;
@@ -354,10 +328,13 @@ char *rec_stringify(obj *o, char *buff){
 
 	while (o != NULL) {
 		if (o->v_typ == 5){
+			//printf("==== Object before key ======\n %s \n ==========", buff);
 			if(o->k){	
 				buff = string_key(o, buff);
 			}
+			//printf("==== Object after key ======\n %s \n ==========", buff);
 			buff = rec_stringify(o->o, buff);
+			//printf("==== Object after rec_stringify ======\n %s \n ==========", buff);
 		}
 		else{
 			buff = string_key(o, buff);
@@ -367,16 +344,18 @@ char *rec_stringify(obj *o, char *buff){
 	}
 	
 	/* Remove comma after last value in object */
-	buff_len = (strlen(buff)+1)*sizeof(char);
+	//printf("==== Object before removing comma returns =======\n %s \n ==========", buff);
+	buff_len = (strlen(buff))*sizeof(char);
 
-	old_buff = malloc(buff_len-2);	
-	memset(old_buff, 0, buff_len-2);
-	old_buff = memcpy(old_buff, buff, buff_len-3);	
+	old_buff = malloc(buff_len-1);	
+	memset(old_buff, 0, buff_len-1);
+	old_buff = memcpy(old_buff, buff, buff_len-2);	
 	
+	//printf("==== Object after removing comma returns =======\n %s \n ==========", old_buff);
 	/* Add closing parenthesis of object */
 	buff_len = (strlen(old_buff)+1)*sizeof(char);
 
-	cpy_buff = "},";
+	cpy_buff = "} , ";
 	cpy_len = (strlen(cpy_buff) + 1)*sizeof(char);
 	
 	buff = xrealloc(buff, (buff_len + cpy_len));
@@ -405,7 +384,7 @@ char *obj_stringify(obj *o){
 	//printf("==== Object before cleaning up =======\n %s \n ==========", pre_buff);
 	
 	/* Remove comma after Object */
-	buff_len = (strlen(pre_buff)+1)*sizeof(char);
+	buff_len = (strlen(pre_buff))*sizeof(char);
 
 	buff = malloc(buff_len-1);
 	memset(buff, 0 , buff_len-1);
