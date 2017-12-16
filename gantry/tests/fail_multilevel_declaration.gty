@@ -1,7 +1,5 @@
 int main(){
-	object o.z = {|
-			string s = "foo"
-		     |};
+	int o.z = 2;
 	return 0;
 }
 

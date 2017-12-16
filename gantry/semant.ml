@@ -218,7 +218,7 @@ let check (globals, functions) =
 		    )
                     fd.f_params actuals;
 		fd.type_spec
-	| KeyVal (lt, s, e) as ex ->
+	| KeyVal (lt, _, e) as ex ->
 		let rt = expression e in
 		check_kv_assign lt rt (Failure("Key " ^ string_of_typ lt ^ 
 		" has different type from value " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
