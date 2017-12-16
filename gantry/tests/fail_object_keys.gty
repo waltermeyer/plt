@@ -1,0 +1,14 @@
+int main () {
+
+float y = 3.14;
+
+object o = {|
+		int x : y,
+		string c : "Hello World"
+	   |};
+
+}
+/*
+****TEST****
+Fatal error: exception Failure("Key int has different type from value float in   int x : y")
+*/

@@ -42,7 +42,11 @@ let check (globals, functions) =
      | (_, _)      -> if lvaluet == rvaluet then lvaluet else raise err
   in
 
-			
+  let check_kv_assign lvaluet rvaluet err = 
+     match lvaluet, rvaluet with
+       (_, _)      -> if lvaluet == rvaluet then Object else raise err
+  in
+
   let add_local (t, n) =
     ignore(Hashtbl.add symbols n t);
   in
@@ -214,10 +218,9 @@ let check (globals, functions) =
 		    )
                     fd.f_params actuals;
 		fd.type_spec
-	| KeyVal (_, s, e) as ex ->
-		let lt = type_of_identifier s 
-		and rt = expression e in
-		check_assign lt rt (Failure("Key " ^ string_of_typ lt ^ 
+	| KeyVal (lt, s, e) as ex ->
+		let rt = expression e in
+		check_kv_assign lt rt (Failure("Key " ^ string_of_typ lt ^ 
 		" has different type from value " ^ string_of_typ rt ^ " in " ^ string_of_expression ex))
 	| ArrExp el -> let arr_typ e =
 			 match e with
@@ -247,7 +250,9 @@ let check (globals, functions) =
 			     | Object	    -> Object
 			     | _	    -> raise (Failure("Invalid array access on " ^
 						      string_of_expression e1)))
-	| ObjExp (_) -> Object
+	| ObjExp (el) -> (match (List.hd (List.map expression el)) with
+			   Object -> Object
+			 | _ -> raise (Failure("Invalid object expression")))
 	| Noexpr -> Null
       in
 
