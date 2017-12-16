@@ -1,0 +1,10 @@
+int main(){
+	string s = "foobar";
+	string split = string_slice(2, 10, s);
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("unrecognized function string_slice")
+*/

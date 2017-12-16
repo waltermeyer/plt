@@ -1,0 +1,10 @@
+int main(){
+	int array four = [1,2,3,4];
+	string z = four[3];
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("illegal assignment string = int in string z = four[3]")
+*/
