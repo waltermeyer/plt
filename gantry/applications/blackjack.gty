@@ -6,6 +6,22 @@
  * No dealer
  */
 
+string find_id(string res, string key, int gap, int l){
+	string value = "";
+	int len = string_length(key);
+	int res_len = string_length(res);
+	string temp = "";
+	for(int i = 0; i < res_len; i++){
+		temp = slice(res, i, i+len);
+		if (temp == key){
+			value = slice(res, i+len+gap, i+len+gap+l);
+		}
+	}
+	return value;
+}
+		
+		
+
 /* Get black jack value of card */
 int match_card(string value){
 	int val = 0;
@@ -22,6 +38,8 @@ int match_card(string value){
 /* Draw a card */
 int hit(string draw_url){
 	string new_card = httpget(draw_url);
+	print_s("Here is the card :");
+	print_s(new_card);
 	int len = string_length(new_card);
 	int val = 0;
 	for (int i = 0; i<len; i++){
@@ -32,8 +50,6 @@ int hit(string draw_url){
 			string value = slice(new_card, index, index + 1);
 			string suite = slice(new_card, index + 1, index + 2);
 			val = match_card(value);
-			print_s("The card drawn was a : ");
-			print_s(value);
 			print_s("With a value of : ");
 			print_i(val);
 		}
@@ -47,9 +63,9 @@ int turn(string draw_url){
 	string req = "Enter 1 to draw, anything else to stay ";
 	string res = get_string(req);
 	if (res == "1"){
-		while (new == 0){
+		//while (new == 0){
 			new = hit(draw_url);
-		}
+		//}
 	}
 	else {
 		new = 0;
@@ -244,10 +260,9 @@ int main(){
 		    |};
 	string url = "https://deckofcardsapi.com/api/deck/";
 	string new_deck = httpget(url ^ "new/shuffle/");
+	string deck_id = find_id(new_deck,"deck_id", 4, 12);
 	int len = string_length(new_deck);	
-	string deck_id = slice(new_deck, len-14, len-2);
 	string draw_url = url ^ deck_id ^ "/draw/?count=1";
-	
 	bool p1_done = p1.done;
 	bool p2_done = p2.done;
 	int new = 0;
