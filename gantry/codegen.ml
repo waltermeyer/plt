@@ -359,13 +359,13 @@ let translate (globals, functions) =
              | _     -> raise (Failure ("Invalid Boolean binary operation"))
            ) i8_t "tmp" builder
         | "i8*" -> (match op with
-            A.Eq    ->  L.build_icmp L.Icmp.Eq
+            A.Eq    ->  L.build_intcast (L.build_icmp L.Icmp.Eq
                        (L.build_call stringeq [| (e1') ; (e2') |] "stringeq" builder)
-                       (L.const_int b_t 1) "tmp" builder
+                       (L.const_int b_t 1) "tmp" builder ) i8_t "tmp" builder
 
-          | A.Neq   ->  L.build_icmp L.Icmp.Eq
+          | A.Neq   ->  L.build_intcast (L.build_icmp L.Icmp.Eq
                        (L.build_call stringeq [| (e1') ; (e2') |] "stringeq" builder)
-                       (L.const_int b_t 0) "tmp" builder
+                       (L.const_int b_t 0) "tmp" builder ) i8_t "tmp" builder
           | A.Conc  -> L.build_call string_concat [| e1'; e2'|] "string_concat" builder
 	  | _       -> raise (Failure ("Invalid string binary operation")))
 	| _         -> raise (Failure ("Invalid binary operation"))
