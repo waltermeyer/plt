@@ -1,26 +1,25 @@
 /* Author : Audrey
- * A game of Black Jack (with some rule modifications):
- * Aces are 1 point (not 1 or 11).
- * There is no special blackjack hand (comb. of face card and 11).
+ * A game of Black Jack in the Gantry Language:
  * No betting.
  * Requires two players, or you can play against yourself.
- * Some extra magic! If the api call fails, player will draw a 0.
+ * No splitting
+ * No dealer
  */
 
+/* Get black jack value of card */
 int match_card(string value){
 	int val = 0;
+	val = stoint(value);
 	if (value == "A"){
 		val = 1;
 	}
 	if (value == "J" || value == "Q" || value == "K" ) {
 		val = 10;
 	}
-	else {
-		val = stoint(value);
-	}
 	return val;
 }
 
+/* Draw a card */
 int hit(string draw_url){
 	string new_card = httpget(draw_url);
 	int len = string_length(new_card);
@@ -42,57 +41,181 @@ int hit(string draw_url){
 	return val;
 }
 
+/* Give player option to hit (1) or stay (other) */
 int turn(string draw_url){
 	int new = 0;
 	string req = "Enter 1 to draw, anything else to stay ";
 	string res = get_string(req);
-	//if (res == "1"){	
-	//	new = hit(draw_url);
-	//}
+	if (res == "1"){
+		while (new == 0){
+			new = hit(draw_url);
+		}
+	}
+	else {
+		new = 0;
+	}
 	return new;
 }
 
-object score(object p, int new){
-	bool aces = p.aces;
-	bool hasten = p.hasten;
-	bool twentyone = p.twentyone;
-	int total = p.total_na; 
+/* Set aces based on new draw */
+object set_aces(int new, object p){
 	int aces = p.aces;
 	/* If current card is an ace */
 	if (new == 1){
 		p.aces = aces + 1;
-		aces = p.aces;
 	}
-	/* If current card is a 10 */
-	//if (new == 10){
-	//	p.hasten = true;
-	//	hasten = p.hasten;
-	//}
 	return p;
 }
-/*	
-	if (aces > 0 && hasten == true){
-		p.blackjack = true;
+
+
+/* Set hasten based on new draw */
+object set_hasten(int new, object p){
+	if (new == 10){
+		p.hasten = true;
 	}
-	if (aces == 0){
-		p.total_na = total + new;
-		total = p.total_na;
+	return p;
+}	
+
+
+/* Set done to true based on done conditions */
+object set_done(object p){
+	bool blackjack = p.blackjack;
+	bool twentyone = p.twentyone;
+	bool bust = p.bust;
+	if (blackjack == true || twentyone == true || bust == true){
+		p.done = true;
+	}
+	return p;
+}
+
+/* If player goes over 21, they bust */
+object set_bust(object p){
+	int total = p.total_na;
+	if (total > 21){
+		p.bust = true;
+	}
+	return p;
+}
+
+/* Check if total with ace is 21 */
+object check_total_wa(object p){
+	int total_wa = p.total_wa;
+	int aces = p.aces;
+	bool hasten = p.hasten;
+	
+	if (total_wa == 21){
+		p.twentyone = true;
+		if (aces > 0 && hasten == true){
+			p.blackjack = true;
+		}
+	}
+	
+	return p;	
+}
+
+/* Check total without aces */
+object check_total_na(object p) {
+	int total_na = p.total_na;
+	if (total_na == 21){
+		p.twentyone = true;
+	}
+	return p;
+}
+
+/* Compute score with ace as 11 */
+object score_aces(object p){
+	int total = p.total_na;
+	int aces = p.aces;
+	int diff = 21 - total;
+
+	if (aces > 0 && diff > 9){
+		p.total_wa = total + 10;
 	}
 	else {
-		if (new == 10){
-			p.hasten = true;
-		}
-		p.total_na = total + new;
-		total = p.total_na;
-		total_temp = p.total_na;
+		p.total_wa = total;
 	}
+
 	return p;
 }
-*/
 
-bool check_done(object p ){
+/* Ace and ten in hand is a blackjack */
+object set_blackjack(object p){
+
+	return p;
+}
+
+object score(object p, int new){
+	bool blackjack = p.blackjack;
+	int total = p.total_na;
+	/* Total with aces gets recomputed each time */
+	p.total_wa = total; 
+	
+	p = set_aces(new, p);
+	p = set_hasten(new, p);
+	
+	int aces = p.aces;
+	bool hasten = p.hasten;
+
+	p = set_blackjack(p);
+
+	/* Treat an ace as a 1 */
+	p.total_na = total + new;
+	total = p.total_na;
+	/* Score with 11 */
+	p = score_aces(p);
+	
+	p = set_bust(p);
+	p = check_total_na(p);
+	p = check_total_wa(p);
+	p = set_done(p);
+	return p;
+}
+
+bool check_done(object p){
 	bool done = p.done;
 	return done;
+}
+
+int print_bust(object p){
+	bool bust = p.bust;
+	if (bust == true) {
+		print_s("BUSTED!!!");
+	}
+	return 0;
+}
+
+int print_win(object p){
+	bool twentyone = p.twentyone;
+	bool blackjack = p.blackjack;
+	if (twentyone || blackjack) {
+		print_s("WINNER!!!");
+	}
+	return 0;
+}
+
+int determine_diff(object p){
+	int diff = 0;
+	int total = p.total_wa;
+	diff = 21 - total;
+	return diff;
+}
+
+int determine_winner(object p1, object p2){
+	bool p1_done = p1.done;
+	bool p2_done = p2.done;
+	int p1_diff = 0;	
+	int p2_diff = 0;
+	if (p1_done == false && p2_done == false){
+		p1_diff = determine_diff(p1);
+		p2_diff = determine_diff(p2);
+		if (p1_diff < p2_diff) {
+			print_s("Player 1 Won");
+		}
+		else {
+			print_s("Player 2 Won");
+		}
+	}
+	return 0;
 }
 
 
@@ -104,19 +227,19 @@ int main(){
 			bool bust : false,
 			bool done : false,
 			bool hasten : false,
-			int new : 0,
 			int total_na : 0,
+			int total_wa : 0,
 			int aces : 0
 		    |};
 	object p2 = {|
-			string name : "Player 1",
+			string name : "Player 2",
 			bool blackjack : false,
 			bool twentyone : false,
 			bool bust : false,
 			bool done : false,
 			bool hasten : false,
-			int new : 0,
 			int total_na : 0,
+			int total_wa : 0,
 			int aces : 0
 		    |};
 	string url = "https://deckofcardsapi.com/api/deck/";
@@ -124,47 +247,45 @@ int main(){
 	int len = string_length(new_deck);	
 	string deck_id = slice(new_deck, len-14, len-2);
 	string draw_url = url ^ deck_id ^ "/draw/?count=1";
-	int p1_total = 0;
-	int p2_total = 0;
-	//int new = 0;
-	bool done = false;
+	
 	bool p1_done = p1.done;
 	bool p2_done = p2.done;
-	bool t = true;
 	int new = 0;
-	while (p1_done == false && p2_done == false){
+	int stay_p1 = 0;
+	int stay_p2 = 0;
+	bool both_stay = false;
+	while (p1_done == false && p2_done == false && both_stay == false){
 		print_s("===Player 1===");
 		new = turn(draw_url);
+		if (new == 0){
+			stay_p1++;
+		}
 	 	p1 = score(p1, new);
+		
 		print_s("===Player 2===");	
 		new = turn(draw_url);
+		if (new == 0){
+			stay_p2++;
+		}
 		p2 = score(p2, new);
+		
 		p1_done = check_done(p1);
 		p2_done = check_done(p2);
-		if (p1_done || p2_done){
-			done = true;
+		if (stay_p1 >0 && stay_p2 > 0){
+			both_stay = true;
 		}
 	}
 	print_s("+++++ GAME OVER +++++");
-	if (p1_total > 21){
-		print_s("PLAYER 1 LOST (went over 21)");
-		print_s("PLAYER 2 WON");
-	}
-	if (p1_total == 21) {
-		print_s("PLAYER 1 WON (hit 21)");
-		print_s("PLAYER 2 LOST");
-	}
-	if (p2_total > 21){
-		print_s("PLAYER 2 LOST (went over 21)");
-		print_s("PLAYER 1 WON");
-	}
-	if (p2_total == 21) {
-		print_s("PLAYER 2 WON (hit 21)");
-		print_s("PLAYER 1 LOST");
-	}
-	print_s("Player 1 total");
-	print_i(p1_total);
-	print_s("Player 2 total");
-	print_i(p2_total);
+	string p1_res = obj_stringify(p1);
+	string p2_res = obj_stringify(p2);
+	print_s("===Player 1===");
+	print_win(p1);
+	print_bust(p1);
+	print_s(p1_res);
+	print_s("===Player 2===");
+	print_win(p2);
+	print_bust(p2);
+	print_s(p2_res);
+	determine_winner(p1, p2);
 	return 0;
 }
