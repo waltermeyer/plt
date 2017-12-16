@@ -1,0 +1,9 @@
+int main(){
+	string array y = [["foo"], ["bar"]];
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("Invalid array type")
+*/
