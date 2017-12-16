@@ -1,0 +1,11 @@
+int main(){
+	object o.z = {|
+			string s = "foo"
+		     |};
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("Can not declare multi-level variable o.z in expression object o.z = {| string s = "foo" |}")
+*/
