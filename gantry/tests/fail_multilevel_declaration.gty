@@ -5,5 +5,5 @@ int main(){
 
 /*
 ****TEST****
-Fatal error: exception Failure("Can not declare multi-level variable o.z in expression object o.z = {| string s = "foo" |}")
+Fatal error: exception Failure("Can not declare multi-level variable o.z in expression int o.z = 2")
 */
