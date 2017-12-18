@@ -259,7 +259,7 @@ let translate (globals, functions) =
       in
 
       (* Variable Lookup *)
-      let lookup n =
+      let lookup builder n =
         (* Local Lookup *)
         try Hashtbl.find f_var_tbl n with
         Not_found -> 
@@ -293,9 +293,9 @@ let translate (globals, functions) =
       | A.BoolLit b -> L.const_int b_t (if b then 1 else 0)
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> if (String.contains s '.') then
-		    (lookup s)
+		    (lookup builder s)
 		  else
-		    (L.build_load (lookup s) s builder)
+		    (L.build_load (lookup builder s) s builder)
       | A.Binop (e1, op, e2) ->
         let e1' = expr builder e1
         and e2' = expr builder e2 in
@@ -378,12 +378,12 @@ let translate (globals, functions) =
 				       (L.build_intcast e' i1_t "tmp" builder)
 				       "tmp" builder) i8_t "tmp" builder
 	   | A.Inc  ->
-	       let n   = lookup (A.expr_to_str e) in
+	       let n   = lookup builder (A.expr_to_str e) in
 	       let tmp = L.build_load n "tmp" builder in
 	       let tmp = L.build_add (L.const_int i32_t 1) tmp "tmp" builder in
 	       L.build_store tmp n builder
 	   | A.Dec  ->
-	       let n   = lookup (A.expr_to_str e) in
+	       let n   = lookup builder (A.expr_to_str e) in
 	       let tmp = L.build_load n "tmp" builder in
 	       let tmp = L.build_sub tmp (L.const_int i32_t 1) "tmp" builder in
 	       L.build_store tmp n builder
@@ -438,9 +438,9 @@ let translate (globals, functions) =
         and idx = expr builder e2 in
 	let arr =
           if (String.contains e1_str '.') then
-	    (lookup e1_str)
+	    (lookup builder e1_str)
 	  else
-	    (L.build_load (lookup e1_str) "arracc" builder)
+	    (L.build_load (lookup builder e1_str) "arracc" builder)
 	in
 	(* Get actual array from struct *)
 	let arr = L.build_struct_gep arr 2 "arr_v" builder in
@@ -529,7 +529,7 @@ let translate (globals, functions) =
 	(* Non-Object on RHS *)
 	if (not (String.contains (A.expr_to_str e) '.')) then (
           let e' = expr builder e in
-	  let n = lookup n in
+	  let n = lookup builder n in
           ignore (L.build_store e' n builder);
           e'
 	)
@@ -537,8 +537,8 @@ let translate (globals, functions) =
 	else (
 	  let e1_str = n
 	  and e2_str = A.expr_to_str e in
-	  let e1' = lookup e1_str
-	  and e2' = lookup e2_str in
+	  let e1' = lookup builder e1_str
+	  and e2' = lookup builder e2_str in
 	  let sidx_of_typ = function
 	      "i32*"    -> 3
 	    | "double*" -> 4
@@ -571,8 +571,8 @@ let translate (globals, functions) =
 	(* Object LHV and RHV: enforce type of RHV *)
 	if ((String.contains e1_str '.') && (String.contains e2_str '.')) then (
 	  (* Get Objects on LHS and RHS *)
-	  let e1' = lookup e1_str
-	  and e2' = lookup e2_str in
+	  let e1' = lookup builder e1_str
+	  and e2' = lookup builder e2_str in
 	  (* Get type of Object on RHS *)
 	  let t_e2' = L.build_call obj_gettyp_func
 		      [| e2' |] "obj_gettyp" builder in
@@ -586,7 +586,7 @@ let translate (globals, functions) =
 	)
 	(* Object LHV Only: enforce type of RHV *)
 	else if (String.contains e1_str '.') then (
-	  let e1' = lookup e1_str
+	  let e1' = lookup builder e1_str
 	  and e2' = expr builder e2 in
 	  let sidx_of_typ = function
 	      "i32"    -> 3
@@ -616,8 +616,8 @@ let translate (globals, functions) =
 	)
 	(* Object RHV Only: try type of RHV (runtime error on failure) *)
 	else if (String.contains e2_str '.') then (
-	  let e1' = lookup e1_str
-	  and e2' = lookup e2_str in
+	  let e1' = lookup builder e1_str
+	  and e2' = lookup builder e2_str in
 	  let sidx_of_typ = function
 	      "i32*"    -> 3
 	    | "double*" -> 4
@@ -646,7 +646,7 @@ let translate (globals, functions) =
 	(* Primitive Assignment *)
 	else (
 	  let e2' = expr builder e2 in
-	  let e1' = lookup e1_str in
+	  let e1' = lookup builder e1_str in
 	  ignore (L.build_store e2' e1' builder);
 	  e2'
 	)
@@ -734,7 +734,7 @@ let translate (globals, functions) =
 	(* If Object is actual, cast its value to formal's type *)
 	let resolve_acts form_t act =
 	if (String.contains (A.expr_to_str act) '.') then (
-	  let e' = lookup (A.expr_to_str act) in
+	  let e' = lookup builder (A.expr_to_str act) in
 	  let sidx_of_typ = function
 	      "int"    -> 3
 	    | "float"  -> 4
@@ -825,7 +825,6 @@ let translate (globals, functions) =
         let merge_bb = L.append_block context "merge" the_function in
         ignore (L.build_cond_br bv body_bb merge_bb pred_builder);
         L.builder_at_end context merge_bb
-
       | A.For (e1, e2, e3, body) -> stmt builder
       ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] )
       in
