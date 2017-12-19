@@ -1,0 +1,16 @@
+int main(){
+        int i = 0;
+        int x = 1;
+	object o = {| int x : 2 |};
+        while(i==0 && x > 0){
+		o.x = 0;
+		x = o.x;
+		
+        }
+	print_i(x);
+        return 0;
+}
+/*
+****TEST****
+0
+*/
