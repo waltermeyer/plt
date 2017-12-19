@@ -1,0 +1,9 @@
+int main(){
+	object o = {| string s : 4 |};
+	return 0;
+}
+
+/*
+****TEST****
+Fatal error: exception Failure("Key string has different type from value int in   string s : 4")
+*/
